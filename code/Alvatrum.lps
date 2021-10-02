@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="11"/>
+    <BuildModes Active="Default"/>
+    <Units Count="19">
+      <Unit0>
+        <Filename Value="Alvatrum.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="10"/>
+        <CursorPos X="29" Y="8"/>
+        <UsageCount Value="211"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SpecEmu"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="1899"/>
+        <CursorPos Y="1886"/>
+        <UsageCount Value="211"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="z80.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Z80"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="739"/>
+        <CursorPos Y="754"/>
+        <UsageCount Value="211"/>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="z80ops.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Z80ops"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="785"/>
+        <CursorPos X="29" Y="796"/>
+        <UsageCount Value="212"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="z80globals.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="z80Globals"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="204"/>
+        <CursorPos Y="223"/>
+        <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="z80bitops.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="7"/>
+        <CursorPos X="30" Y="7"/>
+        <UsageCount Value="218"/>
+        <Loaded Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="z80bitops_ixiy.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Z80bitops_ixiy"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="94"/>
+        <CursorPos Y="108"/>
+        <UsageCount Value="201"/>
+        <Loaded Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="roms.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="3"/>
+        <CursorPos X="24" Y="11"/>
+        <UsageCount Value="219"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="screen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Screen"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="224"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="fastbitmap.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="23"/>
+        <CursorPos X="5" Y="58"/>
+        <UsageCount Value="203"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="z80tools.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Z80Tools"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="282"/>
+        <CursorPos X="61" Y="299"/>
+        <UsageCount Value="210"/>
+        <Loaded Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="exops.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="200"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="spectrum.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="16"/>
+        <CursorPos X="26" Y="27"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="tap.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TAP"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="23" Y="10"/>
+        <UsageCount Value="214"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="C:\lazarus\lcl\lcltype.pp"/>
+        <UnitName Value="LCLType"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="587"/>
+        <CursorPos X="3" Y="579"/>
+        <UsageCount Value="104"/>
+        <Loaded Value="True"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="C:\lazarus\lcl\include\customform.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="171"/>
+        <CursorPos Y="180"/>
+        <UsageCount Value="10"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="..\..\..\AppData\Local\lazarus\onlinepackagemanager\packages\acs\src\filters\acs_misc.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="191"/>
+        <CursorPos Y="219"/>
+        <UsageCount Value="34"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="..\..\..\AppData\Local\lazarus\onlinepackagemanager\packages\acs\src\devices\acs_stdaudio.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="148"/>
+        <CursorPos Y="164"/>
+        <UsageCount Value="30"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="..\..\..\AppData\Local\lazarus\onlinepackagemanager\packages\acs\src\devices\win\acs_audio.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="268"/>
+        <UsageCount Value="30"/>
+      </Unit18>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="130" TopLine="109"/>
+      </Position1>
+      <Position2>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="131" TopLine="109"/>
+      </Position2>
+      <Position3>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="132" TopLine="109"/>
+      </Position3>
+      <Position4>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="133" TopLine="109"/>
+      </Position4>
+      <Position5>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="134" TopLine="109"/>
+      </Position5>
+      <Position6>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="135" TopLine="109"/>
+      </Position6>
+      <Position7>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="136" TopLine="110"/>
+      </Position7>
+      <Position8>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="137" TopLine="111"/>
+      </Position8>
+      <Position9>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="141" TopLine="114"/>
+      </Position9>
+      <Position10>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="142" TopLine="115"/>
+      </Position10>
+      <Position11>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="766" TopLine="750"/>
+      </Position11>
+      <Position12>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="797" TopLine="781"/>
+      </Position12>
+      <Position13>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="798" TopLine="781"/>
+      </Position13>
+      <Position14>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="796" TopLine="781"/>
+      </Position14>
+      <Position15>
+        <Filename Value="z80globals.pas"/>
+        <Caret Line="220" TopLine="204"/>
+      </Position15>
+      <Position16>
+        <Filename Value="z80globals.pas"/>
+        <Caret Line="221" TopLine="204"/>
+      </Position16>
+      <Position17>
+        <Filename Value="z80globals.pas"/>
+        <Caret Line="222" TopLine="204"/>
+      </Position17>
+      <Position18>
+        <Filename Value="z80globals.pas"/>
+        <Caret Line="223" TopLine="204"/>
+      </Position18>
+      <Position19>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="799" Column="18" TopLine="781"/>
+      </Position19>
+      <Position20>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="800" Column="19" TopLine="779"/>
+      </Position20>
+      <Position21>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="775" Column="22" TopLine="805"/>
+      </Position21>
+      <Position22>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="801" TopLine="785"/>
+      </Position22>
+      <Position23>
+        <Filename Value="z80ops.pas"/>
+        <Caret Line="765" TopLine="749"/>
+      </Position23>
+      <Position24>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="116" TopLine="109"/>
+      </Position24>
+      <Position25>
+        <Filename Value="main.pas"/>
+        <Caret Line="1861" TopLine="1872"/>
+      </Position25>
+      <Position26>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="60" Column="10" TopLine="40"/>
+      </Position26>
+      <Position27>
+        <Filename Value="main.pas"/>
+        <Caret Line="1913" Column="70" TopLine="1897"/>
+      </Position27>
+      <Position28>
+        <Filename Value="main.pas"/>
+        <Caret Line="1861" TopLine="1846"/>
+      </Position28>
+      <Position29>
+        <Filename Value="main.pas"/>
+        <Caret Line="1913" Column="65" TopLine="1900"/>
+      </Position29>
+      <Position30>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="27" Column="26" TopLine="16"/>
+      </Position30>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0" ActiveMode="default"/>
+    </RunParams>
+  </ProjectSession>
+  <Debugging>
+    <Watches Count="8">
+      <Item1>
+        <Expression Value="soundpos_read"/>
+      </Item1>
+      <Item2>
+        <Expression Value="soundpos_write"/>
+      </Item2>
+      <Item3>
+        <Expression Value="sound_bytes"/>
+      </Item3>
+      <Item4>
+        <Expression Value="spec_buffer_size"/>
+      </Item4>
+      <Item5>
+        <Expression Value="bufsize"/>
+      </Item5>
+      <Item6>
+        <Expression Value="bytes_readed"/>
+      </Item6>
+      <Item7>
+        <Expression Value="hport"/>
+        <DisplayStyle Value="wdfBinary"/>
+      </Item7>
+      <Item8>
+        <Expression Value="lport"/>
+        <DisplayStyle Value="wdfBinary"/>
+      </Item8>
+    </Watches>
+  </Debugging>
+</CONFIG>
