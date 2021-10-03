@@ -1,11 +1,11 @@
 object SpecEmu: TSpecEmu
-  Left = 223
+  Left = 205
   Height = 659
-  Top = 286
-  Width = 993
+  Top = 193
+  Width = 1050
   Caption = 'Alvatrum'
   ClientHeight = 659
-  ClientWidth = 993
+  ClientWidth = 1050
   DesignTimePPI = 120
   Icon.Data = {
     3E08010000000100010080800000010020002808010016000000280000008000
@@ -2128,10 +2128,6 @@ object SpecEmu: TSpecEmu
   OnClose = FormClose
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
-  OnKeyDown = FormKeyDown
-  OnKeyPress = FormKeyPress
-  OnKeyUp = FormKeyUp
-  OnShow = FormShow
   OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
   UseDockManager = True
@@ -2722,7 +2718,6 @@ object SpecEmu: TSpecEmu
     ParentFont = False
     TabOrder = 1
     Visible = False
-    OnClick = DebugPanelClick
     object FlagsPanel: TPanel
       Left = 163
       Height = 12
@@ -2794,7 +2789,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label2Click
     end
     object Label12: TLabel
       Left = 15
@@ -2891,7 +2885,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label11Click
     end
     object Label10: TLabel
       Left = 151
@@ -2908,7 +2901,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label10Click
     end
     object Label9: TLabel
       Left = 80
@@ -3054,7 +3046,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label7Click
     end
     object Label6: TLabel
       Left = 227
@@ -3135,7 +3126,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label2Click
     end
     object Label1: TLabel
       Left = 15
@@ -3184,7 +3174,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label2Click
     end
     object stRR: TStaticText
       Left = 161
@@ -3291,7 +3280,6 @@ object SpecEmu: TSpecEmu
       Font.Quality = fqDraft
       ParentColor = False
       ParentFont = False
-      OnClick = Label2Click
     end
     object stStack: TStaticText
       Left = 64
@@ -3438,7 +3426,6 @@ object SpecEmu: TSpecEmu
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
-      OnClick = Label18Click
     end
     object Label19: TLabel
       Left = 304
@@ -3713,7 +3700,6 @@ object SpecEmu: TSpecEmu
         Font.Name = 'Consolas'
         Font.Pitch = fpFixed
         Font.Quality = fqDraft
-        OnClick = DumpSourceClick
         OnSelectionChanged = DumpSourceSelectionChanged
         ParentFont = False
         TabOrder = 3
@@ -3772,22 +3758,6 @@ object SpecEmu: TSpecEmu
         OnChange = AsciiSelectionChange
         TabOrder = 4
       end
-    end
-    object stsamples: TStaticText
-      Left = 344
-      Height = 21
-      Top = 57
-      Width = 81
-      Caption = 'stsamples'
-      TabOrder = 26
-    end
-    object stStatesSound: TStaticText
-      Left = 376
-      Height = 21
-      Top = 77
-      Width = 81
-      Caption = 'stStatesSound'
-      TabOrder = 27
     end
   end
   object TapePanel: TPanel
@@ -53108,30 +53078,15 @@ object SpecEmu: TSpecEmu
     Device = 0
     Volume = 15
     Delay = 0
-    Left = 1023
-    Top = 297
-  end
-  object AcsFileIn1: TAcsFileIn
-    StartSample = 0
-    EndSample = -1
-    FileName = 'C:\Users\aleja\OneDrive\Lazarus\Alvatrum\EB8A.WAV'
-    Loop = False
-    Left = 889
-    Top = 345
+    Left = 752
+    Top = 352
   end
   object AcsMemoryIn1: TAcsMemoryIn
     InBitsPerSample = 8
     InChannels = 1
-    InSampleRate = 15600
+    InSampleRate = 16800
     OnBufferDone = AcsMemoryIn1BufferDone
-    Left = 863
-    Top = 464
-  end
-  object AcsStreamIn1: TAcsStreamIn
-    InBitsPerSample = 8
-    InChannels = 1
-    InSampleRate = 8000
-    Left = 982
-    Top = 446
+    Left = 760
+    Top = 448
   end
 end

@@ -1363,7 +1363,10 @@ end;
 procedure cpir;
 begin
   cpi;
-  if bc <> 0 then begin
+  if (pv_flag=0) or (z_flag<>0) then
+  begin
+    // end of CPIR
+  end else begin
     pc-=2;
     inc(t_states, 5);       // 5 additional
   end;
@@ -1406,7 +1409,10 @@ end;
 procedure cpdr;
 begin
   cpd;
-  if bc <> 0 then begin
+  if (pv_flag=0) or (z_flag<>0) then
+  begin
+    // end of CPDR
+  end else begin
     pc-=2;
     inc(t_states, 5);       // 5 additional
   end;

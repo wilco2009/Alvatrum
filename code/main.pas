@@ -9,7 +9,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, uPSComponent, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes,
-  z80Globals, Z80Tools, LCLType, Grids, acs_audio, acs_file, acs_misc,
+  z80Globals, Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file, acs_misc,
   acs_streams, BCListBox, BCGameGrid, CRT, BGRAGraphicControl,
   BGRASpriteAnimation, BGRAResizeSpeedButton, spectrum, SDL, epiktimer;
 type
@@ -18,9 +18,7 @@ type
 
   TSpecEmu = class(TForm)
     AcsAudioOut1: TAcsAudioOut;
-    AcsFileIn1: TAcsFileIn;
     AcsMemoryIn1: TAcsMemoryIn;
-    AcsStreamIn1: TAcsStreamIn;
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
@@ -105,11 +103,9 @@ type
     StaticText4: TStaticText;
     StaticText5: TStaticText;
     StaticText6: TStaticText;
-    stsamples: TStaticText;
     stBreak: TStaticText;
     stFlags: TStaticText;
     stMem: TStaticText;
-    stStatesSound: TStaticText;
     stTstates: TStaticText;
     stTstatesFrame: TStaticText;
     TapeRecLed: TShape;
@@ -380,19 +376,6 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormKeyPress(Sender: TObject; var Key: char);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormShow(Sender: TObject);
-    procedure Image1Click(Sender: TObject);
-    procedure Image2Click(Sender: TObject);
-    procedure Label10Click(Sender: TObject);
-    procedure Label11Click(Sender: TObject);
-    procedure Label18Click(Sender: TObject);
-    procedure Label2Click(Sender: TObject);
-    procedure Label7Click(Sender: TObject);
-    procedure DebugPanelClick(Sender: TObject);
-    procedure DumpSourceClick(Sender: TObject);
     procedure PantallaClick(Sender: TObject);
     procedure ScreenClick(Sender: TObject);
     procedure ButtonDebugClick(Sender: TObject);
@@ -1704,33 +1687,29 @@ var
   k: word;
   bytes_readed: word;
 begin
-  //if (soundpos < 7000) then
-  //begin
-     if (sound_bytes >= 0) then begin
-        if sound_bytes >= bufsize then
-           bytes_readed := bufsize
-        else
-           bytes_readed := sound_bytes;
+   if (sound_bytes >= 0) then begin
+      if sound_bytes >= bufsize then
+         bytes_readed := bufsize
+      else
+         bytes_readed := sound_bytes;
 
-        if soundpos_read + bytes_readed >= spec_buffer_size then
-        begin
-           move(data[soundpos_read], buffer[nb,0], spec_buffer_size-soundpos_read);
-           soundpos_read := bytes_readed-(spec_buffer_size-soundpos_read);
-           move(data[0], buffer[nb,0], soundpos_read);
-        end else begin
-           move(data[soundpos_read], buffer[nb,0], bufsize);
-           inc(soundpos_read,bufsize);
-        end;
-        dec(sound_bytes,bytes_readed);
-        ACSMemoryIn1.DataBuffer :=@buffer[nb];
-        ACSMemoryIn1.DataSize := bufsize;
-     end else begin
-       fillchar(buffer[nb], 1, 128);
-       ACSMemoryIn1.DataBuffer :=@buffer[nb];
-       ACSMemoryIn1.DataSize := 1;
-     end;
-//     if nb = 0 then nb := 1 else nb := 0;
-  //end else soundpos := 0;
+      if soundpos_read + bytes_readed >= spec_buffer_size then
+      begin
+         move(data[soundpos_read], buffer[nb,0], spec_buffer_size-soundpos_read);
+         soundpos_read := bytes_readed-(spec_buffer_size-soundpos_read);
+         move(data[0], buffer[nb,0], soundpos_read);
+      end else begin
+         move(data[soundpos_read], buffer[nb,0], bufsize);
+         inc(soundpos_read,bufsize);
+      end;
+      dec(sound_bytes,bytes_readed);
+      ACSMemoryIn1.DataBuffer :=@buffer[nb];
+      ACSMemoryIn1.DataSize := bufsize;
+   end else begin
+     fillchar(buffer[nb], 1, 128);
+     ACSMemoryIn1.DataBuffer :=@buffer[nb];
+     ACSMemoryIn1.DataSize := 1;
+   end;
 end;
 
 
@@ -1743,24 +1722,6 @@ var
   F: File of byte;
   r: integer;
 begin
-  assignfile(f,'EB8A.WAV');
-  reset(f,1);
-  seek(f,44);
-  blockread(f,data,7014);
-  closefile(f);
-  bits:= ACSFilein1.BitsPerSample;
-  channels:= ACSFilein1.Channels;
-  SampleRate:=ACSFilein1.SampleRate;
-  size := ACSFilein1.Size;
-  move(data[0], buffer[nb,0], bufsize);
-  ACSMemoryIn1.DataBuffer :=@buffer[nb];
-  sound_active := true;
-//  ACSAudioOut1.Run();
-  delay(100);
-  soundpos_read := bufsize;
-  //ACSMemoryIn1.
-//  r := ACSMemoryIn1.getdata(@data[soundpos],bufsize);
-  ACSMemoryIn1.DataSize := bufsize;
   init_z80;
   init_spectrum;
   pc := 0;
@@ -1811,15 +1772,6 @@ begin
   S[14] := iffc(n_flag<>0,'N',' ');
   S[16] := iffc(c_flag<>0,'C',' ');
   stFlags.caption := S;
-  //stFlagZ.Visible:=(z_flag <> 0);
-  //stFlag5.Visible:=(n5_flag <> 0);
-  //stFlagH.Visible:=(h_flag <> 0);
-  //stFlag3.Visible:=(n3_flag <> 0);
-  //stFlagP.Visible:=(pv_flag <> 0);
-  //stFlagN.Visible:=(n_flag <> 0);
-  //stFlagC.Visible:=(c_flag <> 0);
-  //stTStates.caption := HexStr(t_states,16);
-  //stTStatesFrame.caption := HexStr(t_states_cur_frame,8);
   str(t_states,S);
   stTStates.caption := S;
   str(t_states_cur_frame,S);
@@ -1847,8 +1799,11 @@ begin
     end;
     if not pause or step then begin
        empezando := false;
-       if pc = $556 then // LOAD ROUTINE
+       if (pc = $556) then
+          save_cpu_status;
+       if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible then // LOAD ROUTINE
        begin
+          restore_cpu_status;
           c_flag := Load_Tape_block(IX, DE, A); // IX: Addr; DE: Len; A: Flag byte
           compose_flags;
           ix+=de;
@@ -1897,10 +1852,10 @@ begin
         draw_screen;
         repaint_screen := false;
         inc(frames);
-        if (frames mod 50) = 0 then begin
-          stsamples.caption := intToStr(sound_bytes);
-          ststatessound.caption := intToStr(t_states_sound_bit);
-        end;
+        //if (frames mod 50) = 0 then begin
+        //  stsamples.caption := intToStr(sound_bytes);
+        //  ststatessound.caption := intToStr(t_states_sound_bit);
+        //end;
     end;
   end;
 end;
@@ -1939,69 +1894,6 @@ begin
      sizex := sizex1x*scale+15;
      sizey := sizey1x*scale+5;
      SS_Status := 0;
-end;
-
-procedure TSpecEmu.FormKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-end;
-
-procedure TSpecEmu.FormKeyPress(Sender: TObject; var Key: char);
-begin
-end;
-
-procedure TSpecEmu.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
-  );
-begin
-end;
-
-procedure TSpecEmu.FormShow(Sender: TObject);
-begin
-end;
-
-procedure TSpecEmu.Image1Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.Image2Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.Label10Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.Label11Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.Label18Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.Label2Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.Label7Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.DebugPanelClick(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.DumpSourceClick(Sender: TObject);
-begin
-
 end;
 
 procedure TSpecEmu.PantallaClick(Sender: TObject);

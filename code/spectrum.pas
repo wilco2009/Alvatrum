@@ -24,7 +24,7 @@ const
   //screen_testados_linea=224;
   //screen_testados_total=screen_testados_linea*screen_scanlines;
   screen_testados_total=70000;
-  scanline_testados = 218;//208; //screen_testados_total div 334;//312;
+  scanline_testados = 208; //208;// zesarux=224//208; //screen_testados_total div 334;//312;
   screen_tstates_half_scanline = scanline_testados;
 
   MAX_TAPE_BLOCKS = 99;

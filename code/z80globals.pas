@@ -22,6 +22,17 @@ const
      FLAG_S =$80;
 
 var
+   cpu_backup: record
+     registers: Array[0..15] of byte;
+     iff1, iff2: boolean;
+     im: byte;
+     r, i: Byte;
+     ix, iy, sp: word;
+     pc: word;
+     halted: boolean;
+     intpend: boolean;
+     NMI: boolean;
+   end;
    Mem: Array[0..65535] of byte;
    registers: Array[0..15] of byte;
    iff1, iff2: boolean;
@@ -67,6 +78,8 @@ var
    overflow_add_table : Array[0..7] of byte = (0,       0,      0, FLAG_PV, FLAG_PV, 0,       0,      0);
    overflow_sub_table : Array[0..7] of byte = (0, FLAG_PV,      0,       0,       0, 0, FLAG_PV,      0);
 
+   procedure save_cpu_status;
+   procedure restore_cpu_status;
    function parity(a: byte): byte; //inline;
    function iffb(cond: boolean; yes: byte; no: byte): byte; //inline;
    function iffc(cond: boolean; yes: char; no: char): char; //inline;
@@ -107,6 +120,40 @@ var
    function desp8_to_16(desp: byte): integer;
 
 implementation
+
+procedure save_cpu_status;
+begin
+    cpu_backup.registers := registers;
+    cpu_backup.iff1 := iff1;
+    cpu_backup.iff2 := iff2;
+    cpu_backup.im := im;
+    cpu_backup.r := r;
+    cpu_backup.i := i;
+    cpu_backup.ix := ix;
+    cpu_backup.iy := iy;
+    cpu_backup.sp := sp;
+    cpu_backup.pc := pc;
+    cpu_backup.halted := halted;
+    cpu_backup.intpend := intpend;
+    cpu_backup.NMI := NMI;
+end;
+
+procedure restore_cpu_status;
+begin
+    registers := cpu_backup.registers;
+    iff1 := cpu_backup.iff1;
+    iff2 := cpu_backup.iff2;
+    im := cpu_backup.im;
+    r := cpu_backup.r;
+    i := cpu_backup.i;
+    ix := cpu_backup.ix;
+    iy := cpu_backup.iy;
+    sp := cpu_backup.sp;
+    pc := cpu_backup.pc;
+    halted := cpu_backup.halted;
+    intpend := cpu_backup.intpend;
+    NMI := cpu_backup.NMI;
+end;
 
 procedure inc_register_r;
 begin
@@ -179,8 +226,8 @@ end;
 procedure store(x: word; y: byte);
 begin
  wrmem(x,y);
-    if (x = $5c91) and (y>0) then
-       a := a;
+    //if (x = $5c91) and (y>0) then
+    //   a := a;
 end;
 
 // store 8 bit value y at 16 bit location x

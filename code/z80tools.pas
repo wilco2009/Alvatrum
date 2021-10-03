@@ -258,14 +258,14 @@ var
   function bit_instructions: string;
   begin
     case byte2 of
-         $00..$07  : res := comp('RLC',reg8(addr,0),'',2);
-         $10..$17  : res := comp('RL',reg8(addr,0),'',2);
-         $08..$0f  : res := comp('RRC',reg8(addr,0),'',2);
-         $18..$1f  : res := comp('RR',reg8(addr,0),'',2);
-         $20..$27  : res := comp('SLA',reg8(addr,0),'',2);
-         $30..$37  : res := comp('SLL',reg8(addr,0),'',2);
-         $28..$2f  : res := comp('SRA',reg8(addr,0),'',2);
-         $38..$3f  : res := comp('SRL',reg8(addr,0),'',2);
+         $00..$07  : res := comp('RLC',reg8(addr+1,0),'',2);
+         $10..$17  : res := comp('RL',reg8(addr+1,0),'',2);
+         $08..$0f  : res := comp('RRC',reg8(addr+1,0),'',2);
+         $18..$1f  : res := comp('RR',reg8(addr+1,0),'',2);
+         $20..$27  : res := comp('SLA',reg8(addr+1,0),'',2);
+         $30..$37  : res := comp('SLL',reg8(addr+1,0),'',2);
+         $28..$2f  : res := comp('SRA',reg8(addr+1,0),'',2);
+         $38..$3f  : res := comp('SRL',reg8(addr+1,0),'',2);
          $40..$7f  : res := comp('BIT',val3bit(addr+1,3),reg8(addr+1,0),2);
          $c0..$ff  : res := comp('SET',val3bit(addr+1,3),reg8(addr+1,0),2);
          $80..$bf  : res := comp('RES',val3bit(addr+1,3),reg8(addr+1,0),2);
