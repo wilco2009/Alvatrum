@@ -22,6 +22,9 @@ type
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
+    ButtonDeleteBlock: TBGRAResizeSpeedButton;
+    ButtonTapeFirst: TBGRAResizeSpeedButton;
+    ButonTapeEnd: TBGRAResizeSpeedButton;
     ButtonRew: TBGRAResizeSpeedButton;
     ButtonFWD: TBGRAResizeSpeedButton;
     ButtonEject: TBGRAResizeSpeedButton;
@@ -30,6 +33,8 @@ type
     ButtonPlayPressed: TBGRAResizeSpeedButton;
     ButtonRec: TBGRAResizeSpeedButton;
     ButtonRecPressed: TBGRAResizeSpeedButton;
+    ButtonBlockdown: TBGRAResizeSpeedButton;
+    ButtonBlockUp: TBGRAResizeSpeedButton;
     Button_a: TBGRAResizeSpeedButton;
     Button_CS_LOCK: TBGRAResizeSpeedButton;
     Button_F: TBGRAResizeSpeedButton;
@@ -69,8 +74,6 @@ type
     ButtonDebug: TSpeedButton;
     ButtonTap: TSpeedButton;
     ButtonTap1: TSpeedButton;
-    ButtonTapeBegin: TSpeedButton;
-    ButtonTapeEnd: TSpeedButton;
     Button_dos: TBGRAResizeSpeedButton;
     Button_E: TBGRAResizeSpeedButton;
     Button_U: TBGRAResizeSpeedButton;
@@ -171,11 +174,16 @@ type
     procedure BFocusClick(Sender: TObject);
     procedure BFocusdKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ButtonBlockdownClick(Sender: TObject);
+    procedure ButtonBlockUpClick(Sender: TObject);
     procedure ButtonEjectClick(Sender: TObject);
     procedure ButtonFWDClick(Sender: TObject);
     procedure ButtonPlayClick(Sender: TObject);
     procedure ButtonPlayPressedClick(Sender: TObject);
     procedure ButtonRecClick(Sender: TObject);
+    procedure ButtonDeleteBlockClick(Sender: TObject);
+    procedure ButtonTapeFirstClick(Sender: TObject);
+    procedure ButonTapeEndClick(Sender: TObject);
     procedure ButtonRecPressedClick(Sender: TObject);
     procedure ButtonRewClick(Sender: TObject);
     procedure ButtonStopClick(Sender: TObject);
@@ -351,8 +359,6 @@ type
     procedure BlockGridBeforeSelection(Sender: TObject; aCol, aRow: Integer);
     procedure ButtonTap1Click(Sender: TObject);
     procedure ButtonTapClick(Sender: TObject);
-    procedure ButtonTapeBeginClick(Sender: TObject);
-    procedure ButtonTapeEndClick(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
     procedure OpenTapFileDialogClose(Sender: TObject);
@@ -419,11 +425,15 @@ type
     procedure Hide_Keyboard;
     procedure Hideall;
 
+    procedure move_tap_block(uno, dos: word);
+    procedure Delete_Tape_Block(row: word);
     procedure Read_tap_blocs;
     procedure Tape_select(n: integer);
     procedure Set_tape_leds;
 
+    function tap_checksum(flag: byte; addr,len: word): byte;
     function Load_Tape_block(addr, len: word; flag: byte): byte;
+    function Save_Tape_block(addr, len: word; flag: byte): byte;
     procedure resetkeyb(fila, bit: byte);
     procedure reset_SS;
     procedure reset_CS;
@@ -457,6 +467,122 @@ implementation
 {$R *.lfm}
 
 { TSpecEmu }
+
+procedure TSpecEmu.move_tap_block(uno,dos: word);
+Var
+  F, FBak: File;
+  tmp: Word;
+  result: integer;
+begin
+  if dos < uno then
+  begin
+    tmp := dos;
+    dos := uno;
+    uno := tmp;
+  end;
+  CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+  AssignFile (F, OpenTapFileDialog.FileName);
+  Reset(F,1);
+  AssignFile (FBak, '$$$$$$$$.$$$');
+  Reset(FBak,1);
+
+  // copy block from fbak(dos) to f(uno)
+  seek(Fbak, Tape_info[dos].Filepos);
+  blockread(fbak,buffer,Tape_info[dos].size+2);
+  seek(F, Tape_info[uno].Filepos);
+  blockwrite(f,buffer,Tape_info[dos].size+2);
+
+  // copy block from fbak(uno) to f(uno)+size(uno)+2
+  seek(Fbak, Tape_info[uno].Filepos);
+  blockread(fbak,buffer,Tape_info[uno].size+2);
+  seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
+  blockwrite(f,buffer,Tape_info[uno].size+2);
+
+  closefile(F);
+  closefile(Fbak);
+end;
+
+procedure TSpecEmu.Delete_Tape_Block(row: word);
+Var
+  F: File;
+  source_pos, dest_pos: Word;
+  result: integer;
+begin
+  //CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+  AssignFile (F, OpenTapFileDialog.FileName);
+  Reset(F,1);
+  dest_pos := Tape_Info[row].Filepos;
+  Source_pos := dest_pos + Tape_Info[row].Size+2;
+  while Source_pos < filesize(F) do
+  begin
+    seek(f,source_pos);
+    blockread(f, buffer, sizeof(buffer), result);
+    seek(f,dest_pos);
+    blockwrite(f,buffer,result);
+    inc(source_pos, result);
+    inc(dest_pos, result);
+  end;
+  seek(f,dest_pos);
+  truncate(f);
+  closefile(F);
+end;
+
+function TSpecEmu.tap_checksum(flag: byte; addr,len: word): byte;
+var
+  v: byte;
+  x: word;
+begin
+  v := flag;
+  for x := addr to addr+len-1 do
+      v := v xor mem[x];
+  tap_checksum := v;
+end;
+
+function TSpecEmu.Save_Tape_block(addr, len: word; flag: byte): byte; // IX: Addr; DE: Len; A: Flag byte
+Var
+  F, FBak: File;
+  BT,x: Byte;
+  Size, pos: Word;
+begin
+  CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+  AssignFile (F, OpenTapFileDialog.FileName);
+  Reset(F,1);
+  pos := Blockgrid.Row;
+  if pos = 0 then
+    seek(F, 0)
+  else if pos <= Tape_Blocks then
+    seek(F, Tape_Info[pos].Filepos)
+  else
+    seek(F, Tape_Info[pos-1].Filepos+Tape_Info[pos-1].size+2);
+
+  if flag = 0 then // Es una cabecera
+  begin
+    size := 19;
+  end else begin // Es un bloque de datos
+    size := len+2;
+  end;
+  Blockwrite(F, size, sizeof(size));
+  Blockwrite(F, flag, sizeof(flag));
+  Blockwrite(F,mem[addr],len);
+  Blockwrite(F, tap_checksum(flag,addr,len),1);
+  if pos <= Tape_Blocks then
+  begin
+    AssignFile (FBAK, '$$$$$$$$.$$$');
+    Reset(FBAK,1);
+    for x := pos to Tape_Blocks do
+    begin
+       seek(FBAK, Tape_Info[x].Filepos);
+       blockread(FBAK, buffer, Tape_info[x].Size+2);
+       blockwrite(F, buffer, Tape_info[x].Size+2);
+    end;
+    CloseFile(FBAK);
+    Truncate(F);
+  end;
+  CloseFile(F);
+//  Tape_info_bak := Tape_info;
+  read_tap_blocs;
+  Blockgrid.Row := pos+1;
+end;
 
 function TSpecEmu.Load_Tape_block(addr, len: word; flag: byte): byte; // IX: Addr; DE: Len; A: Flag byte
 Var
@@ -849,6 +975,32 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
     key := 0;
 end;
 
+procedure TSpecEmu.ButtonBlockdownClick(Sender: TObject);
+var
+   pos: word;
+begin
+  if (blockgrid.Row < Tape_Blocks) then
+  begin
+       pos := blockgrid.row;
+       move_tap_block(blockgrid.row, blockgrid.row+1);
+       read_tap_blocs;
+       blockgrid.row := pos+1;
+  end;
+end;
+
+procedure TSpecEmu.ButtonBlockUpClick(Sender: TObject);
+var
+   pos: word;
+begin
+  if (blockgrid.Row > 1) then
+  begin
+    pos := blockgrid.row;
+       move_tap_block(blockgrid.row, blockgrid.row-1);
+       read_tap_blocs;
+       blockgrid.row := pos-1;
+  end;
+end;
+
 procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
 begin
   OpenTapFileDialog.Execute;
@@ -875,6 +1027,27 @@ begin
     ButtonRec.Visible := false;
     Set_tape_leds;
   end;
+end;
+
+procedure TSpecEmu.ButtonDeleteBlockClick(Sender: TObject);
+begin
+     if (blockgrid.Row <= Tape_Blocks) and
+        (Application.MessageBox('Are you sure?', 'Delete current tap block',
+                                    MB_ICONQUESTION + MB_YESNO) = IDYES) then
+     begin
+          Delete_Tape_Block(blockgrid.Row);
+          read_tap_blocs;
+     end;
+end;
+
+procedure TSpecEmu.ButtonTapeFirstClick(Sender: TObject);
+begin
+    Tape_Select(1);
+end;
+
+procedure TSpecEmu.ButonTapeEndClick(Sender: TObject);
+begin
+  Tape_Select(Tape_blocks);
 end;
 
 procedure TSpecEmu.ButtonRecPressedClick(Sender: TObject);
@@ -1518,16 +1691,6 @@ begin
   adjust_window_size;
 end;
 
-procedure TSpecEmu.ButtonTapeBeginClick(Sender: TObject);
-begin
-  Tape_Select(1);
-end;
-
-procedure TSpecEmu.ButtonTapeEndClick(Sender: TObject);
-begin
-    Tape_Select(Tape_blocks);
-end;
-
 procedure TSpecEmu.FormDeactivate(Sender: TObject);
 begin
 end;
@@ -1620,12 +1783,26 @@ begin
 end;
 
 procedure TSpecEmu.OpenTapFileDialogClose(Sender: TObject);
+var
+  Reply, BoxStyle: Integer;
+  F: THandle;
 begin
   if OpenTapFileDialog.FileName <> '' then begin
      TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
      TapeImage.Visible := true;
      TapeFileName.Visible := true;
-     Read_tap_blocs;
+
+     if not FileExists(OpenTapFileDialog.FileName) then
+     begin
+       BoxStyle := MB_ICONQUESTION + MB_YESNO;
+       Reply := Application.MessageBox('CREATE A EMPTY TAP FILE?', 'NEW TAP FILE', BoxStyle);
+       if Reply = IDYES then
+          F := FileCreate(OpenTapFileDialog.FileName);
+          FileClose(F);
+     end;
+
+     if FileExists(OpenTapFileDialog.FileName) then
+        Read_tap_blocs;
   end;
 end;
 
@@ -1675,6 +1852,7 @@ begin
   refresh_registers;
   DebugPanel.Enabled := true;
   StepButton.Enabled := true;
+  stepbutton.SetFocus;
 end;
 
 procedure TSpecEmu.BitBtn3Click(Sender: TObject);
@@ -1801,7 +1979,13 @@ begin
        empezando := false;
        if (pc = $556) then
           save_cpu_status;
-       if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible then // LOAD ROUTINE
+       if (pc = $04c2) and TapeRecLed.Visible then // SAVE ROUTINE
+       begin
+            c_flag := Save_tape_block(IX,DE,A);
+            compose_flags;
+            ret;
+            clear_keyboard;
+       end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible then // LOAD ROUTINE
        begin
           restore_cpu_status;
           c_flag := Load_Tape_block(IX, DE, A); // IX: Addr; DE: Len; A: Flag byte

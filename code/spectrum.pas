@@ -36,8 +36,11 @@ type
     Flag: byte;
   end;
 
+  TTapeInfo = array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
+
 var
-  Tape_info: array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
+  Tape_info: TTapeInfo;
+//  Tape_info_bak: TTapeInfo;
   border_color : byte = 7;
   frame: byte = 0;
   //enter_pulsado: boolean = false;

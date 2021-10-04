@@ -19,6 +19,9 @@ alfa version 0.005
 Timing adjustments
 Corrected CPI & CPD instructions, Jetsetwilly now works
 
+alfa version 0.006
+save to tap implemented
+
 TO DO:
 tape reading tzx
 snapshots handle.
