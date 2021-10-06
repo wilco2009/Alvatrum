@@ -22,6 +22,11 @@ Corrected CPI & CPD instructions, Jetsetwilly now works
 alfa version 0.006
 save to tap implemented
 
+alfa version 0.007
+implemented snapshot handle
+ - support load .SNA and .Z80
+ - support save .SNA
+
 TO DO:
 tape reading tzx
 snapshots handle.

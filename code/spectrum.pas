@@ -5,7 +5,7 @@ unit spectrum;
 interface
 
 uses
-  Classes, SysUtils,CRT,Z80Globals;
+  Classes, SysUtils,CRT,Z80Globals,hardware;
 
 const
   ancho_borde = 30;
@@ -35,6 +35,7 @@ type
     Size: word;
     Flag: byte;
   end;
+
 
   TTapeInfo = array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
 
@@ -121,7 +122,9 @@ begin
   v := $ff;
   hport := port >> 8;
   lport := port and $ff;
-  if (port and 1) = 0 then begin // ULA port 0xfe
+  if lport and %11100000 = $00 then       // Kempston joystick
+      v := Kempston
+  else if (port and 1) = 0 then begin // ULA port 0xfe
      if (hport and %00000001) = 0 then
         v := v and Keyboard[0]; // SHIFT Z X C V
      if (hport and %00000010) = 0 then
@@ -138,9 +141,7 @@ begin
         v := v and Keyboard[6]; // ENTER L K J H
      if (hport and %10000000) = 0 then
         v := v and Keyboard[7]; // SPACE SYM M N B
-     if (Keyboard[7] and 1 = 0) then
-       a := a;
-  end else begin                 // other write ports
+  end else begin                   // other write ports
   end;
   spectrum_in := v;
 end;

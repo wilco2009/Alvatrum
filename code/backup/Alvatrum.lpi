@@ -23,27 +23,30 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="6">
+    <RequiredPackages Count="7">
       <Item1>
-        <PackageName Value="laz_acs_lib"/>
+        <PackageName Value="bgragames"/>
       </Item1>
       <Item2>
-        <PackageName Value="etpackage"/>
+        <PackageName Value="laz_acs_lib"/>
       </Item2>
       <Item3>
-        <PackageName Value="pascalscript"/>
+        <PackageName Value="etpackage"/>
       </Item3>
       <Item4>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="pascalscript"/>
       </Item4>
       <Item5>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="bgracontrols"/>
       </Item5>
       <Item6>
-        <PackageName Value="LCL"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item6>
+      <Item7>
+        <PackageName Value="LCL"/>
+      </Item7>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="17">
       <Unit0>
         <Filename Value="Alvatrum.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -110,6 +113,20 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="TAP"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="global.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Global"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="hardware.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="fileformats.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FileFormats"/>
+      </Unit16>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

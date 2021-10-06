@@ -11,7 +11,8 @@ uses
   ExtCtrls, StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes,
   z80Globals, Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file, acs_misc,
   acs_streams, BCListBox, BCGameGrid, CRT, BGRAGraphicControl,
-  BGRASpriteAnimation, BGRAResizeSpeedButton, spectrum, SDL, epiktimer;
+  BGRASpriteAnimation, BGRAResizeSpeedButton, spectrum, SDL, epiktimer,
+  SdpoJoystick, global, hardware, fileformats;
 type
 
   { TSpecEmu }
@@ -22,7 +23,10 @@ type
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
+    ButtonConf: TBGRAResizeSpeedButton;
     ButtonDeleteBlock: TBGRAResizeSpeedButton;
+    ButtonSnapLoad: TBGRAResizeSpeedButton;
+    ButtonSnapSave: TBGRAResizeSpeedButton;
     ButtonTapeFirst: TBGRAResizeSpeedButton;
     ButonTapeEnd: TBGRAResizeSpeedButton;
     ButtonRew: TBGRAResizeSpeedButton;
@@ -83,9 +87,13 @@ type
     Button_B: TBGRAResizeSpeedButton;
     Button_N: TBGRAResizeSpeedButton;
     Button_M: TBGRAResizeSpeedButton;
+    ChkFisicalJoy: TCheckBox;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
     EdMem: TEdit;
+    OpenSnaFileDialog: TOpenDialog;
+    SaveSnaFileDialog: TSaveDialog;
+    OptionsPanel: TPanel;
     screen_timer: TEpikTimer;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
@@ -96,6 +104,7 @@ type
     OpenTapFileDialog: TOpenDialog;
     FlagsPanel: TPanel;
     PanelKeyboard: TPanel;
+    SdpoJoystick1: TSdpoJoystick;
     SideButtons: TPanel;
     src_ix: TRadioButton;
     src_iy: TRadioButton;
@@ -176,12 +185,15 @@ type
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ButtonBlockdownClick(Sender: TObject);
     procedure ButtonBlockUpClick(Sender: TObject);
+    procedure ButtonConfClick(Sender: TObject);
     procedure ButtonEjectClick(Sender: TObject);
     procedure ButtonFWDClick(Sender: TObject);
     procedure ButtonPlayClick(Sender: TObject);
     procedure ButtonPlayPressedClick(Sender: TObject);
     procedure ButtonRecClick(Sender: TObject);
     procedure ButtonDeleteBlockClick(Sender: TObject);
+    procedure ButtonSnapSaveClick(Sender: TObject);
+    procedure ButtonSnapLoadClick(Sender: TObject);
     procedure ButtonTapeFirstClick(Sender: TObject);
     procedure ButonTapeEndClick(Sender: TObject);
     procedure ButtonRecPressedClick(Sender: TObject);
@@ -423,6 +435,8 @@ type
     procedure Hide_Debugger;
     procedure Show_Keyboard;
     procedure Hide_Keyboard;
+    procedure Show_Options;
+    procedure Hide_Options;
     procedure Hideall;
 
     procedure move_tap_block(uno, dos: word);
@@ -458,7 +472,7 @@ var
   debug_width : integer = 0;
   TapePanelWidth: integer = 0;
   KeyboardWidth: integer = 0;
-  RegulatedSpeed: Boolean = True;
+  OptionsWidth: integer = 0;
   buff: Array[0..$ffff] of byte;
   tmp_delay: longint = 5000;
 
@@ -603,6 +617,7 @@ begin
   end;
   closefile(F);
   result := FLAG_C; // devuelve FLAG_C=0 si error
+  BFocus.setfocus;
 end;
 
 procedure TSpecEmu.Hideall;
@@ -610,6 +625,19 @@ begin
   Hide_Keyboard;
   Hide_Tape;
   Hide_Debugger;
+  Hide_Options;
+end;
+
+procedure TSpecEmu.Show_Options;
+begin
+  OptionsPanel.Visible := True;
+  OptionsWidth := OptionsPanel.Width;
+end;
+
+procedure TSpecEmu.Hide_Options;
+begin
+  OptionsPanel.Visible := false;
+  OptionsWidth := 0;
 end;
 
 procedure TSpecEmu.Hide_Keyboard;
@@ -756,12 +784,13 @@ begin
   MainWindowWidth := 352+sizex1x*scale-sizex1x;
   if windowState = wsNormal then begin
     Height := sizey + buttons_height +10; // Height - sizey1x;
-    width := MainWindowWidth + keyboardWidth + debug_width + TapePanelWidth+ SideButtons.width+7;// 55; // width - sizex1x;
+    width := MainWindowWidth + OptionsWidth+keyboardWidth + debug_width + TapePanelWidth+ SideButtons.width+7;// 55; // width - sizex1x;
   end;
   SideButtons.Height := Height-1;
   SideButtons.Left := MainWindowWidth;
   pantalla.width := sizex+17;   //271+38= 288
   pantalla.Height:= sizey+15;
+  OptionsPanel.Left := sizex + 60;
   DebugPanel.Left := sizex + 60;
   TapePanel.Left := sizex + 60;
   PanelKeyboard.Left := sizex + 60;
@@ -820,10 +849,23 @@ procedure TSpecEmu.BFocusdKeyDown(Sender: TObject; var Key: Word;
        if (Activecontrol = EdBreak) or (ActiveControl = EdMem) then exit;
        case key of
             VK_F8    : step := true;
-            VK_LEFT  : begin setkeyb(0,0); setkeyb(3,4);end;
-            VK_DOWN  : begin setkeyb(0,0); setkeyb(4,4);end;
-            VK_UP    : begin setkeyb(0,0); setkeyb(4,3);end;
-            VK_RIGHT : begin setkeyb(0,0); setkeyb(4,2);end;
+            VK_LEFT  : if not chkFisicalJoy.checked then
+                       begin
+                         setkeyb(0,0);
+                         setkeyb(3,4);
+                       end else setKempston(1);
+            VK_DOWN  : if not chkFisicalJoy.checked then
+                       begin
+                         setkeyb(0,0); setkeyb(4,4);
+                       end else setKempston(2);
+            VK_UP    : if not chkFisicalJoy.checked then
+                       begin
+                         setkeyb(0,0); setkeyb(4,3);
+                       end else setKempston(3);
+            VK_RIGHT : if not chkFisicalJoy.checked then
+                       begin
+                         setkeyb(0,0); setkeyb(4,2);
+                       end else setKempston(0);
             VK_OEM_PLUS : begin setkeyb(7,1); setkeyb(6,2);end;
             VK_OEM_MINUS : begin setkeyb(7,1); setkeyb(6,3);end;
             VK_OEM_COMMA : begin setkeyb(7,1); setkeyb(7,3);end;
@@ -876,7 +918,10 @@ procedure TSpecEmu.BFocusdKeyDown(Sender: TObject; var Key: Word;
             VK_K     : setkeyb(6,2);
             VK_J     : setkeyb(6,3);
             VK_H     : setkeyb(6,4);
-            VK_SPACE : setkeyb(7,0);
+            VK_SPACE : if not chkFisicalJoy.checked then
+                       begin
+                         setkeyb(7,0);
+                       end else setKempston(4);
             VK_MENU  : setkeyb(7,1);
             VK_M     : setkeyb(7,2);
             VK_N     : setkeyb(7,3);
@@ -890,6 +935,7 @@ procedure TSpecEmu.BFocusClick(Sender: TObject);
 begin
   clear_keyboard;
   draw_screen;
+  refresh_registers;
 end;
 
 procedure TSpecEmu.AsciiSelectionChange(Sender: TObject);
@@ -909,10 +955,26 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
     if (Activecontrol = EdBreak) or (ActiveControl = EdMem) then exit;
     case key of
          VK_F8    : step := true;
-         VK_LEFT  : begin resetkeyb(0,0); resetkeyb(3,4);end;
-         VK_DOWN  : begin resetkeyb(0,0); resetkeyb(4,4);end;
-         VK_UP    : begin resetkeyb(0,0); resetkeyb(4,3);end;
-         VK_RIGHT : begin resetkeyb(0,0); resetkeyb(4,2);end;
+         VK_LEFT  : if not chkFisicalJoy.checked then
+                    begin
+                      resetkeyb(0,0);
+                      resetkeyb(3,4);
+                    end else resetKempston(1);
+         VK_DOWN  : if not chkFisicalJoy.checked then
+                    begin
+                      resetkeyb(0,0);
+                      resetkeyb(4,4);
+                    end else resetKempston(2);
+         VK_UP    : if not chkFisicalJoy.checked then
+                    begin
+                      resetkeyb(0,0);
+                      resetkeyb(4,3);
+                    end else resetKempston(3);
+         VK_RIGHT : if not chkFisicalJoy.checked then
+                    begin
+                      resetkeyb(0,0);
+                      resetkeyb(4,2);
+                    end else resetKempston(0);
          VK_OEM_PLUS : begin resetkeyb(7,1); resetkeyb(6,2);end;
          VK_OEM_MINUS : begin resetkeyb(7,1); resetkeyb(6,3);end;
 
@@ -966,7 +1028,10 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
          VK_K     : resetkeyb(6,2);
          VK_J     : resetkeyb(6,3);
          VK_H     : resetkeyb(6,4);
-         VK_SPACE : resetkeyb(7,0);
+         VK_SPACE : if not chkFisicalJoy.checked then
+                    begin
+                      resetkeyb(7,0);
+                    end else resetKempston(4);
          VK_MENU  : reset_SS;//resetkeyb(7,1);
          VK_M     : resetkeyb(7,2);
          VK_N     : resetkeyb(7,3);
@@ -984,7 +1049,7 @@ begin
        pos := blockgrid.row;
        move_tap_block(blockgrid.row, blockgrid.row+1);
        read_tap_blocs;
-       blockblockgrid.row := pos+1;
+       blockgrid.row := pos+1;
   end;
 end;
 
@@ -997,8 +1062,19 @@ begin
     pos := blockgrid.row;
        move_tap_block(blockgrid.row, blockgrid.row-1);
        read_tap_blocs;
-       blockblockgrid.row := pos-1;
+       blockgrid.row := pos-1;
   end;
+end;
+
+procedure TSpecEmu.ButtonConfClick(Sender: TObject);
+begin
+  if PanelKeyboard.Visible then begin
+    HideAll;
+  end else begin
+    HideAll;
+    show_Options;
+  end;
+  adjust_window_size;
 end;
 
 procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
@@ -1038,6 +1114,32 @@ begin
           Delete_Tape_Block(blockgrid.Row);
           read_tap_blocs;
      end;
+end;
+
+
+procedure TSpecEmu.ButtonSnapLoadClick(Sender: TObject);
+begin
+  if OpenSnaFileDialog.Execute then
+  begin
+    loadSnapshotfile(OpenSnaFileDialog.FileName);
+  end;
+  BFocus.setfocus;
+end;
+
+procedure TSpecEmu.ButtonSnapSaveClick(Sender: TObject);
+var
+   reply: boolean;
+begin
+   if SaveSnaFileDialog.Execute then
+   begin
+     reply := true;
+     if fileexists(SaveSnaFileDialog.FileName) then
+        reply := Application.MessageBox('Are you sure?', 'overwrite existing file',
+                                 MB_ICONQUESTION + MB_YESNO) = IDYES;
+     if reply = true then
+        SaveSnapshotfile(SaveSnaFileDialog.FileName);
+   end;
+   BFocus.setfocus;
 end;
 
 procedure TSpecEmu.ButtonTapeFirstClick(Sender: TObject);
@@ -1907,6 +2009,7 @@ begin
     draw_screen;
     refresh_registers;
   end;
+  BFocus.setfocus;
 end;
 
 procedure TSpecEmu.StepButtonClick(Sender: TObject);
@@ -2057,6 +2160,9 @@ begin
   ACSMemoryIn1.DataSize := bufsize;
   sound_bytes := 2048;
   soundpos_write := sound_bytes;
+
+  options.machine := Spectrum48;
+  options.joystick := joy_kempston;
 end;
 
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);

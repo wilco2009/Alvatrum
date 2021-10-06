@@ -9,8 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, etpackage, laz_acs_lib, pascalscript, main, Z80, Z80ops, Z80Globals,
   z80bitops, Z80bitops_ixiy, roms, Screen, fastbitmap, Z80Tools, exops,
-  spectrum, TAP
-  { you can add units after this };
+  spectrum, TAP, Global, hardware, FileFormats;
 
 {$R *.res}
 
