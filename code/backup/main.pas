@@ -87,11 +87,26 @@ type
     Button_B: TBGRAResizeSpeedButton;
     Button_N: TBGRAResizeSpeedButton;
     Button_M: TBGRAResizeSpeedButton;
-    ChkFisicalJoy: TCheckBox;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
     EdMem: TEdit;
+    GroupJoystickProtocol: TGroupBox;
+    GroupLeftJoystick: TGroupBox;
+    GroupRightJoystick: TGroupBox;
     OpenSnaFileDialog: TOpenDialog;
+    Panel1: TPanel;
+    RbJoyProtocolSinclair: TRadioButton;
+    RbJoyProtocolUser: TRadioButton;
+    RbJoyProtocolKempston: TRadioButton;
+    RbJoyProtocolNone: TRadioButton;
+    RbLeftJoy1: TRadioButton;
+    RbLeftJoy2: TRadioButton;
+    RbLeftJoyCursor: TRadioButton;
+    RbLeftJoyNone: TRadioButton;
+    RbRightJoy1: TRadioButton;
+    RbRightJoy2: TRadioButton;
+    RbRightJoyCursor: TRadioButton;
+    RbRightJoyNone: TRadioButton;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
     screen_timer: TEpikTimer;
@@ -104,7 +119,8 @@ type
     OpenTapFileDialog: TOpenDialog;
     FlagsPanel: TPanel;
     PanelKeyboard: TPanel;
-    SdpoJoystick1: TSdpoJoystick;
+    Joystick1: TSdpoJoystick;
+    Joystick2: TSdpoJoystick;
     SideButtons: TPanel;
     src_ix: TRadioButton;
     src_iy: TRadioButton;
@@ -115,6 +131,8 @@ type
     StaticText4: TStaticText;
     StaticText5: TStaticText;
     StaticText6: TStaticText;
+    StatusJoystick1: TShape;
+    StatusJoystick2: TShape;
     stBreak: TStaticText;
     stFlags: TStaticText;
     stMem: TStaticText;
@@ -124,6 +142,7 @@ type
     TapeFileName: TStaticText;
     TapePanel: TPanel;
     TapePlayLed: TShape;
+    Timer2: TTimer;
     ZoomOutButton: TBitBtn;
     ZoomInButton: TBitBtn;
     Pantalla: TBGRAGraphicControl;
@@ -183,6 +202,7 @@ type
     procedure BFocusClick(Sender: TObject);
     procedure BFocusdKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Button4Click(Sender: TObject);
     procedure ButtonBlockdownClick(Sender: TObject);
     procedure ButtonBlockUpClick(Sender: TObject);
     procedure ButtonConfClick(Sender: TObject);
@@ -365,6 +385,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure Button_ZMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure GroupLeftJoystickClick(Sender: TObject);
     procedure KeyMouseEnter(Sender: TObject);
     procedure KeyMouseLeave(Sender: TObject);
     procedure BlockGridAfterSelection(Sender: TObject; aCol, aRow: Integer);
@@ -375,12 +396,23 @@ type
     procedure FormWindowStateChange(Sender: TObject);
     procedure OpenTapFileDialogClose(Sender: TObject);
     procedure OpenTapFileDialogSelectionChange(Sender: TObject);
+    procedure OptionsPanelClick(Sender: TObject);
     procedure PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure PantallaPaint(Sender: TObject);
     procedure PauseButtonClick(Sender: TObject);
     procedure PlayButtonClick(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
+    procedure RbJoyProtocolKempstonChange(Sender: TObject);
+    procedure RbJoyProtocolNoneChange(Sender: TObject);
+    procedure RbJoyProtocolSinclairChange(Sender: TObject);
+    procedure RbJoyProtocolUserChange(Sender: TObject);
+    procedure RbLeftJoy1Change(Sender: TObject);
+    procedure RbLeftJoy2Change(Sender: TObject);
+    procedure RbLeftJoyCursorChange(Sender: TObject);
+    procedure RbLeftJoyNoneChange(Sender: TObject);
+    procedure RbRightJoy1Change(Sender: TObject);
+    procedure RbRightJoy2Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
     procedure StepButtonClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -406,8 +438,10 @@ type
     procedure stIYClick(Sender: TObject);
     procedure stPCClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
     procedure ZoomOutButtonClick(Sender: TObject);
+    procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
   private
     saliendo, starting, pause, step, breakpoint_active: boolean;
     SS_Status: Byte;
@@ -418,8 +452,11 @@ type
     SavedHeight: integer;
     SavedTop: integer;
     SavedLeft: integer;
+    LeftJoystickSelection: word;
+    RightJoystickSelection: word;
     procedure draw_screen;
     procedure RunEmulation;
+    procedure refresh_system;
     procedure refresh_registers;
     procedure start_debug;
     procedure stop_debug;
@@ -452,6 +489,11 @@ type
     procedure reset_SS;
     procedure reset_CS;
     procedure setkeyb(fila, bit: byte);
+    function FisicalJoyUsed: boolean;
+    function KempstonUsed: boolean;
+    function SinclairLeftUsed: boolean;
+    function SinclairRightUsed: boolean;
+    procedure UpdateJoystickPanels;
   public
 
   end;
@@ -829,6 +871,26 @@ begin
   draw_screen;
 end;
 
+function TSpecEmu.FisicalJoyUsed: boolean;
+begin
+  FisicalJoyUsed := RBLeftJoyCursor.checked or RBRightJoyCursor.checked;
+end;
+
+function TSpecEmu.KempstonUsed: boolean;
+begin
+  KempstonUsed := RBJoyProtocolKempston.checked;
+end;
+
+function TSpecEmu.SinclairLeftUsed: boolean;
+begin
+  SinclairLeftUsed := RBJoyProtocolSinclair.checked and rbLeftJoyCursor.checked;
+end;
+
+function TSpecEmu.SinclairRightUsed: boolean;
+begin
+  SinclairRightUsed := RBJoyProtocolSinclair.checked and rbRightJoyCursor.checked;
+end;
+
 procedure TSpecEmu.resetkeyb(fila, bit: byte);
 begin
   Keyboard[fila] := Keyboard[fila] or (%00000001 << bit);
@@ -849,23 +911,31 @@ procedure TSpecEmu.BFocusdKeyDown(Sender: TObject; var Key: Word;
        if (Activecontrol = EdBreak) or (ActiveControl = EdMem) then exit;
        case key of
             VK_F8    : step := true;
-            VK_LEFT  : if not chkFisicalJoy.checked then
+            VK_LEFT  : if not FisicalJoyUsed then
                        begin
                          setkeyb(0,0);
                          setkeyb(3,4);
-                       end else setKempston(1);
-            VK_DOWN  : if not chkFisicalJoy.checked then
+                       end else if KempstonUsed then setKempston(1)
+                       else if SinclairLeftUsed then setSinclairLeft(0)
+                       else if SinclairRightUsed then setSinclairRight(4);
+            VK_DOWN  : if not FisicalJoyUsed then
                        begin
                          setkeyb(0,0); setkeyb(4,4);
-                       end else setKempston(2);
-            VK_UP    : if not chkFisicalJoy.checked then
+                       end else if KempstonUsed then setKempston(2)
+                       else if SinclairLeftUsed then setSinclairLeft(2)
+                       else if SinclairRightUsed then setSinclairRight(2);
+            VK_UP    : if not FisicalJoyUsed then
                        begin
                          setkeyb(0,0); setkeyb(4,3);
-                       end else setKempston(3);
-            VK_RIGHT : if not chkFisicalJoy.checked then
+                       end else if KempstonUsed then setKempston(3)
+                       else if SinclairLeftUsed then setSinclairLeft(3)
+                       else if SinclairRightUsed then setSinclairRight(1);
+            VK_RIGHT : if not FisicalJoyUsed then
                        begin
                          setkeyb(0,0); setkeyb(4,2);
-                       end else setKempston(0);
+                       end else if KempstonUsed then setKempston(0)
+                       else if SinclairLeftUsed then setSinclairLeft(1)
+                       else if SinclairRightUsed then setSinclairRight(3);
             VK_OEM_PLUS : begin setkeyb(7,1); setkeyb(6,2);end;
             VK_OEM_MINUS : begin setkeyb(7,1); setkeyb(6,3);end;
             VK_OEM_COMMA : begin setkeyb(7,1); setkeyb(7,3);end;
@@ -918,10 +988,12 @@ procedure TSpecEmu.BFocusdKeyDown(Sender: TObject; var Key: Word;
             VK_K     : setkeyb(6,2);
             VK_J     : setkeyb(6,3);
             VK_H     : setkeyb(6,4);
-            VK_SPACE : if not chkFisicalJoy.checked then
+            VK_SPACE : if not FisicalJoyUsed then
                        begin
                          setkeyb(7,0);
-                       end else setKempston(4);
+                       end else if KempstonUsed then setKempston(4)
+                       else if SinclairLeftUsed then setSinclairLeft(4)
+                       else if SinclairRightUsed then setSinclairRight(0);
             VK_MENU  : setkeyb(7,1);
             VK_M     : setkeyb(7,2);
             VK_N     : setkeyb(7,3);
@@ -933,9 +1005,7 @@ end;
 
 procedure TSpecEmu.BFocusClick(Sender: TObject);
 begin
-  clear_keyboard;
-  draw_screen;
-  refresh_registers;
+  refresh_system;
 end;
 
 procedure TSpecEmu.AsciiSelectionChange(Sender: TObject);
@@ -955,26 +1025,34 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
     if (Activecontrol = EdBreak) or (ActiveControl = EdMem) then exit;
     case key of
          VK_F8    : step := true;
-         VK_LEFT  : if not chkFisicalJoy.checked then
+         VK_LEFT  : if not FisicalJoyUsed then
                     begin
                       resetkeyb(0,0);
                       resetkeyb(3,4);
-                    end else resetKempston(1);
-         VK_DOWN  : if not chkFisicalJoy.checked then
+                    end else if KempstonUsed then resetKempston(1)
+                    else if SinclairLeftUsed then resetSinclairLeft(0)
+                    else if SinclairRightUsed then resetSinclairRight(4);
+         VK_DOWN  : if not FisicalJoyUsed then
                     begin
                       resetkeyb(0,0);
                       resetkeyb(4,4);
-                    end else resetKempston(2);
-         VK_UP    : if not chkFisicalJoy.checked then
+                    end else if KempstonUsed then resetKempston(2)
+                    else if SinclairLeftUsed then resetSinclairLeft(2)
+                    else if SinclairRightUsed then resetSinclairRight(2);
+         VK_UP    : if not FisicalJoyUsed then
                     begin
                       resetkeyb(0,0);
                       resetkeyb(4,3);
-                    end else resetKempston(3);
-         VK_RIGHT : if not chkFisicalJoy.checked then
+                    end else if KempstonUsed then resetKempston(3)
+                    else if SinclairLeftUsed then resetSinclairLeft(3)
+                    else if SinclairRightUsed then resetSinclairRight(1);
+         VK_RIGHT : if not FisicalJoyUsed then
                     begin
                       resetkeyb(0,0);
                       resetkeyb(4,2);
-                    end else resetKempston(0);
+                    end else if KempstonUsed then resetKempston(0)
+                    else if SinclairLeftUsed then resetSinclairLeft(1)
+                    else if SinclairRightUsed then resetSinclairRight(3);
          VK_OEM_PLUS : begin resetkeyb(7,1); resetkeyb(6,2);end;
          VK_OEM_MINUS : begin resetkeyb(7,1); resetkeyb(6,3);end;
 
@@ -1028,16 +1106,23 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
          VK_K     : resetkeyb(6,2);
          VK_J     : resetkeyb(6,3);
          VK_H     : resetkeyb(6,4);
-         VK_SPACE : if not chkFisicalJoy.checked then
+         VK_SPACE : if not FisicalJoyUsed then
                     begin
                       resetkeyb(7,0);
-                    end else resetKempston(4);
+                    end else if KempstonUsed then resetKempston(4)
+                    else if SinclairLeftUsed then resetSinclairLeft(4)
+                    else if SinclairRightUsed then resetSinclairRight(0);
          VK_MENU  : reset_SS;//resetkeyb(7,1);
          VK_M     : resetkeyb(7,2);
          VK_N     : resetkeyb(7,3);
          VK_B     : resetkeyb(7,4);
     end;
     key := 0;
+end;
+
+procedure TSpecEmu.Button4Click(Sender: TObject);
+begin
+  Joystick1.Init;
 end;
 
 procedure TSpecEmu.ButtonBlockdownClick(Sender: TObject);
@@ -1122,6 +1207,7 @@ begin
   if OpenSnaFileDialog.Execute then
   begin
     loadSnapshotfile(OpenSnaFileDialog.FileName);
+    refresh_system;
   end;
   BFocus.setfocus;
 end;
@@ -1710,6 +1796,11 @@ begin
   resetkeyb(0,1);
 end;
 
+procedure TSpecEmu.GroupLeftJoystickClick(Sender: TObject);
+begin
+
+end;
+
 procedure TSpecEmu.KeyMouseEnter(Sender: TObject);
 begin
   with TBGRAResizeSpeedButton(Sender) do
@@ -1913,6 +2004,11 @@ begin
 
 end;
 
+procedure TSpecEmu.OptionsPanelClick(Sender: TObject);
+begin
+
+end;
+
 procedure TSpecEmu.PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 begin
@@ -1960,6 +2056,151 @@ end;
 procedure TSpecEmu.BitBtn3Click(Sender: TObject);
 begin
 
+end;
+
+procedure TSpecEmu.UpdateJoystickPanels;
+begin
+  GroupRightJoystick.Enabled := not rbJoyProtocolKempston.checked and
+                                not rbJoyProtocolNone.checked;
+  GroupLeftJoystick.Enabled := not rbJoyProtocolNone.checked;
+  If joystick1.Active then
+     StatusJoystick1.Brush.Color:= clLime
+  else
+     StatusJoystick1.Brush.Color:= clGray;
+
+  If joystick2.Active then
+     StatusJoystick2.Brush.Color:= clLime
+  else
+     StatusJoystick2.Brush.Color:= clGray;
+end;
+
+procedure TSpecEmu.RbJoyProtocolKempstonChange(Sender: TObject);
+begin
+  UpdateJoystickPanels;
+end;
+
+procedure TSpecEmu.RbJoyProtocolNoneChange(Sender: TObject);
+begin
+  UpdateJoystickPanels;
+end;
+
+procedure TSpecEmu.RbJoyProtocolSinclairChange(Sender: TObject);
+begin
+  UpdateJoystickPanels;
+end;
+
+procedure TSpecEmu.RbJoyProtocolUserChange(Sender: TObject);
+begin
+  UpdateJoystickPanels;
+end;
+
+procedure TSpecEmu.selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
+begin
+  if not joyactive then
+  begin
+     if joysticksel = 2 then
+        Joystick1.Close;
+     if joysticksel = 3 then
+        Joystick2.Close;
+     joysticksel := newsel;
+     case newsel of
+       2: If not Joystick1.Init then
+             ShowMessage('Joystick not found');
+       3: If not Joystick2.Init then
+             ShowMessage('Joystick not found');
+     end;
+
+  end;
+end;
+
+procedure TSpecEmu.RbLeftJoy1Change(Sender: TObject);
+begin
+  if Tradiobutton(Sender).Checked then
+  begin
+    try
+      if not Joystick1.Init then
+        ShowMessage('Joystick1 not found');
+      //else
+      //  ShowMessage('Joystick1 activated');
+    except
+           ShowMessage('Joystick1 not connected')
+    end;
+  end else begin
+    if not rbLeftjoy1.checked and not rbRightJoy1.checked then
+       joystick1.close;
+    //ShowMessage('Joystick1 deactivated');
+  end;
+  UpdateJoystickPanels;
+end;
+
+procedure TSpecEmu.RbLeftJoy2Change(Sender: TObject);
+begin
+  if Tradiobutton(Sender).Checked then
+  begin
+    try
+      if not Joystick2.Init then
+        ShowMessage('Joystick2 not found');
+      //else
+      //  ShowMessage('Joystick2 activated');
+      except
+             ShowMessage('Joystick2 not connected');
+      end;
+  end else begin
+     if not rbLeftjoy2.checked and not rbRightJoy2.checked then
+        joystick2.close;
+    //ShowMessage('Joystick2 deactivated');
+  end;
+  UpdateJoystickPanels;
+end;
+
+procedure TSpecEmu.RbLeftJoyCursorChange(Sender: TObject);
+begin
+  if rbJoyProtocolKempston.checked then
+     rbRightJoyCursor.checked := rbLeftJoyCursor.checked;
+end;
+
+procedure TSpecEmu.RbLeftJoyNoneChange(Sender: TObject);
+begin
+  if rbJoyProtocolKempston.checked then
+     rbRightJoyNone.checked := rbLeftJoyNone.checked;
+end;
+
+procedure TSpecEmu.RbRightJoy1Change(Sender: TObject);
+begin
+  if Tradiobutton(Sender).Checked then
+  begin
+    try
+      if not Joystick1.Init then
+        ShowMessage('Joystick1 not found');
+      //else
+      //  ShowMessage('Joystick1 activated');
+    except
+           ShowMessage('Joystick1 not connected')
+    end;
+  end else begin
+    if not rbLeftjoy1.checked and not rbRightJoy1.checked then
+       joystick1.close;
+    //ShowMessage('Joystick1 deactivated');
+  end;
+end;
+
+procedure TSpecEmu.RbRightJoy2Change(Sender: TObject);
+begin
+  if Tradiobutton(Sender).Checked then
+  begin
+    try
+      if not Joystick2.Init then
+        ShowMessage('Joystick2 not found');
+      //else
+      //  ShowMessage('Joystick2 activated');
+      except
+             ShowMessage('Joystick2 not connected');
+      end;
+  end else begin
+     if not rbLeftjoy2.checked and not rbRightJoy2.checked then
+        joystick2.close;
+    //ShowMessage('Joystick2 deactivated');
+  end;
 end;
 
 procedure TSpecEmu.AcsMemoryIn1BufferDone(Sender: TComponent);
@@ -2015,6 +2256,13 @@ end;
 procedure TSpecEmu.StepButtonClick(Sender: TObject);
 begin
   step := true;
+end;
+
+procedure TSpecEmu.refresh_system;
+begin
+  clear_keyboard;
+  draw_screen;
+  refresh_registers;
 end;
 
 procedure TSpecEmu.refresh_registers;
@@ -2163,6 +2411,10 @@ begin
 
   options.machine := Spectrum48;
   options.joystick := joy_kempston;
+
+  LeftJoystickSelection := 0;
+  RightJoystickSelection := 0;
+  UpdateJoystickPanels;
 end;
 
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -2254,6 +2506,74 @@ begin
   Timer1.Enabled := false;
   starting := true;
   stop_debug;
+end;
+
+procedure TSpecEmu.Timer2Timer(Sender: TObject);
+var
+   s: string;
+   x: integer;
+   left1,up1,right1,down1,fire1,left2,up2,right2,down2,fire2: boolean;
+   procedure getjoystick1;
+   begin
+     down1 := (joystick1.axis[0] > 48000);
+     up1 := joystick1.axis[0] < 10000;
+     right1 := joystick1.axis[0] > 48000;
+     left1 := joystick1.axis[0] < 10000;
+     fire1 := (Joystick1.Buttons[0] <> 0) or
+              (Joystick1.Buttons[1] <> 0) or
+              (Joystick1.Buttons[2] <> 0) or
+              (Joystick1.Buttons[3] <> 0);
+   end;
+
+   procedure getjoystick2;
+   begin
+     down2 := joystick2.axis[0] > 48000;
+     up2 := joystick2.axis[0] < 10000;
+     right2 := joystick2.axis[0] > 48000;
+     left2 := joystick2.axis[0] < 10000;
+     fire2 := (Joystick2.Buttons[0] <> 0) or
+              (Joystick2.Buttons[1] <> 0) or
+              (Joystick2.Buttons[2] <> 0) or
+              (Joystick2.Buttons[3] <> 0);
+   end;
+begin
+  j1 := 0;
+  j2 := 0;
+  if Joystick1.Active then
+     getjoystick1;
+  if Joystick2.Active then
+     getjoystick2;
+  if RbJoyProtocolkempston.Checked and RbLeftJoy1.Checked then
+  begin
+  end;
+  if RbRightJoy1.Checked then
+  begin
+
+  end;
+  //Joystick1.Read();
+  //if Joystick1.Active then
+  //begin
+  //  StaticText7.caption := IntToStr(Joystick1.Axis[0]);
+  //  StaticText8.caption := IntToStr(Joystick1.Axis[1]);
+  //  s := '';
+  //  for x := 0 to 15 do
+  //  begin
+  //       if Joystick1.Buttons[x] <> 0 then S := S + '1'
+  //       else S := S + '0';
+  //  end;
+  //  StaticText9.caption := S;
+  //end;
+  //if Joystick2.Active then
+  //begin
+  //  StaticText10.caption := IntToStr(Joystick2.Axis[0]);
+  //  StaticText11.caption := IntToStr(Joystick2.Axis[1]);
+  //  StaticText12.caption := IntToStr(Joystick2.Axis[2]);
+  //  StaticText13.caption := IntToStr(Joystick2.Axis[3]);
+  //  StaticText14.caption := IntToStr(Joystick2.Axis[4]);
+  //  StaticText15.caption := IntToStr(Joystick2.Axis[5]);
+  //  StaticText16.caption := IntToStr(Joystick2.Axis[6]);
+  //  StaticText17.caption := IntToStr(Joystick2.Axis[7]);
+  //end;
 end;
 
 procedure TSpecEmu.ZoomInButtonClick(Sender: TObject);

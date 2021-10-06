@@ -122,7 +122,9 @@ begin
   v := $ff;
   hport := port >> 8;
   lport := port and $ff;
-  if (port and 1) = 0 then begin // ULA port 0xfe
+  if lport and %11100000 = $00 then       // Kempston joystick
+      v := Kempston
+  else if (port and 1) = 0 then begin // ULA port 0xfe
      if (hport and %00000001) = 0 then
         v := v and Keyboard[0]; // SHIFT Z X C V
      if (hport and %00000010) = 0 then
@@ -132,7 +134,10 @@ begin
      if (hport and %00001000) = 0 then
         v := v and Keyboard[3]; // 1 2 3 4 5
      if (hport and %00010000) = 0 then
+     begin
         v := v and Keyboard[4]; // 0 9 8 7 6
+        v := v and SinclairRight;
+     end;
      if (hport and %00100000) = 0 then
         v := v and Keyboard[5]; // P O I U Y
      if (hport and %01000000) = 0 then
@@ -141,8 +146,6 @@ begin
         v := v and Keyboard[7]; // SPACE SYM M N B
   end else begin                   // other write ports
   end;
-  if lport and %11100000 = $00 then       // Kempston joystick
-      v := Kempston;
   spectrum_in := v;
 end;
 

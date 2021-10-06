@@ -132,9 +132,15 @@ begin
      if (hport and %00000100) = 0 then
         v := v and Keyboard[2]; // Q W E R T
      if (hport and %00001000) = 0 then
+     begin
         v := v and Keyboard[3]; // 1 2 3 4 5
+        v := v and SinclairLeft;
+     end;
      if (hport and %00010000) = 0 then
+     begin
         v := v and Keyboard[4]; // 0 9 8 7 6
+        v := v and SinclairRight;
+     end;
      if (hport and %00100000) = 0 then
         v := v and Keyboard[5]; // P O I U Y
      if (hport and %01000000) = 0 then

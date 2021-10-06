@@ -27,6 +27,9 @@ implemented snapshot handle
  - support load .SNA and .Z80
  - support save .SNA
 
+alfa version 0.008
+joystick support in progress
+
 TO DO:
 tape reading tzx
 snapshots handle.
