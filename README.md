@@ -30,11 +30,13 @@ implemented snapshot handle
 alfa version 0.008
 joystick support in progress
 
+alfa version 0.009
+joystick support implemented
+bug fixed in tape handle
+
 TO DO:
 tape reading tzx
-snapshots handle.
 AY
-Kempston
 memory contention
 
 Thanks to Cesar Hernandez (ZEsarUX coder)
