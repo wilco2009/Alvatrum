@@ -33,7 +33,9 @@ var
      intpend: boolean;
      NMI: boolean;
    end;
-   Mem: Array[0..65535] of byte;
+   // Mem: Array[0..65535] of byte;
+   MemP: Array[0..34,0..$3FFF] of byte; // absolute Mem;
+   Mem_banks: array[0..3] of byte = (0,1,2,3);
    registers: Array[0..15] of byte;
    iff1, iff2: boolean;
    im: byte;
@@ -118,6 +120,8 @@ var
    procedure invalid_instruction;
    procedure inc_register_r;
    function desp8_to_16(desp: byte): integer;
+   function mem_page(x: word): word;
+   function mem_offset(x: word): word;
 
 implementation
 
@@ -215,10 +219,25 @@ begin
   s_flag  := f and FLAG_S;
 end;
 
+//Mem_banks: array[0..3] of byte = (0,1,2,3);
+
+function mem_page(x: word): word;
+begin
+     mem_page := Mem_Banks[x div $4000];
+end;
+
+function mem_offset(x: word): word;
+begin
+     mem_offset := x mod $4000;
+end;
+
 procedure wrmem(x: word; y: byte);
 begin
      if x >= 16384 then
-        Mem[x] := y;
+     begin
+        MemP[mem_page(x), mem_offset(x)] := y;
+        //Mem[x] := y;
+     end;
 end;
 
 
@@ -244,14 +263,14 @@ end;
 
 function rdmem(addr: word): byte;
 begin
-    rdmem := Mem[addr];
+    rdmem := MemP[mem_page(addr), mem_offset(addr)];// Mem[addr];
 end;
 
 function rdmem_signed(addr: word): shortint;
 var
    tmp: byte;
 begin
-     tmp := Mem[addr];
+     tmp := MemP[mem_page(addr), mem_offset(addr)];// Mem[addr];
      rdmem_signed := shortint(tmp);
 end;
 

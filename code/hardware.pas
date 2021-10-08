@@ -5,20 +5,7 @@ unit hardware;
 interface
 
 uses
-  Classes, SysUtils, LCLType;
-
-const
-  user_up = 0;
-  user_down = 1;
-  user_left = 2;
-  user_right = 3;
-  user_fire = 4;
-
-  kempston_right = 0;
-  kempston_left  = 1;
-  kempston_down  = 2;
-  kempston_up    = 3;
-  kempston_fire  = 4;
+  Classes, SysUtils, LCLType,global;
 
 
 procedure setKempston(n: byte);
@@ -28,14 +15,97 @@ procedure ResetSinclairLeft(n: byte);
 procedure setSinclairRight(n: byte);
 procedure ResetSinclairRight(n: byte);
 procedure AssignUserButton(dir: byte; key: word);
+function getdircaption(x: byte): string;
 
 var
     Kempston: byte = 0;
     SinclairRight: byte = $FF;
     SinclairLeft: byte = $FF;
-    user_buttons: array[0..4,0..1] of byte;
+    user_buttons: tUser_buttons;
 
 implementation
+
+function getdircaption(x: byte): string;
+var
+    row,col: byte;
+begin
+  row := user_buttons[x,0];
+  col := user_buttons[x,1];
+  case row of
+    0: begin
+       case col of
+         0: getdircaption := '↑';
+         1: getdircaption := 'Z';
+         2: getdircaption := 'X';
+         3: getdircaption := 'C';
+         4: getdircaption := 'V';
+       end;
+    end;
+    1: begin
+       case col of
+         0: getdircaption := 'A';
+         1: getdircaption := 'S';
+         2: getdircaption := 'D';
+         3: getdircaption := 'F';
+         4: getdircaption := 'G';
+       end;
+    end;
+    2: begin
+       case col of
+         0: getdircaption := 'Q';
+         1: getdircaption := 'W';
+         2: getdircaption := 'E';
+         3: getdircaption := 'R';
+         4: getdircaption := 'T';
+       end;
+    end;
+    3: begin
+       case col of
+         0: getdircaption := '1';
+         1: getdircaption := '2';
+         2: getdircaption := '3';
+         3: getdircaption := '4';
+         4: getdircaption := '5';
+       end;
+    end;
+    4: begin
+       case col of
+         0: getdircaption := '0';
+         1: getdircaption := '9';
+         2: getdircaption := '8';
+         3: getdircaption := '7';
+         4: getdircaption := '6';
+       end;
+    end;
+    5: begin
+       case col of
+         0: getdircaption := 'P';
+         1: getdircaption := 'O';
+         2: getdircaption := 'I';
+         3: getdircaption := 'U';
+         4: getdircaption := 'Y';
+       end;
+    end;
+    6: begin
+       case col of
+         0: getdircaption := '┘';
+         1: getdircaption := 'L';
+         2: getdircaption := 'K';
+         3: getdircaption := 'J';
+         4: getdircaption := 'H';
+       end;
+    end;
+    7: begin
+       case col of
+         0: getdircaption := '_';
+         1: getdircaption := '⌂';
+         2: getdircaption := 'M';
+         3: getdircaption := 'N';
+         4: getdircaption := 'B';
+       end;
+    end;
+  end;
+end;
 
 procedure AssignUserButton(dir: byte; key: word);
 begin

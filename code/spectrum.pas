@@ -117,7 +117,7 @@ function spectrum_in(port: word): byte;
 var
   hport, lport, v: byte;
 begin
-  if mem[sp]=$79 then
+  if rdmem(sp)=$79 then
      a := a;
   v := $ff;
   hport := port >> 8;

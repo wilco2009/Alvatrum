@@ -15,7 +15,7 @@ function val3bit(v: word; desp: byte): string;
 var
    S: String;
 begin
-  str((mem[v] >> desp) and 7,S);
+  str((rdmem(v) >> desp) and 7,S);
   val3bit := S;
 end;
 
@@ -23,28 +23,28 @@ function cond(v: word; desp: byte): string;
 var
   r: array[0..7] of string = ('NZ', 'Z', 'NC', 'C', 'PO', 'PE', 'P', 'M');
 begin
-  cond := r[(mem[v] >> desp) and 7];
+  cond := r[(rdmem(v) >> desp) and 7];
 end;
 
 function reg8(v: word; desp: byte): string;
 var
   r: array[0..7] of string = ('B', 'C', 'D', 'E', 'H', 'L', '(HL)', 'A');
 begin
-  reg8 := r[(mem[v] >> desp) and 7];
+  reg8 := r[(rdmem(v) >> desp) and 7];
 end;
 
 function reg16(v: word; desp: byte): string;
 var
   r: array[0..3] of string = ('BC', 'DE', 'HL', 'SP');
 begin
-  reg16 := r[(mem[v]>>desp) and 3];
+  reg16 := r[(rdmem(v)>>desp) and 3];
 end;
 
 function reg16pp(v: word; desp: byte): string;
 var
   r: array[0..3] of string = ('BC', 'DE', 'HL', 'AF');
 begin
-  reg16pp := r[(mem[v]>>desp) and 3];
+  reg16pp := r[(rdmem(v)>>desp) and 3];
 end;
 
 function reg16ixiy(v: word; desp: byte;reg:string): string;
@@ -52,7 +52,7 @@ var
   r: array[0..3] of string = ('BC', 'DE', 'IX', 'AF');
   n: byte;
 begin
-  n := (mem[v]>>desp) and 3;
+  n := (rdmem(v)>>desp) and 3;
   if n = 2 then reg16ixiy := reg
   else reg16ixiy := r[n];
 end;
@@ -71,7 +71,7 @@ var
   begin
        Tmp := Copy(S,0,10-size*2);
        for i := addr to addr+size-1 do
-           Tmp := Tmp + HexStr(mem[i],2);
+           Tmp := Tmp + HexStr(rdmem(i),2);
        Tmp := Tmp + ':  '+command;
        if param1 <> '' then
           Tmp := Tmp+' '+param1;
@@ -276,10 +276,10 @@ var
 
 
 begin
-  byte1 := mem[addr];
-  byte2 := mem[addr+1];
-  byte3 := mem[addr+2];
-  byte4 := mem[addr+3];
+  byte1 := rdmem(addr);
+  byte2 := rdmem(addr+1);
+  byte3 := rdmem(addr+2);
+  byte4 := rdmem(addr+3);
   case byte1 of
        $22      : res := comp('LD','('+mem_w(addr+1)+')','HL',3);
        $2A      : res := comp('LD','HL','('+mem_w(addr+1)+')',3);

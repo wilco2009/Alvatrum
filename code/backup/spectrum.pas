@@ -59,16 +59,16 @@ var
   t_states_sound_bit: Qword = screen_tstates_half_scanline;
   SoundFrames: Qword = 0;
   speaker_out: boolean = false;
-    data: array[0..7014] of byte;
-    sound_bytes: longint = 0;
-    prev_sound_bytes: longint = 0;
-    nb: byte = 0;
-    buffer: array[0..1,0..bufsize] of byte;
-    scanlines : integer = 0;
-    soundpos_read: longint = 0;
-    soundpos_write: longint = 0;
-    sound_active : boolean= false;
-    sonido_acumulado : longint= 0;
+  data: array[0..7014] of byte;
+  sound_bytes: longint = 0;
+  prev_sound_bytes: longint = 0;
+  nb: byte = 0;
+  buffer: array[0..1,0..bufsize] of byte;
+  scanlines : integer = 0;
+  soundpos_read: longint = 0;
+  soundpos_write: longint = 0;
+  sound_active : boolean= false;
+  sonido_acumulado : longint= 0;
 
 
 

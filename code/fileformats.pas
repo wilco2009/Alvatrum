@@ -232,7 +232,8 @@ begin
    sp  := sna.sp;
    im  := sna.intmode;
    border_color := sna.BorderColor;
-   move(sna.RAM[16384],mem[16384],49152);
+   // move(sna.RAM[16384],mem[16384],49152);
+   move(sna.RAM[$4000],memP[1,0],$C000);
    explode_flags;
    retn;
    load_sna_file := true;
@@ -261,15 +262,18 @@ var
                 0: if Buffer[j] = $ED then estado := 1
                    else if (buffer[j]=0) and endmarker then estado := 4
                    else begin
-                     mem[k] := Buffer[j];
+                     //mem[k] := Buffer[j];
+                     wrmem(k,Buffer[j]);
                      inc(k);
                    end;
                 // $ED
                 1: if Buffer[j] = $ED then estado := 2
                    else begin
-                     mem[k] := $ED;
+                     // mem[k] := $ED;
+                     wrmem(k,$ED);
                      inc(k);
-                     mem[k] := Buffer[j];
+                     // mem[k] := Buffer[j];
+                     wrmem(k,Buffer[j]);
                      inc(k);
                      estado := 0;
                    end;
@@ -283,7 +287,8 @@ var
                    v := Buffer[j];
                    for m := 1 to rep do
                    begin
-                       mem[k] := v;
+                       //mem[k] := v;
+                       wrmem(k,v);
                        inc(k);
                    end;
                    estado := 0;
@@ -292,9 +297,11 @@ var
                 4: if buffer[j] = $ED then
                    estado := 5
                 else begin
-                  mem[k] := 0;
+                  //mem[k] := 0;
+                  wrmem(k,0);
                   inc(k);
-                  mem[k] := buffer[j];
+                  //mem[k] := buffer[j];
+                  wrmem(k,Buffer[j]);
                   inc(k);
                   estado := 0;
                 end;
@@ -302,11 +309,14 @@ var
                 5: if buffer[j] = $ED then
                    estado := 6
                 else begin
-                  mem[k] := 0;
+                  wrmem(k,0);
+                  // mem[k] := 0;
                   inc(k);
-                  mem[k] := $ED;
+                  wrmem(k,$ED);
+                  // mem[k] := $ED;
                   inc(k);
-                  mem[k] := buffer[j];
+                  // mem[k] := buffer[j];
+                  wrmem(k,Buffer[j]);
                   inc(k);
                   estado := 0;
                 end;
@@ -314,13 +324,16 @@ var
                 6: if buffer[j] = $00 then // $00$ED$ED$00 End of block
                    break;
                 else begin
-                  mem[k] := 0;
+                  // mem[k] := 0;
+                  wrmem(k,0);
                   inc(k);
-                  mem[k] := $ED;
+                  // mem[k] := $ED;
+                  wrmem(k,$ED);
                   inc(k);
-                  mem[k] := $ED;
+                  // mem[k] := $ED;
                   inc(k);
-                  mem[k] := buffer[j];
+                  // mem[k] := buffer[j];
+                  wrmem(k,Buffer[j]);
                   inc(k);
                   estado := 0;
                 end;
@@ -373,7 +386,8 @@ begin
       begin
         unpack_block($4000,true,65535);
       end else begin                           // v1 uncompressed file
-        move(buffer, mem[16384], res-Header_Size);
+        // move(buffer, mem[16384], res-Header_Size);
+        move(buffer, memP[1,0], res-Header_Size);
       end;
    end else begin                              // v2 or V3
       no_more_blocks := false;
@@ -441,7 +455,8 @@ begin
     sna.sp  := sp;
     sna.intmode  := im;
     sna.BorderColor := border_color;
-    move(mem[16384],sna.RAM[16384],49152);
+    // move(mem[16384],sna.RAM[16384],49152);
+    move(memP[1,0],sna.RAM[16384],49152);
     Assignfile(F, filename);
     Rewrite(F,1);
     Blockwrite(F,sna,sizeof(sna));

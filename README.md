@@ -34,6 +34,9 @@ alfa version 0.009
 joystick support implemented
 bug fixed in tape handle
 
+alfa version0.010
+Options handle
+
 TO DO:
 tape reading tzx
 AY
