@@ -37,6 +37,9 @@ bug fixed in tape handle
 alfa version0.010
 Options handle
 
+alfa version0.011
+MultiROM support in progress....
+
 TO DO:
 tape reading tzx
 AY

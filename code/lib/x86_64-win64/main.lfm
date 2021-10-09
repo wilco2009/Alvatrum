@@ -1,7 +1,7 @@
 object SpecEmu: TSpecEmu
-  Left = 32
+  Left = 244
   Height = 659
-  Top = 294
+  Top = 181
   Width = 1039
   Caption = 'Alvatrum'
   ClientHeight = 659
@@ -54059,7 +54059,7 @@ object SpecEmu: TSpecEmu
       TabOrder = 5
     end
     object Button4: TButton
-      Left = 393
+      Left = 392
       Height = 29
       Top = 282
       Width = 61
@@ -54075,6 +54075,54 @@ object SpecEmu: TSpecEmu
       Caption = 'Default'
       OnClick = Button5Click
       TabOrder = 7
+    end
+    object stROM0: TStaticText
+      Left = 259
+      Height = 23
+      Top = 144
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM0Click
+      ParentColor = False
+      TabOrder = 8
+      Transparent = False
+    end
+    object stROM1: TStaticText
+      Left = 259
+      Height = 23
+      Top = 173
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM1Click
+      ParentColor = False
+      TabOrder = 9
+      Transparent = False
+    end
+    object stROM2: TStaticText
+      Left = 259
+      Height = 23
+      Top = 202
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM2Click
+      ParentColor = False
+      TabOrder = 10
+      Transparent = False
+    end
+    object stROM3: TStaticText
+      Left = 259
+      Height = 23
+      Top = 231
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM3Click
+      ParentColor = False
+      TabOrder = 11
+      Transparent = False
     end
   end
   object Timer1: TTimer
@@ -54158,5 +54206,11 @@ object SpecEmu: TSpecEmu
     DeviceWin = dwJoystickID2
     Left = 70
     Top = 464
+  end
+  object odROM: TOpenDialog
+    DefaultExt = '.*.rom'
+    Filter = 'ROM files|*.rom|BIN files|*.bin'
+    Left = 872
+    Top = 344
   end
 end

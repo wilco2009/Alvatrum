@@ -795,8 +795,8 @@ end;
 
 procedure init_z80();
 begin
-    fillchar(Mem, Sizeof(Mem), 0);
-    move(sp48rom, Mem, sizeof(sp48rom));
+    fillchar(MemP, Sizeof(MemP), 0);
+    move(sp48rom, MemP[0,0], sizeof(sp48rom));
     af:=$ffff;
     bc:=$ffff;
     de:=$ffff;

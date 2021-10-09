@@ -104,6 +104,7 @@ type
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
     Image3: TImage;
+    odROM: TOpenDialog;
     OpenSnaFileDialog: TOpenDialog;
     Panel1: TPanel;
     GroupLeftJoystick: TRadioGroup;
@@ -132,11 +133,15 @@ type
     StaticText4: TStaticText;
     StaticText5: TStaticText;
     StaticText6: TStaticText;
+    stROM0: TStaticText;
     StatusJoystick1: TShape;
     StatusJoystick2: TShape;
     stBreak: TStaticText;
     stFlags: TStaticText;
     stMem: TStaticText;
+    stROM1: TStaticText;
+    stROM2: TStaticText;
+    stROM3: TStaticText;
     stTstates: TStaticText;
     stTstatesFrame: TStaticText;
     TapeRecLed: TShape;
@@ -433,6 +438,7 @@ type
     procedure rbspec128Change(Sender: TObject);
     procedure rbspec48Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
+    procedure stROM0Click(Sender: TObject);
     procedure StatusJoystick2ChangeBounds(Sender: TObject);
     procedure StepButtonClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -457,6 +463,9 @@ type
     procedure stInstructionClick(Sender: TObject);
     procedure stIYClick(Sender: TObject);
     procedure stPCClick(Sender: TObject);
+    procedure stROM1Click(Sender: TObject);
+    procedure stROM2Click(Sender: TObject);
+    procedure stROM3Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure JoyTimerTimer(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
@@ -523,6 +532,7 @@ type
     procedure UpdateFromOptions;
     procedure DefaultOptions;
     procedure ReadOptions(filename: string);
+    procedure ReadROM;
   public
 
   end;
@@ -1985,6 +1995,8 @@ begin
         ButtonUp.caption := '↑'
     else if key = VK_RETURN then
         ButtonUp.caption := '┘'
+    else if key = VK_CONTROL then
+        ButtonUp.caption := '©'
     else if key = VK_MENU then
         ButtonUp.caption := '⌂'
     else if key = VK_SPACE then
@@ -1997,6 +2009,8 @@ begin
     Buttondown.checked := false;
     if key = VK_SHIFT then
         Buttondown.caption := '↑'
+    else if key = VK_CONTROL then
+        ButtonDown.caption := '©'
     else if key = VK_RETURN then
         Buttondown.caption := '┘'
     else if key = VK_MENU then
@@ -2012,6 +2026,8 @@ begin
     ButtonLeft.checked := false;
     if key = VK_SHIFT then
         ButtonLeft.caption := '↑'
+    else if key = VK_CONTROL then
+        ButtonLeft.caption := '©'
     else if key = VK_RETURN then
         ButtonLeft.caption := '┘'
     else if key = VK_MENU then
@@ -2028,6 +2044,8 @@ begin
     ButtonRight.checked := false;
     if key = VK_SHIFT then
         Buttonright.caption := '↑'
+    else if key = VK_CONTROL then
+        ButtonRight.caption := '©'
     else if key = VK_RETURN then
         Buttonright.caption := '┘'
     else if key = VK_MENU then
@@ -2043,6 +2061,8 @@ begin
     ButtonFire.checked := false;
     if key = VK_SHIFT then
         ButtonFire.caption := '↑'
+    else if key = VK_CONTROL then
+        ButtonFire.caption := '©'
     else if key = VK_RETURN then
         ButtonFire.caption := '┘'
     else if key = VK_MENU then
@@ -2092,6 +2112,10 @@ end;
 
 procedure TSpecEmu.GroupMachineClick(Sender: TObject);
 begin
+  stROM0.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,0]);
+  stROM1.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,1]);
+  stROM2.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,2]);
+  stROM3.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,3]);
 end;
 
 procedure TSpecEmu.GroupRightJoystickClick(Sender: TObject);
@@ -2476,7 +2500,7 @@ begin
     //ShowMessage('Joystick2 deactivated');
   end;
   UpdateJoystickPanels;
-  UpdateOptions;
+//  UpdateOptions;
 end;
 
 procedure TSpecEmu.AcsMemoryIn1BufferDone(Sender: TComponent);
@@ -2519,6 +2543,7 @@ var
   F: File of byte;
   r: integer;
 begin
+  ReadROM;
   init_z80;
   init_spectrum;
   pc := 0;
@@ -2527,6 +2552,16 @@ begin
     refresh_registers;
   end;
   BFocus.setfocus;
+end;
+
+procedure TSpecEmu.stROM0Click(Sender: TObject);
+begin
+  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,0];
+  if odROM.Execute then
+  begin
+    stROM0.Caption := ExtractFileName(odROM.FileName);
+    options.ROMFilename[groupmachine.itemindex,0] := odROM.FileName;
+  end;
 end;
 
 procedure TSpecEmu.StatusJoystick2ChangeBounds(Sender: TObject);
@@ -2689,6 +2724,10 @@ begin
   ButtonLeft.caption := getdircaption(user_left);
   ButtonRight.caption := getdircaption(user_right);
   ButtonFire.caption := getdircaption(user_fire);
+  stROM0.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,0]);
+  stROM1.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,1]);
+  stROM2.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,2]);
+  stROM3.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,3]);
 end;
 
 procedure TSpecEmu.DefaultOptions;
@@ -2705,6 +2744,26 @@ begin
   AssignUserButton(user_right,VK_P);
   AssignUserButton(user_fire,VK_SPACE);
   options.user_keys := user_buttons;
+  options.ROMFilename[0,0]:='ROM\48.rom';
+  options.ROMFilename[0,1]:='';
+  options.ROMFilename[0,2]:='';
+  options.ROMFilename[0,3]:='';
+  options.ROMFilename[1,0]:='ROM\128ROM0.rom';
+  options.ROMFilename[1,1]:='ROM\128ROM1.rom';
+  options.ROMFilename[1,2]:='';
+  options.ROMFilename[1,3]:='';
+  options.ROMFilename[2,0]:='ROM\plus2ROM0.rom';
+  options.ROMFilename[2,1]:='ROM\plus2ROM1.rom';
+  options.ROMFilename[2,2]:='';
+  options.ROMFilename[2,3]:='';
+  options.ROMFilename[3,0]:='ROM\plus3ROM0_4-1.rom';
+  options.ROMFilename[3,1]:='ROM\plus3ROM1_4-1.rom';
+  options.ROMFilename[3,2]:='ROM\plus3ROM2_4-1.rom';
+  options.ROMFilename[3,3]:='ROM\plus3ROM3_4-1.rom';
+  options.ROMFilename[4,0]:='ROM\plus3ROM0_4-1.rom';
+  options.ROMFilename[4,1]:='ROM\plus3ROM1_4-1.rom';
+  options.ROMFilename[4,2]:='ROM\plus3ROM2_4-1.rom';
+  options.ROMFilename[4,3]:='ROM\plus3ROM3_4-1.rom';
 
   UpdateFromOptions;
 
@@ -2713,19 +2772,43 @@ begin
   UpdateJoystickPanels;
 end;
 
+procedure TSpecEmu.ReadROM;
+var
+   FF: File;
+   r: longint;
+   filename: string;
+begin
+  filename := Options.ROMFilename[0,0];
+  if fileExists(filename) then
+  begin
+    Try
+      AssignFile(FF,Filename);
+      Reset(FF,1);
+      blockread(FF,memP[0],$4000,r);
+      CloseFile(FF);
+    finally
+    end;
+    Init_Z80;
+  end;
+end;
+
 procedure TSpecEmu.ReadOptions(Filename: string);
 var
    FF: File;
+   r: longint;
 begin
-  DefaultOptions;
-  Try
-    AssignFile(FF,Filename);
-    Reset(FF,1);
-    blockread(FF,options,sizeof(options));
-    UpdateFromOptions;
-    CloseFile(FF);
-  finally
-  end;
+  if fileExists(filename) then
+  begin
+    Try
+      AssignFile(FF,Filename);
+      Reset(FF,1);
+      blockread(FF,options,sizeof(options),r);
+      UpdateFromOptions;
+      CloseFile(FF);
+    finally
+    end;
+  end else DefaultOptions;
+
 end;
 
 procedure TSpecEmu.FormActivate(Sender: TObject);
@@ -2743,6 +2826,7 @@ begin
   soundpos_write := sound_bytes;
 
   ReadOptions('OPTIONS.CFG');
+  ReadROM;
 
   ButtonUp.OnKeyPress:=@UserJoyKeypress;
   ButtonDown.OnKeyPress:=@UserJoyKeypress;
@@ -2845,6 +2929,36 @@ end;
 procedure TSpecEmu.stPCClick(Sender: TObject);
 begin
 
+end;
+
+procedure TSpecEmu.stROM1Click(Sender: TObject);
+begin
+  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,1];
+  if odROM.Execute then
+  begin
+    stROM1.Caption := ExtractFileName(odROM.FileName);
+    options.ROMFilename[groupmachine.itemindex,1] := odROM.FileName;
+  end;
+end;
+
+procedure TSpecEmu.stROM2Click(Sender: TObject);
+begin
+  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,2];
+  if odROM.Execute then
+  begin
+    stROM2.Caption := ExtractFileName(odROM.FileName);
+    options.ROMFilename[groupmachine.itemindex,2] := odROM.FileName;
+  end;
+end;
+
+procedure TSpecEmu.stROM3Click(Sender: TObject);
+begin
+  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,3];
+  if odROM.Execute then
+  begin
+    stROM3.Caption := ExtractFileName(odROM.FileName);
+    options.ROMFilename[groupmachine.itemindex,3] := odROM.FileName;
+  end;
 end;
 
 procedure TSpecEmu.Timer1Timer(Sender: TObject);
