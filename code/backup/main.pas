@@ -533,6 +533,7 @@ type
     procedure DefaultOptions;
     procedure ReadOptions(filename: string);
     procedure ReadROM;
+    procedure ReadROMPage(Machine: Tmachine; ROMPage, Membank: byte);
   public
 
   end;
@@ -2544,8 +2545,10 @@ var
   r: integer;
 begin
   UpdateOptions;
-  init_z80;
+  ReadROM;
   init_spectrum;
+  init_z80;
+  reset_memory_banks;
   pc := 0;
   if pause then begin
     draw_screen;
@@ -2634,6 +2637,7 @@ var
 begin
   init_z80;
   init_spectrum;
+  reset_memory_banks;
   draw_screen;
   screen_timer.Start;
   repaint_screen := false;
@@ -2772,24 +2776,34 @@ begin
   UpdateJoystickPanels;
 end;
 
-procedure TSpecEmu.ReadROM;
+procedure TSpecEmu.ReadROMPage(Machine: Tmachine; ROMPage, Membank: byte);
 var
    FF: File;
    r: longint;
    filename: string;
 begin
-  filename := Options.ROMFilename[0,0];
+  filename := Options.ROMFilename[ord(machine),ROMPage];
   if fileExists(filename) then
   begin
     Try
       AssignFile(FF,Filename);
       Reset(FF,1);
-      blockread(FF,memP[0],$4000,r);
+      blockread(FF,memP[membank],$4000,r);
       CloseFile(FF);
-    finally
+    except
+       showmessage('Error reading ROM ' + filename);
     end;
     Init_Z80;
+    reset_memory_banks
   end;
+end;
+
+procedure TSpecEmu.ReadROM;
+begin
+  ReadROMPage(options.machine, 0,ROMPAGE0);
+  ReadROMPage(options.machine, 1,ROMPAGE1);
+  ReadROMPage(options.machine, 2,ROMPAGE2);
+  ReadROMPage(options.machine, 3,ROMPAGE3);
 end;
 
 procedure TSpecEmu.ReadOptions(Filename: string);
@@ -3321,6 +3335,11 @@ procedure TSpecEmu.draw_screen;
       end;
     end;
 
+    function rdshadow(addr: word): byte;
+    begin
+      rdshadow := memp[7,addr and $4000];
+    end;
+
 begin
     inc(frame);
     bgra := TBGRABitmap.Create(sizex1x, sizey1x, BGRABlack);
@@ -3342,7 +3361,10 @@ begin
       pmem := lines[y];
       for x := 0 to 255 do
       begin
-        v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0);
+        if (options.machine = spectrum48) or (screen_page = SCREENPAGE) then
+           v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0)
+        else // SHADOW SCREEN SELECTED
+           v := getColor(rdshadow(pattr+attr_offset), (rdshadow(pmem) and bit) <> 0)
         p^.red:= getRedComponent(v);
         p^.blue:= getBlueComponent(v);
         p^.green:= getGreenComponent(v);

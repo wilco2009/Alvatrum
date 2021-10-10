@@ -5,7 +5,7 @@ unit spectrum;
 interface
 
 uses
-  Classes, SysUtils,CRT,Z80Globals,hardware;
+  Classes, SysUtils,CRT,Z80Globals,hardware,Global;
 
 const
   ancho_borde = 30;
@@ -69,8 +69,9 @@ var
   soundpos_write: longint = 0;
   sound_active : boolean= false;
   sonido_acumulado : longint= 0;
-
-
+  disk_motor: boolean = false;
+  printer_strobe: boolean = false;
+  screen_page: byte = 5;
 
   keyboard: array[0..7] of byte = ($bf,$bf,$bf,$bf,$bf,$bf,$bf,$bf);
 
@@ -98,6 +99,8 @@ begin
 end;
 
 procedure spectrum_out(port: word; v: byte);
+var
+  pagging_mode, special_mode: byte;
 begin
   if (port and 1) = 0 then begin // ULA port 0xfe
      border_color := v and $7;
@@ -107,9 +110,86 @@ begin
      end else begin
        speaker_out := false;
      end;
-     //else
-     //  NoSound;
-  end else begin                 // other write ports
+  end;
+  if not disable_pagging then
+  begin
+    // port 7ffd spectrum 128 and +2 gray
+    if ((options.machine = Spectrum128) or (options.machine = Spectrum_plus2))
+    and ((port and %1000000000000010) = 0) then
+    begin
+       //if (v and %1000) = 0 then
+       //   Mem_banks[1] := SCREENPAGE
+       //else
+       //  Mem_banks[1] := SHADOWPAGE;
+      if (v and %1000) = 0 then
+         screen_page := NORMAL_PAGE
+      else
+         screen_page := SHADOWPAGE;
+      Mem_banks[1] := 5;
+       if (v and %10000) = 0 then
+          Mem_banks[0] := ROMPAGE0
+       else
+         Mem_banks[0] := ROMPAGE1;
+       disable_pagging := (v and %100000) = 1;
+
+       Mem_banks[2] := v and %111;
+    end;
+    // port 7ffd spectrum +2a/+3
+    if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
+    and ((port and %1100000000000010) = %0100000000000000) then
+    begin
+       if (v and %1000) = 0 then
+          screen_page := NORMAL_PAGE
+       else
+          screen_page := SHADOWPAGE;
+       Mem_banks[1] := 5;
+       rom_bank := (rom_bank and %10) or ((v and %10000)>>4);
+       disable_pagging := (v and %100000) = 1;
+
+       Mem_banks[2] := v and %111;
+       select_rom;
+    end;
+    // port 1ffd spectrum +2a/+3
+    if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
+    and ((port and %1111000000000010) = %0001000000000000) then
+    begin
+       pagging_mode := v and %1;
+       if pagging_mode = 0 then
+       begin
+         rom_bank := (rom_bank and %01) or ((v and %100)>>2);
+         disk_motor := (v and %1000) <> 0;
+         printer_strobe := (v and %10000) <> 0;
+         select_rom;
+      end else begin
+         special_mode := (v and %110) >> 1;
+         case special_mode of
+           %00: begin
+             Mem_banks[0] := 0;
+             Mem_banks[1] := 1;
+             Mem_banks[2] := 2;
+             Mem_banks[3] := 3;
+           end;
+           %01: begin
+             Mem_banks[0] := 4;
+             Mem_banks[1] := 5;
+             Mem_banks[2] := 6;
+             Mem_banks[3] := 7;
+           end;
+           %10: begin
+             Mem_banks[0] := 4;
+             Mem_banks[1] := 5;
+             Mem_banks[2] := 6;
+             Mem_banks[3] := 3;
+           end;
+           %11: begin
+             Mem_banks[0] := 4;
+             Mem_banks[1] := 7;
+             Mem_banks[2] := 6;
+             Mem_banks[3] := 3;
+           end;
+         end;
+       end;
+    end;
   end;
 end;
 
@@ -117,7 +197,7 @@ function spectrum_in(port: word): byte;
 var
   hport, lport, v: byte;
 begin
-  if mem[sp]=$79 then
+  if rdmem(sp)=$79 then
      a := a;
   v := $ff;
   hport := port >> 8;
@@ -148,6 +228,7 @@ begin
      if (hport and %10000000) = 0 then
         v := v and Keyboard[7]; // SPACE SYM M N B
   end else begin                   // other write ports
+    v := $ff;
   end;
   spectrum_in := v;
 end;

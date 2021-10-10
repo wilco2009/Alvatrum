@@ -40,6 +40,12 @@ Options handle
 alfa version0.011
 MultiROM support in progress....
 
+alfa version0.012
+Spectrum 48K/TK90/TK95 - working
+Spectrum 128K - working
+Spectrum +2 gray - working
+Spectrum +2a/+3 - In progress.....
+
 TO DO:
 tape reading tzx
 AY

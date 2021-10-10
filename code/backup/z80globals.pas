@@ -5,7 +5,7 @@ unit z80Globals;
 interface
 
 uses
-  Classes, SysUtils, graphics;
+  Classes, SysUtils, graphics,global;
 
 var
    n3_flag, n5_flag, c_flag, h_flag, n_flag, z_flag, s_flag, pv_flag: byte;
@@ -34,8 +34,9 @@ var
      NMI: boolean;
    end;
    // Mem: Array[0..65535] of byte;
-   MemP: Array[0..31,0..$3FFF] of byte; // absolute Mem;
+   MemP: Array[0..34,0..$3FFF] of byte; // absolute Mem;
    Mem_banks: array[0..3] of byte = (0,1,2,3);
+   disable_pagging: boolean = false;
    registers: Array[0..15] of byte;
    iff1, iff2: boolean;
    im: byte;
@@ -122,8 +123,29 @@ var
    function desp8_to_16(desp: byte): integer;
    function mem_page(x: word): word;
    function mem_offset(x: word): word;
+   procedure reset_memory_banks;
+
 
 implementation
+
+procedure reset_memory_banks;
+begin
+  case options.machine of
+    Spectrum48: begin
+      Mem_banks[0] := ROMPAGE0;
+      Mem_banks[1] := 1;
+      Mem_banks[2] := 2;
+      Mem_banks[3] := 3;
+    end;
+    Spectrum128,Spectrum_plus2,Spectrum_plus2a,Spectrum_plus3: begin
+      Mem_banks[0] := ROMPAGE0;
+      Mem_banks[1] := SCREENPAGE;
+      Mem_banks[2] := SHADOWPAGE;
+      Mem_banks[3] := 3;
+    end;
+  end;
+end;
+
 
 procedure save_cpu_status;
 begin

@@ -20,8 +20,17 @@ const
   kempston_up    = 3;
   kempston_fire  = 4;
 
+  ROMPAGE0 = 0;
+  ROMPAGE1 = 31;
+  ROMPAGE2 = 32;
+  ROMPAGE3 = 33;
+
+  SCREENPAGE = 5;
+  SHADOWPAGE = 7;
+
+
 Type
-  Tmachine = (Spectrum48, Spectrum128, Spectrum_plus3, Spectrum_pus2, Spectrum_plus2a);
+  Tmachine = (Spectrum48, Spectrum128, Spectrum_plus3, Spectrum_plus2, Spectrum_plus2a);
   TjoystickProtocol = (joyp_none,joyp_kempston, joyp_sinclair,joyp_user);
   TjoystickType = (joyt_none,joyt_cursor, joyt_j1,joyt_j2);
   TUser_buttons = array[0..4,0..1] of byte;
@@ -31,7 +40,7 @@ Type
     joystick_Protocol: TjoystickProtocol;
     JL_Type,JR_Type: TJoystickType;
     user_keys: TUser_buttons;
-    ROMFilename: array[0..10,0..3] of string;
+    ROMFilename: array[0..10,0..3] of string[100];
   end;
 
 var
