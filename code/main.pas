@@ -24,8 +24,13 @@ type
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
     Button4: TButton;
     Button5: TButton;
+    Button6: TButton;
+    Button7: TButton;
     ButtonConf: TBGRAResizeSpeedButton;
     ButtonDeleteBlock: TBGRAResizeSpeedButton;
     ButtonDown: TToggleBox;
@@ -80,9 +85,6 @@ type
     Button_cuatro: TBGRAResizeSpeedButton;
     Button_cinco: TBGRAResizeSpeedButton;
     Button_uno: TBGRAResizeSpeedButton;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
     ButtonDebug: TSpeedButton;
     ButtonTap: TSpeedButton;
     ButtonTap1: TSpeedButton;
@@ -97,29 +99,55 @@ type
     Button_M: TBGRAResizeSpeedButton;
     ckAYSound: TCheckBox;
     CheckGroup1: TCheckGroup;
+    DebugPanel: TPanel;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
     EdMem: TEdit;
+    FlagsPanel: TPanel;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    GroupBox4: TGroupBox;
     GroupJoystickProtocol: TRadioGroup;
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
     Image3: TImage;
+    Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
+    Label12: TLabel;
+    Label13: TLabel;
+    Label14: TLabel;
+    Label17: TLabel;
+    Label18: TLabel;
+    Label19: TLabel;
+    Label2: TLabel;
+    Label20: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    labelI: TLabel;
+    memgrid: TStringGrid;
     odROM: TOpenDialog;
     OpenSnaFileDialog: TOpenDialog;
     Panel1: TPanel;
     GroupLeftJoystick: TRadioGroup;
     GroupMachine: TRadioGroup;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    pDebug1: TPanel;
+    pDebug2: TPanel;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
     screen_timer: TEpikTimer;
-    GroupBox1: TGroupBox;
-    GroupBox2: TGroupBox;
-    GroupBox3: TGroupBox;
     Image1: TImage;
     Image2: TImage;
     BlockGrid: TStringGrid;
     OpenTapFileDialog: TOpenDialog;
-    FlagsPanel: TPanel;
     PanelKeyboard: TPanel;
     Joystick1: TSdpoJoystick;
     Joystick2: TSdpoJoystick;
@@ -127,21 +155,47 @@ type
     src_ix: TRadioButton;
     src_iy: TRadioButton;
     src_ptr: TRadioButton;
+    stAF: TStaticText;
+    stAF1: TStaticText;
     StaticText1: TStaticText;
     StaticText2: TStaticText;
     StaticText3: TStaticText;
     StaticText4: TStaticText;
     StaticText5: TStaticText;
     StaticText6: TStaticText;
+    stdiskMotor: TStaticText;
+    stPrinterStrobe: TStaticText;
+    stScreenPage: TStaticText;
+    stBC: TStaticText;
+    stBC1: TStaticText;
+    stBCc: TStaticText;
+    stBreak: TStaticText;
+    stDE: TStaticText;
+    stDE1: TStaticText;
+    stDEc: TStaticText;
+    stFlags: TStaticText;
+    stHL: TStaticText;
+    stHL1: TStaticText;
+    stHLc: TStaticText;
+    stIff1: TStaticText;
+    stII: TStaticText;
+    stIM: TStaticText;
+    stInstruction: TStaticText;
+    stIX: TStaticText;
+    stIY: TStaticText;
+    stMem: TStaticText;
+    stPC: TStaticText;
+    MemPages: TStringGrid;
     stROM0: TStaticText;
     StatusJoystick1: TShape;
     StatusJoystick2: TShape;
-    stBreak: TStaticText;
-    stFlags: TStaticText;
-    stMem: TStaticText;
     stROM1: TStaticText;
     stROM2: TStaticText;
     stROM3: TStaticText;
+    stRR: TStaticText;
+    stPaggingDisabled: TStaticText;
+    stSP: TStaticText;
+    stStack: TStaticText;
     stTstates: TStaticText;
     stTstatesFrame: TStaticText;
     TapeRecLed: TShape;
@@ -157,50 +211,7 @@ type
     ResetButton: TBitBtn;
     StepButton: TBitBtn;
     TapeImage: TImage;
-    Label1: TLabel;
-    Label10: TLabel;
-    Label11: TLabel;
-    Label12: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
-    Label17: TLabel;
-    Label18: TLabel;
-    Label19: TLabel;
-    Label20: TLabel;
-    labelI: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    Label9: TLabel;
     BottomButtonsPanel: TPanel;
-    DebugPanel: TPanel;
-    Panel3: TPanel;
-    stAF1: TStaticText;
-    stBCc: TStaticText;
-    stHLc: TStaticText;
-    stDEc: TStaticText;
-    stIM: TStaticText;
-    stIff1: TStaticText;
-    stInstruction: TStaticText;
-    stBC1: TStaticText;
-    stDE1: TStaticText;
-    stHL1: TStaticText;
-    stPC: TStaticText;
-    stAF: TStaticText;
-    stBC: TStaticText;
-    stDE: TStaticText;
-    stHL: TStaticText;
-    stIX: TStaticText;
-    memgrid: TStringGrid;
-    stStack: TStaticText;
-    stRR: TStaticText;
-    stSP: TStaticText;
-    stIY: TStaticText;
-    stII: TStaticText;
     Timer1: TTimer;
     procedure AcsMemoryIn1BufferDone(Sender: TComponent);
     procedure ApplicationProperties1Activate(Sender: TObject);
@@ -210,6 +221,8 @@ type
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
     procedure ButtonBlockdownClick(Sender: TObject);
     procedure ButtonBlockUpClick(Sender: TObject);
     procedure ButtonConfClick(Sender: TObject);
@@ -685,7 +698,7 @@ function TSpecEmu.Load_Tape_block(addr, len: word; flag: byte): byte; // IX: Add
 Var
   F: File;
   BT: Byte;
-  Size: Word;
+  Size,k: Word;
 begin
   AssignFile (F, OpenTapFileDialog.FileName);
   Reset(F,1);
@@ -696,7 +709,9 @@ begin
   BlockRead(F, buff, size-1);
   if BT = flag then
   begin
-       move(buff,memp[mem_page(addr),mem_offset(addr)],len);
+       for k := 0 to len-1 do
+           wrmem(addr+k,buff[k]);
+       //move(buff,memp[mem_page(addr),mem_offset(addr)],len);
   end;
   closefile(F);
   result := FLAG_C; // devuelve FLAG_C=0 si error
@@ -1209,6 +1224,18 @@ end;
 procedure TSpecEmu.Button5Click(Sender: TObject);
 begin
   DefaultOptions;
+end;
+
+procedure TSpecEmu.Button6Click(Sender: TObject);
+begin
+  pDebug1.Visible:= true;
+  pDebug2.Visible:= false;
+end;
+
+procedure TSpecEmu.Button7Click(Sender: TObject);
+begin
+  pDebug1.Visible:= false;
+  pDebug2.Visible:= true;
 end;
 
 procedure TSpecEmu.ButtonBlockdownClick(Sender: TObject);
@@ -2117,6 +2144,7 @@ begin
   stROM1.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,1]);
   stROM2.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,2]);
   stROM3.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,3]);
+  coldbootrequired := true;
 end;
 
 procedure TSpecEmu.GroupRightJoystickClick(Sender: TObject);
@@ -2547,7 +2575,7 @@ begin
   UpdateOptions;
   ReadROM;
   init_spectrum;
-  init_z80;
+  init_z80(coldbootrequired);
   reset_memory_banks;
   pc := 0;
   if pause then begin
@@ -2627,6 +2655,38 @@ begin
   set_stack_label;
   set_memory_dump;
   set_mem_label;
+  MemPages.Cells[0,0] := 'C000-FFFF';
+  MemPages.Cells[0,1] := '8000-BFFF';
+  MemPages.Cells[0,2] := '4000-7FFF';
+  MemPages.Cells[0,3] := '0000-3FFF';
+  MemPages.Cells[1,0] := PageToStr(Mem_banks[3]);
+  MemPages.Cells[1,1] := PageToStr(Mem_banks[2]);
+  MemPages.Cells[1,2] := PageToStr(Mem_banks[1]);
+  MemPages.Cells[1,3] := PageToStr(Mem_banks[0]);
+  stScreenPage.Caption := 'SCREEN=RAM'+IntToStr(screen_page);
+  if options.machine = spectrum48 then
+  begin
+    stPaggingDisabled.caption := 'NO PAGGING';
+    stDiskMotor.caption := 'DISK MOTOR: N/A';
+    stprinterStrobe.caption := 'PRINT STRB: N/A';
+  end else begin
+    if disable_pagging then
+      stPaggingDisabled.caption := 'PAG DISABLED'
+    else
+      stPaggingDisabled.caption := 'PAG ENABLED';
+    if options.machine < spectrum_plus2a then
+      stDiskMotor.caption := 'DISK MOTOR: N/A'
+    else if disk_motor then
+      stDiskMotor.caption := 'DISK MOTOR: ON'
+    else
+      stDiskMotor.caption := 'DISK MOTOR: OFF';
+    if options.machine < spectrum_plus2a then
+      stprinterStrobe.caption := 'PRINT STRB: N/A'
+    else if printer_strobe then
+      stprinterStrobe.caption := 'PRINT STRB: ON'
+    else
+      stprinterStrobe.caption := 'PRINT STRB: OFF';
+  end;
 end;
 
 procedure TSpecEmu.RunEmulation;
@@ -2635,7 +2695,7 @@ var
    dd: longint;
 
 begin
-  init_z80;
+  init_z80(true);
   init_spectrum;
   reset_memory_banks;
   draw_screen;
@@ -2793,7 +2853,7 @@ begin
     except
        showmessage('Error reading ROM ' + filename);
     end;
-    Init_Z80;
+    Init_Z80(true);
     reset_memory_banks
   end;
 end;

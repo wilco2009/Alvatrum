@@ -96,6 +96,7 @@ var
 begin
      border_color := 7;
      clear_keyboard;
+     screen_page := Mem_banks[1];
 end;
 
 procedure spectrum_out(port: word; v: byte);
@@ -132,7 +133,7 @@ begin
          Mem_banks[0] := ROMPAGE1;
        disable_pagging := (v and %100000) = 1;
 
-       Mem_banks[2] := v and %111;
+       Mem_banks[3] := v and %111;
     end;
     // port 7ffd spectrum +2a/+3
     if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
@@ -146,7 +147,7 @@ begin
        rom_bank := (rom_bank and %10) or ((v and %10000)>>4);
        disable_pagging := (v and %100000) = 1;
 
-       Mem_banks[2] := v and %111;
+       Mem_banks[3] := v and %111;
        select_rom;
     end;
     // port 1ffd spectrum +2a/+3
@@ -156,7 +157,7 @@ begin
        pagging_mode := v and %1;
        if pagging_mode = 0 then
        begin
-         rom_bank := (rom_bank and %01) or ((v and %100)>>2);
+         rom_bank := (rom_bank and %01) or ((v and %100)>>1);
          disk_motor := (v and %1000) <> 0;
          printer_strobe := (v and %10000) <> 0;
          select_rom;

@@ -34,7 +34,7 @@ var
      NMI: boolean;
    end;
    // Mem: Array[0..65535] of byte;
-   MemP: Array[0..34,0..$3FFF] of byte; // absolute Mem;
+   MemP: Array[0..35,0..$3FFF] of byte; // absolute Mem;
    Mem_banks: array[0..3] of byte = (0,1,2,3);
    disable_pagging: boolean = false;
    registers: Array[0..15] of byte;
@@ -126,9 +126,18 @@ var
    function mem_offset(x: word): word;
    procedure reset_memory_banks;
    procedure select_rom;
+   function PageToStr(page: byte): string;
 
 
 implementation
+
+function PageToStr(page: byte): string;
+begin
+  if page < 32 then
+    PageToStr := 'RAM'+ IntToStr(page)
+  else
+    PageToStr := 'ROM'+ IntToStr(page-32);
+end;
 
 procedure select_rom;
 begin
@@ -153,8 +162,8 @@ begin
     Spectrum128,Spectrum_plus2,Spectrum_plus2a,Spectrum_plus3: begin
       Mem_banks[0] := ROMPAGE0;
       Mem_banks[1] := SCREENPAGE;
-      Mem_banks[2] := SHADOWPAGE;
-      Mem_banks[3] := 3;
+      Mem_banks[2] := 2;
+      Mem_banks[3] := 0;
     end;
   end;
 end;

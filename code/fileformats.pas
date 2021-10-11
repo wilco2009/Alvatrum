@@ -5,7 +5,7 @@ unit FileFormats;
 interface
 
 uses
-  Classes, SysUtils,Z80Globals,z80ops,spectrum, Dialogs;
+  Classes, SysUtils,Z80Globals,z80ops,spectrum, Dialogs,global;
 
 function loadSnapshotfile(FileName: String):boolean;
 function SaveSnapshotfile(FileName: String):boolean;
@@ -210,6 +210,7 @@ var
 function load_sna_file(filename: string): boolean;
 var
   F: File;
+  x: byte;
 begin
    Assignfile(F, filename);
    Reset(F,1);
@@ -233,7 +234,16 @@ begin
    im  := sna.intmode;
    border_color := sna.BorderColor;
    // move(sna.RAM[16384],mem[16384],49152);
-   move(sna.RAM[$4000],memP[1,0],$C000);
+   case options.machine of
+        spectrum48      : rom_bank := 0;
+        spectrum128,
+        Spectrum_plus2  : rom_bank := 1;
+        Spectrum_plus2a,
+        Spectrum_plus3  : rom_bank := 3;
+   end;
+   select_rom;
+   for x := 1 to 3 do
+       move(sna.RAM[x*$4000],memP[Mem_banks[x],0],$4000);
    explode_flags;
    retn;
    load_sna_file := true;

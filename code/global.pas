@@ -20,10 +20,10 @@ const
   kempston_up    = 3;
   kempston_fire  = 4;
 
-  ROMPAGE0 = 0;
-  ROMPAGE1 = 31;
-  ROMPAGE2 = 32;
-  ROMPAGE3 = 33;
+  ROMPAGE0 = 32;
+  ROMPAGE1 = 33;
+  ROMPAGE2 = 34;
+  ROMPAGE3 = 35;
 
   SCREENPAGE = 5;
   SHADOWPAGE = 7;
@@ -45,6 +45,7 @@ Type
 
 var
   options: Toptions;
+  coldbootrequired: boolean = false;
 
 implementation
 

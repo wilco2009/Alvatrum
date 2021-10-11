@@ -46,6 +46,13 @@ Spectrum 128K - working
 Spectrum +2 gray - working
 Spectrum +2a/+3 - In progress.....
 
+alfa version0.013
+Spectrum 48K/TK90/TK95 - working
+Spectrum 128K - working
+Spectrum +2 gray - working
+Spectrum +2a/+3 - working
+fixing z80 snapshots for +3 in progress
+
 TO DO:
 tape reading tzx
 AY

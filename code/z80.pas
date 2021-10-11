@@ -11,7 +11,7 @@ uses
   Classes, SysUtils, Z80ops, Z80Globals, Z80bitops, Z80bitops_ixiy,roms, Screen;
 
 procedure do_Z80;
-procedure init_z80;
+procedure init_z80(coldboot: boolean);
 procedure ddfd_cb_instructions(var reg: word);
 
 implementation
@@ -793,9 +793,13 @@ begin
 
 end;
 
-procedure init_z80();
+procedure init_z80(coldboot: boolean);
+var
+   x: byte;
 begin
-    //fillchar(MemP, Sizeof(MemP), 0);
+    if coldboot then
+       for x := 0 to 31 do
+           fillchar(MemP[x], $4000, 0);
     //move(sp48rom, MemP[0,0], sizeof(sp48rom));
     af:=$ffff;
     bc:=$ffff;
