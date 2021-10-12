@@ -73,6 +73,9 @@ var
   printer_strobe: boolean = false;
   screen_page: byte = 5;
 
+  last_out_7ffd : byte = 0;
+  last_out_1ffd : byte = 0;
+
   keyboard: array[0..7] of byte = ($bf,$bf,$bf,$bf,$bf,$bf,$bf,$bf);
 
 procedure spectrum_out(port: word; v: byte);
@@ -118,6 +121,7 @@ begin
     if ((options.machine = Spectrum128) or (options.machine = Spectrum_plus2))
     and ((port and %1000000000000010) = 0) then
     begin
+      last_out_7ffd := v;
        //if (v and %1000) = 0 then
        //   Mem_banks[1] := SCREENPAGE
        //else
@@ -139,6 +143,7 @@ begin
     if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
     and ((port and %1100000000000010) = %0100000000000000) then
     begin
+       last_out_7ffd := v;
        if (v and %1000) = 0 then
           screen_page := SCREENPAGE
        else
@@ -154,6 +159,7 @@ begin
     if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
     and ((port and %1111000000000010) = %0001000000000000) then
     begin
+       last_out_1ffd := v;
        pagging_mode := v and %1;
        if pagging_mode = 0 then
        begin

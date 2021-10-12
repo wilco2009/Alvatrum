@@ -53,6 +53,9 @@ Spectrum +2 gray - working
 Spectrum +2a/+3 - working
 fixing z80 snapshots for +3 in progress
 
+alfa version 0.014
+z80 and sna snapshots are now working in 128/+3 mode
+
 TO DO:
 tape reading tzx
 AY

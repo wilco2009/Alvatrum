@@ -589,26 +589,39 @@ begin
     dos := uno;
     uno := tmp;
   end;
-  CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  AssignFile (FBak, '$$$$$$$$.$$$');
-  Reset(FBak,1);
+  try
+    CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+  except
+     showmessage('Error opening tap file '+OpenTapFileDialog.FileName);
+     exit;
+  end;
+  try
+    AssignFile (FBak, '$$$$$$$$.$$$');
+    Reset(FBak,1);
+  except
+     showmessage('Error opening temporary file');
+     exit;
+  end;
+  try
+    // copy block from fbak(dos) to f(uno)
+    seek(Fbak, Tape_info[dos].Filepos);
+    blockread(fbak,buffer,Tape_info[dos].size+2);
+    seek(F, Tape_info[uno].Filepos);
+    blockwrite(f,buffer,Tape_info[dos].size+2);
 
-  // copy block from fbak(dos) to f(uno)
-  seek(Fbak, Tape_info[dos].Filepos);
-  blockread(fbak,buffer,Tape_info[dos].size+2);
-  seek(F, Tape_info[uno].Filepos);
-  blockwrite(f,buffer,Tape_info[dos].size+2);
+    // copy block from fbak(uno) to f(uno)+size(uno)+2
+    seek(Fbak, Tape_info[uno].Filepos);
+    blockread(fbak,buffer,Tape_info[uno].size+2);
+    seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
+    blockwrite(f,buffer,Tape_info[uno].size+2);
 
-  // copy block from fbak(uno) to f(uno)+size(uno)+2
-  seek(Fbak, Tape_info[uno].Filepos);
-  blockread(fbak,buffer,Tape_info[uno].size+2);
-  seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
-  blockwrite(f,buffer,Tape_info[uno].size+2);
-
-  closefile(F);
-  closefile(Fbak);
+    closefile(F);
+    closefile(Fbak);
+  except
+    showmessage('error moving tap block');
+  end;
 end;
 
 procedure TSpecEmu.Delete_Tape_Block(row: word);
@@ -617,23 +630,27 @@ Var
   source_pos, dest_pos: Word;
   result: integer;
 begin
-  //CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  dest_pos := Tape_Info[row].Filepos;
-  Source_pos := dest_pos + Tape_Info[row].Size+2;
-  while Source_pos < filesize(F) do
-  begin
-    seek(f,source_pos);
-    blockread(f, buffer, sizeof(buffer), result);
+  try
+    //CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    dest_pos := Tape_Info[row].Filepos;
+    Source_pos := dest_pos + Tape_Info[row].Size+2;
+    while Source_pos < filesize(F) do
+    begin
+      seek(f,source_pos);
+      blockread(f, buffer, sizeof(buffer), result);
+      seek(f,dest_pos);
+      blockwrite(f,buffer,result);
+      inc(source_pos, result);
+      inc(dest_pos, result);
+    end;
     seek(f,dest_pos);
-    blockwrite(f,buffer,result);
-    inc(source_pos, result);
-    inc(dest_pos, result);
+    truncate(f);
+    closefile(F);
+  except
+    showmessage('Error deleting tap block');
   end;
-  seek(f,dest_pos);
-  truncate(f);
-  closefile(F);
 end;
 
 function TSpecEmu.tap_checksum(flag: byte; addr,len: word): byte;
@@ -653,45 +670,49 @@ Var
   BT,x: Byte;
   Size, pos: Word;
 begin
-  CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  pos := Blockgrid.Row;
-  if pos = 1 then
-    seek(F, 0)
-  else if pos <= Tape_Blocks then
-    seek(F, Tape_Info[pos].Filepos)
-  else
-    seek(F, Tape_Info[pos-1].Filepos+Tape_Info[pos-1].size+2);
+  try
+    CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    pos := Blockgrid.Row;
+    if pos = 1 then
+      seek(F, 0)
+    else if pos <= Tape_Blocks then
+      seek(F, Tape_Info[pos].Filepos)
+    else
+      seek(F, Tape_Info[pos-1].Filepos+Tape_Info[pos-1].size+2);
 
-  if flag = 0 then // Es una cabecera
-  begin
-    size := 19;
-  end else begin // Es un bloque de datos
-    size := len+2;
-  end;
-  Blockwrite(F, size, sizeof(size));
-  Blockwrite(F, flag, sizeof(flag));
-//  Blockwrite(F,mem[addr],len);
-  Blockwrite(F,memP[mem_page(addr),mem_offset(addr)],len);
-  Blockwrite(F, tap_checksum(flag,addr,len),1);
-  if pos <= Tape_Blocks then
-  begin
-    AssignFile (FBAK, '$$$$$$$$.$$$');
-    Reset(FBAK,1);
-    for x := pos to Tape_Blocks do
+    if flag = 0 then // Es una cabecera
     begin
-       seek(FBAK, Tape_Info[x].Filepos);
-       blockread(FBAK, buffer, Tape_info[x].Size+2);
-       blockwrite(F, buffer, Tape_info[x].Size+2);
+      size := 19;
+    end else begin // Es un bloque de datos
+      size := len+2;
     end;
-    CloseFile(FBAK);
-    Truncate(F);
+    Blockwrite(F, size, sizeof(size));
+    Blockwrite(F, flag, sizeof(flag));
+  //  Blockwrite(F,mem[addr],len);
+    Blockwrite(F,memP[mem_page(addr),mem_offset(addr)],len);
+    Blockwrite(F, tap_checksum(flag,addr,len),1);
+    if pos <= Tape_Blocks then
+    begin
+      AssignFile (FBAK, '$$$$$$$$.$$$');
+      Reset(FBAK,1);
+      for x := pos to Tape_Blocks do
+      begin
+         seek(FBAK, Tape_Info[x].Filepos);
+         blockread(FBAK, buffer, Tape_info[x].Size+2);
+         blockwrite(F, buffer, Tape_info[x].Size+2);
+      end;
+      CloseFile(FBAK);
+      Truncate(F);
+    end;
+    CloseFile(F);
+  //  Tape_info_bak := Tape_info;
+    read_tap_blocs;
+    Blockgrid.Row := pos+1;
+  except
+    ShowMessage('Error saving tap block.');
   end;
-  CloseFile(F);
-//  Tape_info_bak := Tape_info;
-  read_tap_blocs;
-  Blockgrid.Row := pos+1;
 end;
 
 function TSpecEmu.Load_Tape_block(addr, len: word; flag: byte): byte; // IX: Addr; DE: Len; A: Flag byte
@@ -700,22 +721,26 @@ Var
   BT: Byte;
   Size,k: Word;
 begin
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  Seek(F,Tape_info[Blockgrid.Row].Filepos);
-  Blockgrid.Row := Blockgrid.Row +1;
-  BlockRead(F, size, sizeof(size));
-  BlockRead(F,BT,1);
-  BlockRead(F, buff, size-1);
-  if BT = flag then
-  begin
-       for k := 0 to len-1 do
-           wrmem(addr+k,buff[k]);
-       //move(buff,memp[mem_page(addr),mem_offset(addr)],len);
+  try
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    Seek(F,Tape_info[Blockgrid.Row].Filepos);
+    Blockgrid.Row := Blockgrid.Row +1;
+    BlockRead(F, size, sizeof(size));
+    BlockRead(F,BT,1);
+    BlockRead(F, buff, size-1);
+    if BT = flag then
+    begin
+         for k := 0 to len-1 do
+             wrmem(addr+k,buff[k]);
+         //move(buff,memp[mem_page(addr),mem_offset(addr)],len);
+    end;
+    closefile(F);
+    result := FLAG_C; // devuelve FLAG_C=0 si error
+    BFocus.setfocus;
+  except
+    Showmessage('Error loading tap block.');
   end;
-  closefile(F);
-  result := FLAG_C; // devuelve FLAG_C=0 si error
-  BFocus.setfocus;
 end;
 
 procedure TSpecEmu.Hideall;
@@ -1266,7 +1291,7 @@ end;
 
 procedure TSpecEmu.ButtonConfClick(Sender: TObject);
 begin
-  if PanelKeyboard.Visible then begin
+  if OptionsPanel.Visible then begin
     HideAll;
   end else begin
     HideAll;
@@ -2277,59 +2302,63 @@ var
   BSize: String[6];
   BT: Byte;
 begin
-  DataType := 'BYTES';     // If not header next block is RAW
-  n := 1;
-  Blockgrid.Clean;
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  Seek(F,0);
-  while FilePos(F) < FileSize(F) do
-  begin
-    Tape_info[n].FilePos := FilePos(F);
-    BlockRead(F, size, sizeof(size));
-    Str(size,BSize);
-    if size > 0 then
+  try
+    DataType := 'BYTES';     // If not header next block is RAW
+    n := 1;
+    Blockgrid.Clean;
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    Seek(F,0);
+    while FilePos(F) < FileSize(F) do
     begin
-      BlockRead(F,BT,1);
-      BlockRead(F, buff, size-1);
-      Tape_info[n].Flag := BT;
-      Tape_info[n].Size := size;
-      if BT=0 then begin               // HEADER
-         BlockType := 'HEADER';
-         autostart := Buff[14]*256+Buff[13];
-         case buff[0] of
-           0: DataType := 'BAS';
-           1: DataType := 'NVAR';
-           2: DataType := 'SVAR';
-           3: if startAddr=$4000 then DataType := 'SCR' else DataType := 'BYTES';
-         end;
-         move(buff[1],FileName[1],10);
-         FileName[0]:= #10;
-         Blocklen := Buff[12]*256+Buff[11];
-         if DataType='NVAR' then
-            Variable := chr(byte('A')+buff[14])
-         else if DataType='SVAR' then
-              Variable := chr(byte('A')+buff[14])+'$';
-         Proglen := Buff[16]*256+Buff[15];
-         Blockgrid.InsertRowWithValues(n,['',FileName,BSize,BlockType]);
-      end
-      else begin
-          BlockType := 'DATA';
-          if (DataType='BAS') then
-             Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,IntToStr(ProgLen)])
-          else if(DataType='BYTES') or (DataType='SCR') then
-             Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,''])
-          else
-             Blockgrid.InsertRowWithValues(n,['',Variable,BSize,DataType,'']);
-          DataType := 'BYTES';
+      Tape_info[n].FilePos := FilePos(F);
+      BlockRead(F, size, sizeof(size));
+      Str(size,BSize);
+      if size > 0 then
+      begin
+        BlockRead(F,BT,1);
+        BlockRead(F, buff, size-1);
+        Tape_info[n].Flag := BT;
+        Tape_info[n].Size := size;
+        if BT=0 then begin               // HEADER
+           BlockType := 'HEADER';
+           autostart := Buff[14]*256+Buff[13];
+           case buff[0] of
+             0: DataType := 'BAS';
+             1: DataType := 'NVAR';
+             2: DataType := 'SVAR';
+             3: if startAddr=$4000 then DataType := 'SCR' else DataType := 'BYTES';
+           end;
+           move(buff[1],FileName[1],10);
+           FileName[0]:= #10;
+           Blocklen := Buff[12]*256+Buff[11];
+           if DataType='NVAR' then
+              Variable := chr(byte('A')+buff[14])
+           else if DataType='SVAR' then
+                Variable := chr(byte('A')+buff[14])+'$';
+           Proglen := Buff[16]*256+Buff[15];
+           Blockgrid.InsertRowWithValues(n,['',FileName,BSize,BlockType]);
+        end
+        else begin
+            BlockType := 'DATA';
+            if (DataType='BAS') then
+               Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,IntToStr(ProgLen)])
+            else if(DataType='BYTES') or (DataType='SCR') then
+               Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,''])
+            else
+               Blockgrid.InsertRowWithValues(n,['',Variable,BSize,DataType,'']);
+            DataType := 'BYTES';
+        end;
       end;
+      inc(n);
     end;
-    inc(n);
+    Tape_Blocks := n-1;
+    Blockgrid.cells[0,1] := '>';
+    Blockgrid.row := 1;
+    CloseFile(F);
+  except
+    ShowMessage('Error reading tap blocks');
   end;
-  Tape_Blocks := n-1;
-  Blockgrid.cells[0,1] := '>';
-  Blockgrid.row := 1;
-  CloseFile(F);
 end;
 
 procedure TSpecEmu.OpenTapFileDialogClose(Sender: TObject);
@@ -2814,12 +2843,12 @@ begin
   options.ROMFilename[0,3]:='';
   options.ROMFilename[1,0]:='ROM\128ROM0.rom';
   options.ROMFilename[1,1]:='ROM\128ROM1.rom';
-  options.ROMFilename[1,2]:='';
-  options.ROMFilename[1,3]:='';
+  options.ROMFilename[1,2]:='ROM\128ROM0.rom';
+  options.ROMFilename[1,3]:='ROM\128ROM1.rom';
   options.ROMFilename[2,0]:='ROM\plus2ROM0.rom';
   options.ROMFilename[2,1]:='ROM\plus2ROM1.rom';
-  options.ROMFilename[2,2]:='';
-  options.ROMFilename[2,3]:='';
+  options.ROMFilename[2,2]:='ROM\plus2ROM0.rom';
+  options.ROMFilename[2,3]:='ROM\plus2ROM1.rom';
   options.ROMFilename[3,0]:='ROM\plus3ROM0_4-1.rom';
   options.ROMFilename[3,1]:='ROM\plus3ROM1_4-1.rom';
   options.ROMFilename[3,2]:='ROM\plus3ROM2_4-1.rom';
@@ -2879,7 +2908,8 @@ begin
       blockread(FF,options,sizeof(options),r);
       UpdateFromOptions;
       CloseFile(FF);
-    finally
+      except
+         showmessage('Error reading options file');
     end;
   end else DefaultOptions;
 

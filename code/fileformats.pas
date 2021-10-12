@@ -56,6 +56,24 @@ Type
     BorderColor: Byte;
     RAM: Array[16384..65535] of byte;
   end;
+  TSnaFormatv2 = record
+    I: Byte;
+    HL1:word;
+    DE1,BC1,AF1: Word;
+    HL,DE,BC,IY,IX: Word;
+    Interrupt: Byte;
+    R: Byte;
+    AF,SP: Word;
+    IntMode: byte;
+    BorderColor: Byte;
+    RAM5: Array[0..$3FFF] of byte;
+    RAM2: Array[0..$3FFF] of byte;
+    RAMH: Array[0..$3FFF] of byte;
+    pc: word;
+    lastout_7ffd: byte;
+    TRDOSROMP: byte;
+    RAMP: Array[0..5,0..$3FFF] of byte;
+  end;
 
   // Offset  Length  Description
     //---------------------------
@@ -175,7 +193,7 @@ Type
     Additional_len: word;
     pc: word;
     hardware_mode: byte;
-    s74ls259: byte;
+    lastout_7ffd: byte;
     If1_rompaged: byte;
     info3: byte;
     lastout_fffd: byte;
@@ -201,7 +219,8 @@ Type
 
 var
   z80: Tz80Formatv2;
-  sna: TSnaFormat absolute z80;
+  snav2: TSnaFormatv2;
+  sna: TSnaFormat absolute snav2;
   buffer: Array[0..65535] of byte;
 
   //z80v1: Tz80Formatv1 absolute z80;
@@ -210,43 +229,81 @@ var
 function load_sna_file(filename: string): boolean;
 var
   F: File;
-  x: byte;
+  x,ii,pageh: byte;
+  modo48k: boolean;
+  rr: longint;
 begin
-   Assignfile(F, filename);
-   Reset(F,1);
-   Blockread(F,sna,sizeof(sna));
-   CloseFile(F);
-   i   := sna.i;
-   hl1 := sna.hl1;
-   de1 := sna.de1;
-   bc1 := sna.bc1;
-   af1 := sna.af1;
-   hl  := sna.hl;
-   de  := sna.de;
-   bc  := sna.bc;
-   iy  := sna.iy;
-   ix  := sna.ix;
-   iff2 := (sna.Interrupt and %100) <> 0;
-   iff1 := iff2;
-   r   := sna.r;
-   af  := sna.af;
-   sp  := sna.sp;
-   im  := sna.intmode;
-   border_color := sna.BorderColor;
-   // move(sna.RAM[16384],mem[16384],49152);
-   case options.machine of
-        spectrum48      : rom_bank := 0;
-        spectrum128,
-        Spectrum_plus2  : rom_bank := 1;
-        Spectrum_plus2a,
-        Spectrum_plus3  : rom_bank := 3;
+   try
+     Assignfile(F, filename);
+     Reset(F,1);
+     modo48k := filesize(f) = 49179;
+     if modo48k then
+        Blockread(F,sna,sizeof(sna),rr)
+     else
+       Blockread(F,snav2,sizeof(snav2),rr);
+     CloseFile(F);
+     i   := sna.i;
+     hl1 := sna.hl1;
+     de1 := sna.de1;
+     bc1 := sna.bc1;
+     af1 := sna.af1;
+     hl  := sna.hl;
+     de  := sna.de;
+     bc  := sna.bc;
+     iy  := sna.iy;
+     ix  := sna.ix;
+     iff2 := (sna.Interrupt and %100) <> 0;
+     iff1 := iff2;
+     r   := sna.r;
+     af  := sna.af;
+     sp  := sna.sp;
+     im  := sna.intmode;
+     border_color := sna.BorderColor;
+     explode_flags;
+     if modo48k then  // 48K mode
+     begin
+       // move(sna.RAM[16384],mem[16384],49152);
+       case options.machine of
+            spectrum48      : rom_bank := 0;
+            spectrum128,
+            Spectrum_plus2  : rom_bank := 1;
+            Spectrum_plus2a,
+            Spectrum_plus3  : rom_bank := 3;
+       end;
+       select_rom;
+       for x := 1 to 3 do
+           move(sna.RAM[x*$4000],memP[Mem_banks[x],0],$4000);
+       retn;
+     end else begin  // 128K mode
+        case options.machine of
+             spectrum128,
+             Spectrum_plus2  : rom_bank := 1;
+             Spectrum_plus2a,
+             Spectrum_plus3  : rom_bank := 3;
+        end;
+        select_rom;
+        spectrum_out($7ffd, snav2.lastout_7ffd);
+        pageh := snav2.lastout_7ffd and %111;
+        move(snav2.RAM5[0], memp[5,0],$4000);
+        move(snav2.RAM2[0], memp[2,0],$4000);
+        move(snav2.RAMH[0], memp[pageh,0],$4000);
+        x := 0;
+        ii := 0;
+        repeat
+          if (x <> 2) and (x <>5) and (x <> pageh) then
+          begin
+            move(snav2.RAMP[ii,0], memp[x,0], $4000);
+            inc(ii);
+          end;
+          inc(x);
+        until x > 7;
+        pc := snav2.pc;
+     end;
+     load_sna_file := true;
+
+   except
+     ShowMessage('Error loading sna file');
    end;
-   select_rom;
-   for x := 1 to 3 do
-       move(sna.RAM[x*$4000],memP[Mem_banks[x],0],$4000);
-   explode_flags;
-   retn;
-   load_sna_file := true;
 end;
 
 function load_z80_file(filename: string): boolean;
@@ -258,32 +315,34 @@ var
   v,rep: byte;
   no_more_blocks: boolean;
   bhead: tz80_block_header;
+  ver: byte;
+  modo48k,modo128k: boolean;
 
-  procedure unpack_block(addr: word; endmarker: boolean; len: word);
+  procedure unpack_block(page: byte; endmarker: boolean; len: word);
   var
     j,k: word;
     m: byte;
   begin
-       if addr = 0 then exit;
-       k := addr;
+       if page = $ff then exit;
+       k := 0;
        for j := 0 to len-1 do
        begin
            case estado of
                 0: if Buffer[j] = $ED then estado := 1
                    else if (buffer[j]=0) and endmarker then estado := 4
                    else begin
-                     //mem[k] := Buffer[j];
-                     wrmem(k,Buffer[j]);
+                     // wrmem(k,Buffer[j]);
+                     memp[page,k]:=Buffer[j];
                      inc(k);
                    end;
                 // $ED
                 1: if Buffer[j] = $ED then estado := 2
                    else begin
-                     // mem[k] := $ED;
-                     wrmem(k,$ED);
+                     //wrmem(k,$ED);
+                     memp[page,k]:=$ED;
                      inc(k);
-                     // mem[k] := Buffer[j];
-                     wrmem(k,Buffer[j]);
+                     //wrmem(k,Buffer[j]);
+                     memp[page,k]:=Buffer[j];
                      inc(k);
                      estado := 0;
                    end;
@@ -297,8 +356,8 @@ var
                    v := Buffer[j];
                    for m := 1 to rep do
                    begin
-                       //mem[k] := v;
-                       wrmem(k,v);
+                       // wrmem(k,v);
+                       memp[page,k]:=v;
                        inc(k);
                    end;
                    estado := 0;
@@ -307,11 +366,11 @@ var
                 4: if buffer[j] = $ED then
                    estado := 5
                 else begin
-                  //mem[k] := 0;
-                  wrmem(k,0);
+                  //wrmem(k,0);
+                  memp[page,k]:=0;
                   inc(k);
-                  //mem[k] := buffer[j];
-                  wrmem(k,Buffer[j]);
+                  //wrmem(k,Buffer[j]);
+                  memp[page,k]:=Buffer[j];
                   inc(k);
                   estado := 0;
                 end;
@@ -319,14 +378,14 @@ var
                 5: if buffer[j] = $ED then
                    estado := 6
                 else begin
-                  wrmem(k,0);
-                  // mem[k] := 0;
+                  // wrmem(k,0);
+                  memp[page,k]:=0;
                   inc(k);
-                  wrmem(k,$ED);
-                  // mem[k] := $ED;
+                  //wrmem(k,$ED);
+                  memp[page,k]:=$ED;
                   inc(k);
-                  // mem[k] := buffer[j];
-                  wrmem(k,Buffer[j]);
+                  //wrmem(k,Buffer[j]);
+                  memp[page,k]:=Buffer[j];
                   inc(k);
                   estado := 0;
                 end;
@@ -334,16 +393,17 @@ var
                 6: if buffer[j] = $00 then // $00$ED$ED$00 End of block
                    break;
                 else begin
-                  // mem[k] := 0;
-                  wrmem(k,0);
+                  // wrmem(k,0);
+                  memp[page,k]:=0;
+                  inc(k);
+                  // wrmem(k,$ED);
+                  memp[page,k]:= $ED;
                   inc(k);
                   // mem[k] := $ED;
-                  wrmem(k,$ED);
+                  memp[page,k]:=$ED;
                   inc(k);
-                  // mem[k] := $ED;
-                  inc(k);
-                  // mem[k] := buffer[j];
-                  wrmem(k,Buffer[j]);
+                  // wrmem(k,Buffer[j]);
+                  memp[page,k]:=Buffer[j];
                   inc(k);
                   estado := 0;
                 end;
@@ -352,80 +412,120 @@ var
        end;
   end;
 begin
-   Assignfile(FF, filename);
-   Reset(FF,1);
-   fillchar(z80, sizeof(z80), 0);
-   Blockread(FF,z80,30,res);
-   A := z80.A;
-   F := Z80.F;
-   bc := Z80.bc;
-   hl := z80.hl;
-   if z80.old_pc_byte <> 0 then
-   begin
-      pc := z80.old_pc_byte // v1
-   end else begin
-      Blockread(FF,z80.Additional_len,sizeof(word),res);
-      Blockread(FF,z80.pc,z80.Additional_len,res);
-      pc := z80.pc;                                 // v2 o v3
+   try
+     Assignfile(FF, filename);
+     Reset(FF,1);
+     fillchar(z80, sizeof(z80), 0);
+     Blockread(FF,z80,30,res);
+     A := z80.A;
+     F := Z80.F;
+     bc := Z80.bc;
+     hl := z80.hl;
+     if z80.old_pc_byte <> 0 then
+     begin
+        pc := z80.old_pc_byte // v1
+     end else begin
+        Blockread(FF,z80.Additional_len,sizeof(word),res);
+        Blockread(FF,z80.pc,z80.Additional_len,res);
+        pc := z80.pc;                                 // v2 o v3
+     end;
+     sp := z80.sp;
+     i := z80.I;
+     R := z80.R;
+     if z80.info1 = 255 then z80.info1 := 1;
+     R_bit7 := (z80.info1 and 1) << 7;
+     R := R_bit7 or (R and %011111111);
+     border_color := (z80.info1 >> 1) and %111;
+     de := z80.de;
+     bc1 := z80.bc1;
+     de1 := z80.de1;
+     hl1 := z80.hl1;
+     A1 := z80.a1;
+     f1 := z80.f1;
+     iy := z80.iy;
+     ix := z80.ix;
+     iff1 := z80.iff2 <> 0;
+     iff2 := iff1;
+     im := z80.info2 and %11;
+     explode_flags;
+
+     modo48k := (z80.hardware_mode = 0) or  (z80.hardware_mode = 1) or
+             ((ver=3) and (z80.hardware_mode = 3));
+     modo128k := ((ver=2) and (z80.hardware_mode = 3)) or
+                 (z80.hardware_mode = 4) or  (z80.hardware_mode = 5) or
+                 (z80.hardware_mode = 6);
+
+     if modo128k then
+        spectrum_out($7ffd,z80.lastout_7ffd);
+
+     if options.machine >= spectrum_plus2a then
+     begin
+       if modo128k and (z80.Additional_len = 55) then
+          spectrum_out($1ffd,z80.lastout_1ffd)
+       else
+           spectrum_out($1ffd,%100);
+     end;
+     if (z80.old_pc_byte <> 0) then             // v1
+     begin
+        Blockread(FF,buffer,$c000,res);
+        if (z80.info1 and %00100000) <> 0 then // v1 compressed file
+        begin
+          unpack_block(1,true,65535);
+        end else begin                           // v1 uncompressed file
+          // move(buffer, mem[16384], res-Header_Size);
+          move(buffer, memP[1,0], res-Header_Size);
+        end;
+     end else begin                              // v2 or V3
+        no_more_blocks := false;
+        repeat
+         Blockread(FF,bhead,sizeof(bhead),res);
+         if res = sizeof(bhead) then
+         begin
+            Blockread(FF,buffer,bhead.len,res);
+            if (z80.Additional_len = 23) then ver := 2
+            else ver := 3;
+            if modo48k then // 48K
+            begin
+              case bhead.page of
+                0: unpack_block(32,false,bhead.len);      // 48KB BASIC
+                1: unpack_block($ff,false,bhead.len);      // Interface I, Disciple or Plus D rom, according to setting
+                2: unpack_block($ff,false,bhead.len);      //
+                3: unpack_block($ff,false,bhead.len);      //
+                4: unpack_block(2,false,bhead.len);      // 8000-bfff
+                5: unpack_block(3,false,bhead.len);      // c000-ffff
+                6: unpack_block(3,false,bhead.len);      //
+                7: unpack_block($ff,false,bhead.len);      //
+                8: unpack_block(1,false,bhead.len);      // 4000-7fff
+                9: unpack_block($ff,false,bhead.len);      //
+               10: unpack_block($ff,false,bhead.len);      //
+               11: unpack_block($ff,false,bhead.len);      // Multiface rom
+              end;
+            end else if modo128k then // 128K
+            begin
+               case bhead.page of
+                    0: unpack_block(35,false,bhead.len);      // 48KB BASIC
+                    1: unpack_block($ff,false,bhead.len);      // Interface I, Disciple or Plus D rom, according to setting
+                    2: unpack_block(32,false,bhead.len);      //
+                    3: unpack_block(0,false,bhead.len);      //
+                    4: unpack_block(1,false,bhead.len);      // 8000-bfff
+                    5: unpack_block(2,false,bhead.len);      // c000-ffff
+                    6: unpack_block(3,false,bhead.len);      //
+                    7: unpack_block(4,false,bhead.len);      //
+                    8: unpack_block(5,false,bhead.len);      // 4000-7fff
+                    9: unpack_block(6,false,bhead.len);      //
+                   10: unpack_block(7,false,bhead.len);      //
+                   11: unpack_block($ff,false,bhead.len);      // Multiface rom
+               end;
+            end;
+        end else no_more_blocks := true;
+        until no_more_blocks;
+     end;
+     CloseFile(FF);
+     load_z80_file := true;
+   except
+     load_z80_file := false;
+     ShowMessage('Error reading z80 file');
    end;
-   sp := z80.sp;
-   i := z80.I;
-   R := z80.R;
-   if z80.info1 = 255 then z80.info1 := 1;
-   R_bit7 := (z80.info1 and 1) << 7;
-   R := R_bit7 or (R and %011111111);
-   border_color := (z80.info1 >> 1) and %111;
-   de := z80.de;
-   bc1 := z80.bc1;
-   de1 := z80.de1;
-   hl1 := z80.hl1;
-   A1 := z80.a1;
-   f1 := z80.f1;
-   iy := z80.iy;
-   ix := z80.ix;
-   iff1 := z80.iff2 <> 0;
-   iff2 := iff1;
-   im := z80.info2 and %11;
-   explode_flags;
-
-
-   if (z80.old_pc_byte <> 0) then             // v1
-   begin
-      Blockread(FF,buffer,$c000,res);
-      if (z80.info1 and %00100000) <> 0 then // v1 compressed file
-      begin
-        unpack_block($4000,true,65535);
-      end else begin                           // v1 uncompressed file
-        // move(buffer, mem[16384], res-Header_Size);
-        move(buffer, memP[1,0], res-Header_Size);
-      end;
-   end else begin                              // v2 or V3
-      no_more_blocks := false;
-      repeat
-       Blockread(FF,bhead,sizeof(bhead),res);
-       if res = sizeof(bhead) then
-       begin
-          Blockread(FF,buffer,bhead.len,res);
-          case bhead.page of
-            0: unpack_block($0000,false,bhead.len);      // 48KB BASIC
-            1: unpack_block($0000,false,bhead.len);      // Interface I, Disciple or Plus D rom, according to setting
-            2: unpack_block($0000,false,bhead.len);      //
-            3: unpack_block($0000,false,bhead.len);      //
-            4: unpack_block($8000,false,bhead.len);      // 8000-bfff
-            5: unpack_block($c000,false,bhead.len);      // c000-ffff
-            6: unpack_block($0000,false,bhead.len);      //
-            7: unpack_block($0000,false,bhead.len);      //
-            8: unpack_block($4000,false,bhead.len);      // 4000-7fff
-            9: unpack_block($0000,false,bhead.len);      //
-           10: unpack_block($0000,false,bhead.len);      //
-           11: unpack_block($0000,false,bhead.len);      // Multiface rom
-          end;
-
-      end else no_more_blocks := true;
-      until no_more_blocks;
-   end;
-   CloseFile(FF);
-   load_z80_file := true;
 end;
 
 function loadSnapshotfile(FileName: String):boolean;
@@ -444,8 +544,15 @@ end;
 function save_sna_file(FileName: String):boolean;
 var
    F: File;
+   x,ii,Banks_not_used,pageh: byte;
 begin
-    push2(pc);
+    if options.machine = spectrum48 then
+       push2(pc)
+    else begin
+        snav2.pc := pc;
+        snav2.lastout_7ffd :=  last_out_7ffd;
+        snav2.TRDOSROMP := 0;
+    end;
     sna.i   := i;
     sna.hl1 := hl1;
     sna.de1 := de1;
@@ -465,13 +572,51 @@ begin
     sna.sp  := sp;
     sna.intmode  := im;
     sna.BorderColor := border_color;
-    // move(mem[16384],sna.RAM[16384],49152);
-    move(memP[1,0],sna.RAM[16384],49152);
-    Assignfile(F, filename);
-    Rewrite(F,1);
-    Blockwrite(F,sna,sizeof(sna));
-    CloseFile(F);
-    save_sna_file := true;
+
+    if options.machine = spectrum48 then
+    begin
+      for x := 1 to 3 do
+          move(memP[Mem_banks[x],0],sna.RAM[x*$4000],$4000);
+      Try
+        Assignfile(F, filename);
+        Rewrite(F,1);
+        Blockwrite(F,sna,sizeof(sna));
+        CloseFile(F);
+        save_sna_file := true;
+        retn;
+      except
+        save_sna_file := false;
+        ShowMessage('Error saving sna file.');
+      end;
+
+    end else begin // Spectrum128
+       pageh := snav2.lastout_7ffd and %111;
+       move(memp[5,0],snav2.RAM5[0],$4000);
+       move(memp[2,0],snav2.RAM2[0],$4000);
+       move(memp[pageh,0],snav2.RAMH[0],$4000);
+       x := 0;
+       ii := 0;
+       repeat
+         if (x <> 2) and (x <>5) and (x <> pageh) then
+         begin
+           move(memp[x,0],snav2.RAMP[ii,0],$4000);
+           inc(ii);
+         end;
+         inc(x);
+       until x > 7;
+       Banks_not_used := 6-ii;
+       Try
+         Assignfile(F, filename);
+         Rewrite(F,1);
+         Blockwrite(F,snav2,sizeof(snav2)-Banks_not_used*$4000);
+         CloseFile(F);
+         save_sna_file := true;
+       except
+         save_sna_file := false;
+         ShowMessage('Error saving sna file.');
+       end;
+
+    end;
 end;
 
 function save_z80_file(FileName: String):boolean;
