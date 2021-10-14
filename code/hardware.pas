@@ -17,11 +17,19 @@ procedure ResetSinclairRight(n: byte);
 procedure AssignUserButton(dir: byte; key: word);
 function getdircaption(x: byte): string;
 
+type
+  tAYChip = record
+    R: array[0..15] of byte;
+    selReg: byte;
+  end;
+
 var
     Kempston: byte = 0;
     SinclairRight: byte = $FF;
     SinclairLeft: byte = $FF;
     user_buttons: tUser_buttons;
+
+    AY1: tAYChip;
 
 implementation
 
@@ -163,5 +171,6 @@ end;
 begin
   Kempston := 0;
   fillchar(user_buttons, sizeof(user_buttons),0);
+  fillchar(AY1, sizeof(AY1), 0);
 end.
 

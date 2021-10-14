@@ -56,6 +56,10 @@ fixing z80 snapshots for +3 in progress
 alfa version 0.014
 z80 and sna snapshots are now working in 128/+3 mode
 
+alfa version 0.015
+fixed some problems with save in 128K machines
+AY chip implementation in progress
+
 TO DO:
 tape reading tzx
 AY

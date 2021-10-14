@@ -9,18 +9,22 @@ interface
 uses
   Classes, SysUtils, FileUtil, uPSComponent, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes,
-  z80Globals, Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file, acs_misc,
-  acs_streams, BCListBox, BCGameGrid, CRT, BGRAGraphicControl,
+  z80Globals, Z80Tools, LCLType, Grids, ComCtrls, Spin, acs_audio, acs_file,
+  acs_misc, acs_streams, acs_mixer, acs_audiomix, acs_multimix, acs_volumequery,
+  acs_filters, BCListBox, BCGameGrid, CRT, BGRAGraphicControl,
   BGRASpriteAnimation, BGRAResizeSpeedButton, BGRAShape, BCPanel, BCImageButton,
-  BCMaterialDesignButton, BCMDButtonFocus, BCButtonFocus, spectrum,
-  epiktimer, SdpoJoystick, global, hardware, fileformats;
+  BCMaterialDesignButton, BCMDButtonFocus, BCButtonFocus, spectrum{, epiktimer*},
+  SdpoJoystick, global, hardware, fileformats;
 type
 
   { TSpecEmu }
 
   TSpecEmu = class(TForm)
-    AcsAudioOut1: TAcsAudioOut;
-    AcsMemoryIn1: TAcsMemoryIn;
+    AudioOut: TAcsAudioOut;
+    ACSEar: TAcsMemoryIn;
+    ACS_AY_CHA: TAcsMemoryIn;
+    ACS_AY_CHC: TAcsMemoryIn;
+    ACS_AY_CHB: TAcsMemoryIn;
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
@@ -108,6 +112,7 @@ type
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
     GroupBox4: TGroupBox;
+    GroupBox5: TGroupBox;
     GroupJoystickProtocol: TRadioGroup;
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
@@ -143,7 +148,7 @@ type
     pDebug2: TPanel;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
-    screen_timer: TEpikTimer;
+    //screen_timer: TEpikTimer;
     Image1: TImage;
     Image2: TImage;
     BlockGrid: TStringGrid;
@@ -152,6 +157,7 @@ type
     Joystick1: TSdpoJoystick;
     Joystick2: TSdpoJoystick;
     SideButtons: TPanel;
+    SpinEdit1: TSpinEdit;
     src_ix: TRadioButton;
     src_iy: TRadioButton;
     src_ptr: TRadioButton;
@@ -164,6 +170,8 @@ type
     StaticText5: TStaticText;
     StaticText6: TStaticText;
     stdiskMotor: TStaticText;
+    stportout7ffd: TStaticText;
+    stportout1ffd: TStaticText;
     stPrinterStrobe: TStaticText;
     stScreenPage: TStaticText;
     stBC: TStaticText;
@@ -213,7 +221,7 @@ type
     TapeImage: TImage;
     BottomButtonsPanel: TPanel;
     Timer1: TTimer;
-    procedure AcsMemoryIn1BufferDone(Sender: TComponent);
+    procedure ACSEarBufferDone(Sender: TComponent);
     procedure ApplicationProperties1Activate(Sender: TObject);
     procedure AsciiSelectionChange(Sender: TObject);
     procedure BFocusClick(Sender: TObject);
@@ -451,6 +459,7 @@ type
     procedure rbspec128Change(Sender: TObject);
     procedure rbspec48Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
+    procedure SpinEdit1Change(Sender: TObject);
     procedure stROM0Click(Sender: TObject);
     procedure StatusJoystick2ChangeBounds(Sender: TObject);
     procedure StepButtonClick(Sender: TObject);
@@ -485,7 +494,7 @@ type
     procedure ZoomOutButtonClick(Sender: TObject);
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
   private
-    saliendo, starting, pause, step, breakpoint_active: boolean;
+    saliendo, starting, pause, debugging, step, breakpoint_active: boolean;
     SS_Status: Byte;
     breakpoint, mem_addr: word;
     empezando : boolean;
@@ -500,6 +509,8 @@ type
     procedure RunEmulation;
     procedure refresh_system;
     procedure refresh_registers;
+    procedure pause_emulation;
+    procedure restart_emulation;
     procedure start_debug;
     procedure stop_debug;
     procedure set_breakpoint;
@@ -607,15 +618,15 @@ begin
   try
     // copy block from fbak(dos) to f(uno)
     seek(Fbak, Tape_info[dos].Filepos);
-    blockread(fbak,buffer,Tape_info[dos].size+2);
+    blockread(fbak,speaker_buffer,Tape_info[dos].size+2);
     seek(F, Tape_info[uno].Filepos);
-    blockwrite(f,buffer,Tape_info[dos].size+2);
+    blockwrite(f,speaker_buffer,Tape_info[dos].size+2);
 
     // copy block from fbak(uno) to f(uno)+size(uno)+2
     seek(Fbak, Tape_info[uno].Filepos);
-    blockread(fbak,buffer,Tape_info[uno].size+2);
+    blockread(fbak,speaker_buffer,Tape_info[uno].size+2);
     seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
-    blockwrite(f,buffer,Tape_info[uno].size+2);
+    blockwrite(f,speaker_buffer,Tape_info[uno].size+2);
 
     closefile(F);
     closefile(Fbak);
@@ -639,9 +650,9 @@ begin
     while Source_pos < filesize(F) do
     begin
       seek(f,source_pos);
-      blockread(f, buffer, sizeof(buffer), result);
+      blockread(f, speaker_buffer, sizeof(speaker_buffer), result);
       seek(f,dest_pos);
-      blockwrite(f,buffer,result);
+      blockwrite(f,speaker_buffer,result);
       inc(source_pos, result);
       inc(dest_pos, result);
     end;
@@ -667,8 +678,8 @@ end;
 function TSpecEmu.Save_Tape_block(addr, len: word; flag: byte): byte; // IX: Addr; DE: Len; A: Flag byte
 Var
   F, FBak: File;
-  BT,x: Byte;
-  Size, pos: Word;
+  BT: Byte;
+  Size, pos,x: Word;
 begin
   try
     CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
@@ -691,7 +702,9 @@ begin
     Blockwrite(F, size, sizeof(size));
     Blockwrite(F, flag, sizeof(flag));
   //  Blockwrite(F,mem[addr],len);
-    Blockwrite(F,memP[mem_page(addr),mem_offset(addr)],len);
+    //Blockwrite(F,memP[mem_page(addr),mem_offset(addr)],len);
+    for x := addr to addr+len-1 do
+        Blockwrite(F,rdmem(x),1);
     Blockwrite(F, tap_checksum(flag,addr,len),1);
     if pos <= Tape_Blocks then
     begin
@@ -700,8 +713,8 @@ begin
       for x := pos to Tape_Blocks do
       begin
          seek(FBAK, Tape_Info[x].Filepos);
-         blockread(FBAK, buffer, Tape_info[x].Size+2);
-         blockwrite(F, buffer, Tape_info[x].Size+2);
+         blockread(FBAK, speaker_buffer, Tape_info[x].Size+2);
+         blockwrite(F, speaker_buffer, Tape_info[x].Size+2);
       end;
       CloseFile(FBAK);
       Truncate(F);
@@ -1316,7 +1329,9 @@ end;
 
 procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
 begin
+  pause_emulation;
   OpenTapFileDialog.Execute;
+  restart_emulation;
 end;
 
 procedure TSpecEmu.ButtonFireChange(Sender: TObject);
@@ -1406,11 +1421,13 @@ end;
 
 procedure TSpecEmu.ButtonSnapLoadClick(Sender: TObject);
 begin
+  pause_emulation;
   if OpenSnaFileDialog.Execute then
   begin
     loadSnapshotfile(OpenSnaFileDialog.FileName);
     refresh_system;
   end;
+  restart_emulation;
   BFocus.setfocus;
 end;
 
@@ -1418,6 +1435,7 @@ procedure TSpecEmu.ButtonSnapSaveClick(Sender: TObject);
 var
    reply: boolean;
 begin
+  pause_emulation;
    if SaveSnaFileDialog.Execute then
    begin
      reply := true;
@@ -1427,6 +1445,7 @@ begin
      if reply = true then
         SaveSnapshotfile(SaveSnaFileDialog.FileName);
    end;
+   restart_emulation;
    BFocus.setfocus;
 end;
 
@@ -1442,9 +1461,12 @@ end;
 
 procedure TSpecEmu.ButtonRecPressedClick(Sender: TObject);
 begin
-  ButtonRecPressed.Visible := false;
-  ButtonRec.Visible := true;
-  Set_tape_leds;
+  if tapeImage.Visible then
+  begin
+    ButtonRecPressed.Visible := false;
+    ButtonRec.Visible := true;
+    Set_tape_leds;
+  end;
 end;
 
 procedure TSpecEmu.ButtonRewClick(Sender: TObject);
@@ -2028,6 +2050,9 @@ end;
 procedure TSpecEmu.ckAYSoundChange(Sender: TObject);
 begin
   UpdateOptions;
+  AYCHA.enabled := ckAYSound.Checked;
+  AYCHB.enabled := false;
+  AYCHC.enabled := false;
 end;
 
 procedure TSpecEmu.GroupJoystickProtocolClick(Sender: TObject);
@@ -2411,10 +2436,16 @@ begin
   stop_debug;
 end;
 
+procedure TSpecEmu.restart_emulation;
+begin
+  AudioOut.Run();
+  pause := false;
+end;
+
 procedure TSpecEmu.stop_debug;
 begin
   empezando := true;
-  pause := false;
+  restart_emulation;
   PauseButton.Visible := not pause;
   PlayButton.Visible := pause;
   if starting then begin
@@ -2425,10 +2456,16 @@ begin
   StepButton.Enabled := false;
 end;
 
+procedure TSpecEmu.pause_emulation;
+begin
+  AudioOut.Stop();
+  pause := true;
+end;
+
 procedure TSpecEmu.start_debug;
 begin
+  pause_emulation;
   empezando := false;
-  pause := true;
   PauseButton.Visible := not pause;
   PlayButton.Visible := pause;
   stInstruction.caption := decode_instruction(pc);
@@ -2437,6 +2474,7 @@ begin
   DebugPanel.Enabled := true;
   StepButton.Enabled := true;
   stepbutton.SetFocus;
+  debugging := true;
 end;
 
 procedure TSpecEmu.BitBtn3Click(Sender: TObject);
@@ -2561,7 +2599,7 @@ begin
 //  UpdateOptions;
 end;
 
-procedure TSpecEmu.AcsMemoryIn1BufferDone(Sender: TComponent);
+procedure TSpecEmu.ACSEarBufferDone(Sender: TComponent);
 var
   k: word;
   bytes_readed: word;
@@ -2574,20 +2612,27 @@ begin
 
       if soundpos_read + bytes_readed >= spec_buffer_size then
       begin
-         move(data[soundpos_read], buffer[nb,0], spec_buffer_size-soundpos_read);
+         move(speaker_data[soundpos_read], speaker_buffer[0], spec_buffer_size-soundpos_read);
          soundpos_read := bytes_readed-(spec_buffer_size-soundpos_read);
-         move(data[0], buffer[nb,0], soundpos_read);
+         move(speaker_data[0], speaker_buffer[0], soundpos_read);
       end else begin
-         move(data[soundpos_read], buffer[nb,0], bufsize);
+         move(speaker_data[soundpos_read], speaker_buffer[0], bufsize);
          inc(soundpos_read,bufsize);
       end;
       dec(sound_bytes,bytes_readed);
-      ACSMemoryIn1.DataBuffer :=@buffer[nb];
-      ACSMemoryIn1.DataSize := bufsize;
+
+      AYCHA.paused := false;
+      AYCHB.paused := false;
+      AYCHC.paused := false;
+      ACSEar.DataBuffer :=@speaker_buffer;
+      ACSEar.DataSize := bufsize;
    end else begin
-     fillchar(buffer[nb], 1, 128);
-     ACSMemoryIn1.DataBuffer :=@buffer[nb];
-     ACSMemoryIn1.DataSize := 1;
+     AYCHA.paused := true;
+     AYCHB.paused := true;
+     AYCHC.paused := true;
+     fillchar(speaker_buffer, 1, 128);
+     ACSEar.DataBuffer :=@speaker_buffer;
+     ACSEar.DataSize := 1;
    end;
 end;
 
@@ -2614,14 +2659,24 @@ begin
   BFocus.setfocus;
 end;
 
+procedure TSpecEmu.SpinEdit1Change(Sender: TObject);
+var
+  freq: integer;
+begin
+  freq:=SpinEdit1.Value;
+  CONFIG_AY_Channel(AYCHA,freq,AYCHA.volume,true,1,false);
+end;
+
 procedure TSpecEmu.stROM0Click(Sender: TObject);
 begin
+  pause_emulation;
   odROM.FileName := Options.ROMFileName[groupmachine.itemindex,0];
   if odROM.Execute then
   begin
     stROM0.Caption := ExtractFileName(odROM.FileName);
     options.ROMFilename[groupmachine.itemindex,0] := odROM.FileName;
   end;
+  restart_emulation;
 end;
 
 procedure TSpecEmu.StatusJoystick2ChangeBounds(Sender: TObject);
@@ -2715,6 +2770,8 @@ begin
       stprinterStrobe.caption := 'PRINT STRB: ON'
     else
       stprinterStrobe.caption := 'PRINT STRB: OFF';
+    stportout7ffd.caption := '7FFD: '+ BinStr(last_out_7ffd,8);
+    stportout1ffd.caption := '1FFD: '+ BinStr(last_out_1ffd,8);
   end;
 end;
 
@@ -2722,30 +2779,41 @@ procedure TSpecEmu.RunEmulation;
 var
    i: word = 0;
    dd: longint;
+   tini,tt: qword;
+   cc: qword;
+   basicrom: boolean;
 
 begin
   init_z80(true);
   init_spectrum;
   reset_memory_banks;
   draw_screen;
-  screen_timer.Start;
+  //screen_timer.Start;
   repaint_screen := false;
   prev_sound_bytes := sound_bytes;
+  //tini := GetTickCount64;
+  //cc := 0;
   while (not saliendo) do begin
     if not pause and (breakpoint_active) and ((breakpoint = pc) and not empezando) then begin
        start_debug;
     end;
     if not pause or step then begin
        empezando := false;
-       if (pc = $556) then
+       basicrom := (options.machine = spectrum48) or
+          ((options.machine = spectrum128)      and (Mem_banks[0]=ROMPAGE1)) or
+          ((options.machine = spectrum_plus2)   and (Mem_banks[0]=ROMPAGE1)) or
+          ((options.machine >= spectrum_plus2a) and (Mem_banks[0]=ROMPAGE3));
+
+       if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6))) and basicrom then
           save_cpu_status;
-       if (pc = $04c2) and TapeRecLed.Visible then // SAVE ROUTINE
+       if (pc >= $04c2) and (pc <= $04d8) and TapeRecLed.Visible and basicrom then // SAVE ROUTINE
        begin
+            restore_cpu_status;
             c_flag := Save_tape_block(IX,DE,A);
             compose_flags;
             ret;
             clear_keyboard;
-       end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible then // LOAD ROUTINE
+       end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible and basicrom then // LOAD ROUTINE
        begin
           restore_cpu_status;
           c_flag := Load_Tape_block(IX, DE, A); // IX: Addr; DE: Len; A: Flag byte
@@ -2774,23 +2842,34 @@ begin
     t_states_prev_instruction := t_states;
     if t_states_cur_half_scanline >= t_states_sound_bit then
     begin
-      if sonido_acumulado > 0 then
-         a := a;
+      //inc(cc);
+      //if cc = 16500 then
+      //begin
+      //  tt := GetTickCount64-tini;
+      //  tini := GetTickCount64;
+      //  cc := 0;
+      //end;
+      Run_AY_Channel(AYCHA);
+      Run_AY_Channel(AYCHB);
+      Run_AY_Channel(AYCHC);
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
-      data[soundpos_write] := 128 + (sonido_acumulado * 32) div t_states_sound_bit;
+      //speaker_data[soundpos_write] := 128 +
+      //                             ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
+      //                             AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
+      speaker_data[soundpos_write] := 128 + AYCHA.sound_level;
       sonido_acumulado := 0;
       inc(soundpos_write);
       if soundpos_write > spec_buffer_size-1 then soundpos_write := 0;
       inc(sound_bytes);
     end;
     t_states_cur_frame := t_states - t_states_ini_frame;
-    time := screen_timer.Elapsed;
+//    time := screen_timer.Elapsed;
     screen_tstates_reached := (t_states_cur_frame >= screen_testados_total);
     repaint_screen := screen_tstates_reached and (sound_bytes <= 2048);//screen_timer.Elapsed >= 0.020;
     if repaint_screen and screen_tstates_reached then begin
         prev_sound_bytes := sound_bytes;
-        screen_timer.clear;
-        screen_timer.start;
+        //screen_timer.clear;
+        //screen_timer.start;
         t_states_ini_frame := t_states-(t_states_cur_frame-screen_testados_total);
         intpend := true;
         draw_screen;
@@ -2922,10 +3001,16 @@ begin
   DebugPanel.Visible := false;
   memgrid.ColWidths[0] := 35;
   adjust_window_size;
-  fillchar(buffer,sizeof(buffer),0);
-  ACSAudioOut1.Run();
-  ACSMemoryIn1.DataBuffer :=@buffer[nb];
-  ACSMemoryIn1.DataSize := bufsize;
+  fillchar(speaker_buffer,sizeof(speaker_buffer),0);
+  //AudioOut.Run();
+  Init_AY_Channel(AYCHA);
+  Init_AY_Channel(AYCHB);
+  Init_AY_Channel(AYCHC);
+  CONFIG_AY_Channel(AYCHA,440,8,false,1,false);
+  CONFIG_AY_Channel(AYCHB,16,8,false,1,false);
+  CONFIG_AY_Channel(AYCHC,16,8,false,1,false);
+  ACSEar.DataBuffer :=@speaker_buffer;
+  ACSEar.DataSize := bufsize;
   sound_bytes := 2048;
   soundpos_write := sound_bytes;
 
@@ -2954,7 +3039,7 @@ end;
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   saliendo := true;
-  ACSAudioOut1.Stop();
+  AudioOut.Stop();
 
 end;
 

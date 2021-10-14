@@ -5,7 +5,7 @@ unit spectrum;
 interface
 
 uses
-  Classes, SysUtils,CRT,Z80Globals,hardware,Global;
+  Classes, SysUtils,CRT,Z80Globals,hardware,Global,acs_misc;
 
 const
   ancho_borde = 30;
@@ -28,6 +28,7 @@ const
   screen_tstates_half_scanline = scanline_testados;
 
   MAX_TAPE_BLOCKS = 99;
+  MAXFREQ = 16500;
 
 type
   TTapeBlockInfo = record
@@ -38,6 +39,24 @@ type
 
 
   TTapeInfo = array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
+
+  TAYChannel = record
+    counter: integer;
+    rng: longint;
+    noise_period: integer;
+    noise_enabled: boolean;
+    noise_level: boolean;
+    sound_level: byte;
+    signal: boolean;
+    enabled,paused: boolean;
+    //counter: integer;       // x
+    freq: integer;          // dy
+    d: integer;             // d
+    d1,d2: integer;
+    data: array[0..7014] of byte;
+    volume: byte;
+    buffer: array[0..bufsize] of byte;
+  end;
 
 var
   Tape_info: TTapeInfo;
@@ -58,12 +77,14 @@ var
   t_states_prev_instruction: Qword = 0;
   t_states_sound_bit: Qword = screen_tstates_half_scanline;
   SoundFrames: Qword = 0;
+  volume_speaker: byte = 8;
   speaker_out: boolean = false;
-  data: array[0..7014] of byte;
+  speaker_data: array[0..7014] of byte;
+  AYCHA, AYCHB, AYCHC: TAYChannel;
+  speaker_buffer: array[0..bufsize] of byte;
   sound_bytes: longint = 0;
   prev_sound_bytes: longint = 0;
-  nb: byte = 0;
-  buffer: array[0..1,0..bufsize] of byte;
+  //nb: byte = 0;
   scanlines : integer = 0;
   soundpos_read: longint = 0;
   soundpos_write: longint = 0;
@@ -82,8 +103,101 @@ procedure spectrum_out(port: word; v: byte);
 function spectrum_in(port: word): byte;
 procedure init_spectrum;
 procedure clear_keyboard;
+procedure Init_AY_Channel(var AYCH: TAYChannel);
+procedure CONFIG_AY_Channel(var AYCH: TAYChannel; tone_freq: integer; volume: byte; tone_enabled: boolean; noise_freq: integer; noise_enabled: boolean);
+procedure RUN_AY_Channel(var AYCH: TAYChannel);
 
 implementation
+
+procedure Init_AY_Channel(var AYCH: TAYChannel);
+begin
+  AYCH.enabled := false;
+  AYCH.volume := 8;
+  AYCH.paused := false;
+  AYCH.freq := MAXFREQ;
+  AYCH.rng := 1;
+  AYCH.noise_period := 0;
+  AYCH.noise_enabled := false;
+  AYCH.counter := 0;
+  AYCH.noise_level := false;
+end;
+
+procedure CONFIG_AY_Channel(var AYCH: TAYChannel; tone_freq: integer; volume: byte; tone_enabled: boolean; noise_freq: integer; noise_enabled: boolean);
+begin
+  AYCH.enabled := tone_enabled;
+  AYCH.noise_enabled := noise_enabled;
+  if noise_freq > 0 then
+     AYCH.noise_period := MAXFREQ div noise_freq
+  else
+     AYCH.noise_period := 0;
+  AYCH.freq:= tone_freq;
+  AYCH.volume:= volume;
+  AYCH.sound_level := 0;
+  AYCH.d := AYCH.freq*2*2-MAXFREQ;
+  AYCH.d2 := (AYCH.freq*2-MAXFREQ)*2;
+  AYCH.d1 := AYCH.freq*2*2;
+end;
+
+procedure RUN_AY_Channel(var AYCH: TAYChannel);
+begin
+  with AYCH do
+  begin
+    sound_level := 128;
+    if enabled and not paused then
+    begin
+       if d < 0 then
+           d += d1
+       else begin
+          d += d2;
+          signal := not signal;
+       end;
+       if signal then
+          sound_level := 128+AYCH.volume*8
+       else
+          sound_level := 128;
+     end;
+     inc(counter);
+     if (counter >= noise_period) and noise_enabled and not paused then
+     begin
+        if (((rng + 1) and $02) <> 0) then
+           noise_level := not noise_level;
+        if ((rng and $01) <> 0) then
+           rng := rng xor %100100000000000000;  // $24000
+        rng := rng >> 1;
+        if noise_level then
+           sound_level := 128+AYCH.volume*8;
+        counter := 0;
+     end;
+  end;
+end;
+
+procedure config_AY;
+var
+  d1,d2,d3,f1,f2,f3,nf: word;
+begin
+  d1 := AY1.R[0]+AY1.R[1]*256;
+  d2 := AY1.R[2]+AY1.R[3]*256;
+  d3 := AY1.R[4]+AY1.R[5]*256;
+  if d1 > 0 then
+     f1 := 3500000 div 32 div d1
+  else
+     f1 := 0;
+  if d2 > 0 then
+     f2 := 3500000 div 32 div d2
+  else
+     f2 := 0;
+  if d3 > 0 then
+     f3 := 3500000 div 32 div d3
+  else
+     f3 := 0;
+  if AY1.R[6] > 0 then
+     nf := 3500000 div 32 div AY1.R[6]
+  else
+     nf := 0;
+  CONFIG_AY_Channel(AYCHA,f1,AY1.R[ 8],AY1.R[7] and %001 = 0,nf,AY1.R[7] and %00001000 = 0);
+  CONFIG_AY_Channel(AYCHB,f2,AY1.R[ 9],AY1.R[7] and %010 = 0,nf,AY1.R[7] and %00010000 = 0);
+  CONFIG_AY_Channel(AYCHC,f3,AY1.R[10],AY1.R[7] and %100 = 0,nf,AY1.R[7] and %00100000 = 0);
+end;
 
 procedure clear_keyboard;
 var
@@ -115,6 +229,7 @@ begin
        speaker_out := false;
      end;
   end;
+
   if not disable_pagging then
   begin
     // port 7ffd spectrum 128 and +2 gray
@@ -197,6 +312,25 @@ begin
          end;
        end;
     end;
+
+    // port $fffd AY Select a register 0-14
+    if port and %1100000000000010 = %1100000000000000 then
+    begin
+      AY1.selReg:=v;
+    end;
+    // port $bffd Write to the selected register
+    if port and %1100000000000010 = %1000000000000000 then
+    begin
+      case AY1.selreg of
+       1,3,5,8,9,10,13:
+         AY1.R[AY1.selreg]:=v and %1111;
+       6:
+         AY1.R[AY1.selreg]:=v and %11111;
+       else
+            AY1.R[AY1.selreg]:=v;
+      end;
+       config_AY;
+     end;
   end;
 end;
 
@@ -236,6 +370,11 @@ begin
         v := v and Keyboard[7]; // SPACE SYM M N B
   end else begin                   // other write ports
     v := $ff;
+  end;
+  // port $fffd AY Read the value of the selected register
+  if port and %1100000000000010 = %1100000000000000 then
+  begin
+     v := AY1.R[AY1.selreg];
   end;
   spectrum_in := v;
 end;
