@@ -60,9 +60,14 @@ alfa version 0.015
 fixed some problems with save in 128K machines
 AY chip implementation in progress
 
+alfa version 0.016
+AY chip implementation completed
+
 TO DO:
 tape reading tzx
-AY
 memory contention
 
-Thanks to Cesar Hernandez (ZEsarUX coder)
+Thanks to:
+ - Cesar Hernandez (ZEsarUX coder) - For his help along the emulator development. 
+   Thanks also, because the source code of his emulator (ZEsarUX) was a very good reference in many occasions.
+- José Luis Sanchez (JSpeccy coder) - For his help in the AY emulator matters. I take his Java code as reference in this matter.

@@ -40,6 +40,18 @@ type
 
   TTapeInfo = array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
 
+  TAYEnvelope = record
+    //freq: integer;
+    enabled: boolean;
+    counter: integer;
+    period: integer;
+    typ: byte;
+    signal: boolean;
+    starting: boolean;
+    value: byte;
+    incv: integer;
+  end;
+
   TAYChannel = record
     counter: integer;
     rng: longint;
@@ -49,12 +61,13 @@ type
     sound_level: byte;
     signal: boolean;
     enabled,paused: boolean;
-    //counter: integer;       // x
+    env: TAYEnvelope;
     freq: integer;          // dy
     d: integer;             // d
     d1,d2: integer;
     data: array[0..7014] of byte;
     volume: byte;
+    envelope_volume: boolean;
     buffer: array[0..bufsize] of byte;
   end;
 
@@ -96,6 +109,11 @@ var
 
   last_out_7ffd : byte = 0;
   last_out_1ffd : byte = 0;
+  last_out_fffd : byte = 0;
+  last_out_bffd : byte = 0;
+  last_in_fffd  : byte = 0;
+  last_in_fe    : byte = 0;
+  last_out_fe   : byte = 0;
 
   keyboard: array[0..7] of byte = ($bf,$bf,$bf,$bf,$bf,$bf,$bf,$bf);
 
@@ -104,7 +122,10 @@ function spectrum_in(port: word): byte;
 procedure init_spectrum;
 procedure clear_keyboard;
 procedure Init_AY_Channel(var AYCH: TAYChannel);
-procedure CONFIG_AY_Channel(var AYCH: TAYChannel; tone_freq: integer; volume: byte; tone_enabled: boolean; noise_freq: integer; noise_enabled: boolean);
+procedure CONFIG_AY_Channel(var AYCH: TAYChannel;
+                                tone_freq: integer; volume: byte; tone_enabled: boolean;
+                                noise_freq: integer; noise_enabled: boolean;
+                                env_freq:integer; env_type: byte; env_enabled: boolean);
 procedure RUN_AY_Channel(var AYCH: TAYChannel);
 
 implementation
@@ -120,29 +141,72 @@ begin
   AYCH.noise_enabled := false;
   AYCH.counter := 0;
   AYCH.noise_level := false;
+  AYCH.env.period:=0;
+  AYCH.env.enabled:= false;
+  AYCH.env.starting := true;
 end;
 
-procedure CONFIG_AY_Channel(var AYCH: TAYChannel; tone_freq: integer; volume: byte; tone_enabled: boolean; noise_freq: integer; noise_enabled: boolean);
+procedure CONFIG_AY_Channel(var AYCH: TAYChannel;
+                                tone_freq: integer; volume: byte; tone_enabled: boolean;
+                                noise_freq: integer; noise_enabled: boolean;
+                                env_freq:integer; env_type: byte; env_enabled: boolean);
+var
+  prev_env_period, prev_noise_period: integer;
 begin
+  if (AYCH.freq <> tone_freq) and tone_enabled then
+  begin
+    AYCH.d := tone_freq*2*2-MAXFREQ;
+    AYCH.d2 := (tone_freq*2-MAXFREQ)*2;
+    AYCH.d1 := tone_freq*2*2;
+  end;
+
+
   AYCH.enabled := tone_enabled;
   AYCH.noise_enabled := noise_enabled;
+  prev_noise_period := AYCH.noise_period;
   if noise_freq > 0 then
      AYCH.noise_period := MAXFREQ div noise_freq
   else
      AYCH.noise_period := 0;
+  if (AYCH.noise_period <> prev_noise_period) and noise_enabled then
+  begin
+    AYCH.counter := 0;
+  end;
+
   AYCH.freq:= tone_freq;
-  AYCH.volume:= volume;
+  AYCH.volume:= volume and %1111;
+  AYCH.envelope_volume:= (AYCH.volume and %10000) <> 0;
   AYCH.sound_level := 0;
-  AYCH.d := AYCH.freq*2*2-MAXFREQ;
-  AYCH.d2 := (AYCH.freq*2-MAXFREQ)*2;
-  AYCH.d1 := AYCH.freq*2*2;
+
+  prev_env_period := AYCH.env.period;
+  AYCH.env.enabled:=env_enabled;
+  if env_freq > 0 then
+     AYCH.env.period := (MAXFREQ div env_freq)*4
+  else
+     AYCH.env.period := 0;
+
+  AYCH.env.signal := false;
+  AYCH.env.starting := true;
+  AYCH.env.counter := 0;
+  if (AYCH.env.period <> prev_env_period) and env_enabled then
+  begin
+  end;
+
+  AYCH.env.typ:=env_type;
+  AYCH.env.counter:=0;
+  if AYCH.env.period > 0 then
+     AYCH.env.incv := (AYCH.env.period div 16)
+  else
+     AYCH.env.incv := 0;
 end;
 
 procedure RUN_AY_Channel(var AYCH: TAYChannel);
+var
+  vv: byte;
 begin
   with AYCH do
   begin
-    sound_level := 128;
+    sound_level := 0; //128;
     if enabled and not paused then
     begin
        if d < 0 then
@@ -152,32 +216,104 @@ begin
           signal := not signal;
        end;
        if signal then
-          sound_level := 128+AYCH.volume*8
+          sound_level := {128+}1//AYCH.volume*8
        else
-          sound_level := 128;
-     end;
-     inc(counter);
-     if (counter >= noise_period) and noise_enabled and not paused then
-     begin
-        if (((rng + 1) and $02) <> 0) then
-           noise_level := not noise_level;
-        if ((rng and $01) <> 0) then
-           rng := rng xor %100100000000000000;  // $24000
-        rng := rng >> 1;
-        if noise_level then
-           sound_level := 128+AYCH.volume*8;
-        counter := 0;
-     end;
+          sound_level := 0;//128;
+    end;
+
+    vv := AYCH.volume;
+
+    // ENVELOPE
+    // 0      \__________     single decay then off
+    //
+    // 4      /|_________     single attack then off
+    //
+    // 8      \|\|\|\|\|\     repeated decay
+    //
+    // 9      \__________     single decay then off
+    //
+    //10      \/\/\/\/\/\     repeated decay-attack
+    //          _________
+    //11      \|              single decay then hold
+    //
+    //12      /|/|/|/|/|/     repeated attack
+    //         __________
+    //13      /               single attack then hold
+    //
+    //14      /\/\/\/\/\/     repeated attack-decay
+    //
+    //15      /|_________     single attack then off
+    if env.enabled and not paused then
+    begin
+      inc(env.counter);
+      if not env.signal then
+      begin
+        case env.typ of
+           0,9:
+             if env.starting then
+               env.value := 15-(16*env.counter div AYCH.env.period)
+             else
+               env.value := 0; //128;
+           11:
+             if env.starting then
+               env.value := 15-(16*env.counter div AYCH.env.period)
+             else
+               env.value := {128+}64;
+           4,15:
+              if env.starting then
+                 env.value := (16*env.counter div AYCH.env.period)
+              else
+                 env.value := 0;//128;
+           13:
+              if env.starting then
+                 env.value := (16*env.counter div AYCH.env.period)
+              else
+                 env.value := {128+}64;
+           8,10: env.value := 15-(16*env.counter div AYCH.env.period);
+           12,14: env.value := (16*env.counter div AYCH.env.period);
+        end;
+      end else begin
+        case env.typ of
+           0,4,9,14,15:
+             env.value := 0;//128;
+           8,10,11,13:
+             env.value := {128+}15;
+        end;
+      end;
+      if env.counter >= env.period then
+      begin
+        env.starting := false;
+        env.counter := 0;
+        env.signal:= not env.signal;
+      end;
+      vv := env.value;
+    end;
+
+    // NOISE
+    inc(counter);
+    if (counter >= noise_period) and noise_enabled and not paused then
+    begin
+      if (((rng + 1) and $02) <> 0) then
+         noise_level := not noise_level;
+      if ((rng and $01) <> 0) then
+         rng := rng xor %100100000000000000;  // $24000
+      rng := rng >> 1;
+      if noise_level then
+         sound_level := {128+}1; //vv*8;
+      counter := 0;
+    end;
+    sound_level := sound_level * vv*4;
   end;
 end;
 
 procedure config_AY;
 var
-  d1,d2,d3,f1,f2,f3,nf: word;
+  d1,d2,d3,de,f1,f2,f3,nf,ef: word;
 begin
   d1 := AY1.R[0]+AY1.R[1]*256;
   d2 := AY1.R[2]+AY1.R[3]*256;
   d3 := AY1.R[4]+AY1.R[5]*256;
+  de := AY1.R[11]+AY1.R[12]*256;
   if d1 > 0 then
      f1 := 3500000 div 32 div d1
   else
@@ -190,13 +326,26 @@ begin
      f3 := 3500000 div 32 div d3
   else
      f3 := 0;
+  if de > 0 then
+     ef := 3500000 div 32 div de
+  else
+     ef := 0;
   if AY1.R[6] > 0 then
      nf := 3500000 div 32 div AY1.R[6]
   else
      nf := 0;
-  CONFIG_AY_Channel(AYCHA,f1,AY1.R[ 8],AY1.R[7] and %001 = 0,nf,AY1.R[7] and %00001000 = 0);
-  CONFIG_AY_Channel(AYCHB,f2,AY1.R[ 9],AY1.R[7] and %010 = 0,nf,AY1.R[7] and %00010000 = 0);
-  CONFIG_AY_Channel(AYCHC,f3,AY1.R[10],AY1.R[7] and %100 = 0,nf,AY1.R[7] and %00100000 = 0);
+  CONFIG_AY_Channel(AYCHA,
+                          f1,AY1.R[ 8],AY1.R[7] and %001 = 0,
+                          nf,AY1.R[7] and %00001000 = 0,
+                          ef,AY1.R[13], AY1.R[8] and %00010000 <> 0);
+  CONFIG_AY_Channel(AYCHB,
+                          f2,AY1.R[ 9],AY1.R[7] and %010 = 0,
+                          nf,AY1.R[7] and %00010000 = 0,
+                          ef,AY1.R[13], AY1.R[9] and %00010000 <> 0);
+  CONFIG_AY_Channel(AYCHC,
+                          f3,AY1.R[10],AY1.R[7] and %100 = 0,
+                          nf,AY1.R[7] and %00100000 = 0,
+                          ef,AY1.R[13], AY1.R[10] and %00010000 <> 0);
 end;
 
 procedure clear_keyboard;
@@ -221,13 +370,14 @@ var
   pagging_mode, special_mode: byte;
 begin
   if (port and 1) = 0 then begin // ULA port 0xfe
-     border_color := v and $7;
-     if (v and %00010000) <> 0 then
-     begin
-        speaker_out := true;
-     end else begin
-       speaker_out := false;
-     end;
+    last_out_fe := v;
+    border_color := v and $7;
+    if (v and %00010000) <> 0 then
+    begin
+      speaker_out := true;
+    end else begin
+     speaker_out := false;
+    end;
   end;
 
   if not disable_pagging then
@@ -316,15 +466,17 @@ begin
     // port $fffd AY Select a register 0-14
     if port and %1100000000000010 = %1100000000000000 then
     begin
+      last_out_fffd := v;
       AY1.selReg:=v;
     end;
     // port $bffd Write to the selected register
     if port and %1100000000000010 = %1000000000000000 then
     begin
+      last_out_bffd := v;
       case AY1.selreg of
-       1,3,5,8,9,10,13:
+       1,3,5,13:
          AY1.R[AY1.selreg]:=v and %1111;
-       6:
+       8,9,10,6:
          AY1.R[AY1.selreg]:=v and %11111;
        else
             AY1.R[AY1.selreg]:=v;
@@ -368,6 +520,7 @@ begin
         v := v and Keyboard[6]; // ENTER L K J H
      if (hport and %10000000) = 0 then
         v := v and Keyboard[7]; // SPACE SYM M N B
+     last_in_FE := v;
   end else begin                   // other write ports
     v := $ff;
   end;
@@ -375,6 +528,7 @@ begin
   if port and %1100000000000010 = %1100000000000000 then
   begin
      v := AY1.R[AY1.selreg];
+     last_in_fffd := v;
   end;
   spectrum_in := v;
 end;

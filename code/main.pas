@@ -22,9 +22,6 @@ type
   TSpecEmu = class(TForm)
     AudioOut: TAcsAudioOut;
     ACSEar: TAcsMemoryIn;
-    ACS_AY_CHA: TAcsMemoryIn;
-    ACS_AY_CHC: TAcsMemoryIn;
-    ACS_AY_CHB: TAcsMemoryIn;
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
@@ -157,22 +154,34 @@ type
     Joystick1: TSdpoJoystick;
     Joystick2: TSdpoJoystick;
     SideButtons: TPanel;
-    SpinEdit1: TSpinEdit;
     src_ix: TRadioButton;
     src_iy: TRadioButton;
     src_ptr: TRadioButton;
     stAF: TStaticText;
     stAF1: TStaticText;
     StaticText1: TStaticText;
+    StaticText10: TStaticText;
+    StaticText11: TStaticText;
+    StaticText12: TStaticText;
+    StaticText13: TStaticText;
     StaticText2: TStaticText;
     StaticText3: TStaticText;
     StaticText4: TStaticText;
     StaticText5: TStaticText;
     StaticText6: TStaticText;
+    StaticText7: TStaticText;
+    StaticText8: TStaticText;
+    StaticText9: TStaticText;
     stdiskMotor: TStaticText;
+    stportoutFE: TStaticText;
+    stportinFE: TStaticText;
+    stportoutfffd: TStaticText;
     stportout7ffd: TStaticText;
     stportout1ffd: TStaticText;
+    stportoutbffd: TStaticText;
+    stportinfffd: TStaticText;
     stPrinterStrobe: TStaticText;
+    stSamples: TStaticText;
     stScreenPage: TStaticText;
     stBC: TStaticText;
     stBC1: TStaticText;
@@ -459,7 +468,6 @@ type
     procedure rbspec128Change(Sender: TObject);
     procedure rbspec48Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
-    procedure SpinEdit1Change(Sender: TObject);
     procedure stROM0Click(Sender: TObject);
     procedure StatusJoystick2ChangeBounds(Sender: TObject);
     procedure StepButtonClick(Sender: TObject);
@@ -2659,14 +2667,6 @@ begin
   BFocus.setfocus;
 end;
 
-procedure TSpecEmu.SpinEdit1Change(Sender: TObject);
-var
-  freq: integer;
-begin
-  freq:=SpinEdit1.Value;
-  CONFIG_AY_Channel(AYCHA,freq,AYCHA.volume,true,1,false);
-end;
-
 procedure TSpecEmu.stROM0Click(Sender: TObject);
 begin
   pause_emulation;
@@ -2770,14 +2770,20 @@ begin
       stprinterStrobe.caption := 'PRINT STRB: ON'
     else
       stprinterStrobe.caption := 'PRINT STRB: OFF';
-    stportout7ffd.caption := '7FFD: '+ BinStr(last_out_7ffd,8);
-    stportout1ffd.caption := '1FFD: '+ BinStr(last_out_1ffd,8);
+    stportout7ffd.caption := HexStr(last_out_7ffd,4);
+    stportout1ffd.caption := HexStr(last_out_1ffd,4);
+    stportoutfffd.caption := HexStr(last_out_fffd,4);
+    stportinfffd.caption := HexStr(last_out_fffd,4);
+    stportoutbffd.caption := HexStr(last_out_bffd,4);
+    stportoutfe.caption := HexStr(last_out_fe,4);
+    stportinfe.caption := HexStr(last_in_fe,4);
   end;
 end;
 
 procedure TSpecEmu.RunEmulation;
 var
-   i: word = 0;
+   ii: word = 0;
+   ss: word;
    dd: longint;
    tini,tt: qword;
    cc: qword;
@@ -2830,10 +2836,10 @@ begin
        end;
        step := false;
     end;
-    inc(i);
-    if (i >= 2048) then begin
+    inc(ii);
+    if (ii >= 2048) then begin
       Application.ProcessMessages;
-      i := 0;
+      ii := 0;
     end;
     t_states_cur_half_scanline := t_states - t_states_ini_half_scanline;
     t_states_cur_instruction := t_states - t_states_prev_instruction;
@@ -2853,10 +2859,13 @@ begin
       Run_AY_Channel(AYCHB);
       Run_AY_Channel(AYCHC);
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
-      //speaker_data[soundpos_write] := 128 +
-      //                             ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
-      //                             AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
-      speaker_data[soundpos_write] := 128 + AYCHA.sound_level;
+      ss := ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
+                                   AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
+      if ss > 127 then
+         ss := 127;
+      speaker_data[soundpos_write] := 128 + ss;
+
+      //speaker_data[soundpos_write] := 128 + AYCHA.sound_level;
       sonido_acumulado := 0;
       inc(soundpos_write);
       if soundpos_write > spec_buffer_size-1 then soundpos_write := 0;
@@ -2875,10 +2884,10 @@ begin
         draw_screen;
         repaint_screen := false;
         inc(frames);
-        //if (frames mod 50) = 0 then begin
-        //  stsamples.caption := intToStr(sound_bytes);
-        //  ststatessound.caption := intToStr(t_states_sound_bit);
-        //end;
+        if (frames mod 50) = 0 then begin
+          stsamples.caption := intToStr(sound_bytes);
+          //ststatessound.caption := intToStr(t_states_sound_bit);
+        end;
     end;
   end;
 end;
@@ -3006,9 +3015,9 @@ begin
   Init_AY_Channel(AYCHA);
   Init_AY_Channel(AYCHB);
   Init_AY_Channel(AYCHC);
-  CONFIG_AY_Channel(AYCHA,440,8,false,1,false);
-  CONFIG_AY_Channel(AYCHB,16,8,false,1,false);
-  CONFIG_AY_Channel(AYCHC,16,8,false,1,false);
+  CONFIG_AY_Channel(AYCHA,440,8,false,1,false,444,0,false);
+  CONFIG_AY_Channel(AYCHB,16,8,false,1,false,444,0,false);
+  CONFIG_AY_Channel(AYCHC,16,8,false,1,false,444,0,false);
   ACSEar.DataBuffer :=@speaker_buffer;
   ACSEar.DataSize := bufsize;
   sound_bytes := 2048;

@@ -8,7 +8,7 @@
       <Unit0>
         <Filename Value="Alvatrum.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <CursorPos Y="17"/>
         <UsageCount Value="211"/>
         <Loaded Value="True"/>
@@ -20,8 +20,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="2802"/>
-        <CursorPos Y="2811"/>
+        <TopLine Value="2356"/>
+        <CursorPos X="41" Y="2779"/>
         <UsageCount Value="211"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -30,7 +30,7 @@
         <Filename Value="z80.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Z80"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="810"/>
         <CursorPos X="19" Y="796"/>
         <UsageCount Value="211"/>
@@ -40,7 +40,7 @@
         <Filename Value="z80ops.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Z80ops"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="10"/>
         <CursorPos X="62" Y="8"/>
         <UsageCount Value="212"/>
         <Loaded Value="True"/>
@@ -49,8 +49,8 @@
         <Filename Value="z80globals.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="z80Globals"/>
-        <EditorIndex Value="14"/>
-        <TopLine Value="144"/>
+        <EditorIndex Value="13"/>
+        <TopLine Value="100"/>
         <CursorPos X="16" Y="163"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -58,7 +58,7 @@
       <Unit5>
         <Filename Value="z80bitops.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="11"/>
         <CursorPos X="66" Y="7"/>
         <UsageCount Value="218"/>
         <Loaded Value="True"/>
@@ -67,7 +67,7 @@
         <Filename Value="z80bitops_ixiy.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Z80bitops_ixiy"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="94"/>
         <CursorPos X="66" Y="102"/>
         <UsageCount Value="201"/>
@@ -76,7 +76,7 @@
       <Unit7>
         <Filename Value="roms.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="3"/>
         <CursorPos X="8" Y="11"/>
         <UsageCount Value="219"/>
@@ -102,7 +102,7 @@
         <Filename Value="z80tools.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Z80Tools"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="266"/>
         <CursorPos X="49" Y="272"/>
         <UsageCount Value="210"/>
@@ -118,9 +118,9 @@
         <Filename Value="spectrum.pas"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="8"/>
-        <TopLine Value="150"/>
-        <CursorPos X="23" Y="168"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="232"/>
+        <CursorPos Y="285"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit12>
@@ -136,8 +136,7 @@
         <Filename Value="global.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Global"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="16"/>
+        <EditorIndex Value="5"/>
         <CursorPos X="37" Y="48"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -145,8 +144,7 @@
       <Unit15>
         <Filename Value="hardware.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="7"/>
+        <EditorIndex Value="3"/>
         <CursorPos X="18" Y="23"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -155,7 +153,7 @@
         <Filename Value="fileformats.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="FileFormats"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="614"/>
         <CursorPos X="14" Y="586"/>
         <UsageCount Value="216"/>
@@ -174,14 +172,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="830"/>
         <CursorPos Y="843"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="4"/>
       </Unit18>
       <Unit19>
         <Filename Value="..\..\..\AppData\Local\lazarus\onlinepackagemanager\packages\acs\src\filters\acs_classes.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1061"/>
         <CursorPos Y="1074"/>
-        <UsageCount Value="18"/>
+        <UsageCount Value="14"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit19>
       <Unit20>
@@ -189,7 +187,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="713"/>
         <CursorPos X="26" Y="443"/>
-        <UsageCount Value="17"/>
+        <UsageCount Value="13"/>
       </Unit20>
       <Unit21>
         <Filename Value="C:\lazarus\lcl\lclmessageglue.pas"/>
@@ -197,152 +195,151 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="100"/>
         <CursorPos Y="105"/>
-        <UsageCount Value="16"/>
+        <UsageCount Value="12"/>
       </Unit21>
       <Unit22>
         <Filename Value="..\..\..\AppData\Local\lazarus\onlinepackagemanager\packages\acs\src\devices\acs_stdaudio.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="8"/>
         <CursorPos Y="164"/>
-        <UsageCount Value="44"/>
+        <UsageCount Value="40"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit22>
       <Unit23>
         <Filename Value="..\..\..\AppData\Local\lazarus\onlinepackagemanager\packages\acs\src\filters\acs_misc.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="14" Y="12"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="7"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit23>
       <Unit24>
         <Filename Value="C:\lazarus\fpc\3.2.0\source\rtl\objpas\sysutils\sysutilh.inc"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="15"/>
         <CursorPos X="10" Y="29"/>
-        <UsageCount Value="28"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="41"/>
       </Unit24>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="main.pas"/>
-        <Caret Line="3118" Column="17" TopLine="3050"/>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="246" TopLine="232"/>
       </Position1>
       <Position2>
-        <Filename Value="main.pas"/>
-        <Caret Line="540" Column="29" TopLine="529"/>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="205" TopLine="187"/>
       </Position2>
       <Position3>
-        <Filename Value="main.pas"/>
-        <Caret Line="678" Column="34" TopLine="656"/>
+        <Filename Value="spectrum.pas"/>
+        <Caret Line="247" TopLine="230"/>
       </Position3>
       <Position4>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="325" Column="33" TopLine="307"/>
+        <Caret Line="205" TopLine="187"/>
       </Position4>
       <Position5>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="173" TopLine="168"/>
+        <Caret Line="274" TopLine="257"/>
       </Position5>
       <Position6>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="174" TopLine="168"/>
+        <Caret Line="205" TopLine="187"/>
       </Position6>
       <Position7>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="175" TopLine="168"/>
+        <Caret Line="190" TopLine="172"/>
       </Position7>
       <Position8>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="176" TopLine="168"/>
+        <Caret Line="247" TopLine="230"/>
       </Position8>
       <Position9>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="177" TopLine="168"/>
+        <Caret Line="191" Column="20" TopLine="175"/>
       </Position9>
       <Position10>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="180" TopLine="168"/>
+        <Caret Line="248" Column="24" TopLine="220"/>
       </Position10>
       <Position11>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="183" TopLine="168"/>
+        <Caret Line="272" TopLine="243"/>
       </Position11>
       <Position12>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="184" TopLine="168"/>
+        <Caret Line="254" Column="16" TopLine="243"/>
       </Position12>
       <Position13>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="187" TopLine="168"/>
+        <Caret Line="207" TopLine="189"/>
       </Position13>
       <Position14>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="188" TopLine="168"/>
+        <Caret Line="254" TopLine="237"/>
       </Position14>
       <Position15>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="189" TopLine="168"/>
+        <Caret Line="207" TopLine="189"/>
       </Position15>
       <Position16>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="158" TopLine="170"/>
+        <Caret Line="254" TopLine="237"/>
       </Position16>
       <Position17>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="127" TopLine="114"/>
+        <Caret Line="207" TopLine="189"/>
       </Position17>
       <Position18>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="128" TopLine="114"/>
+        <Caret Line="254" TopLine="237"/>
       </Position18>
       <Position19>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="129" Column="46" TopLine="114"/>
+        <Caret Line="207" TopLine="189"/>
       </Position19>
       <Position20>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="319" TopLine="307"/>
+        <Caret Line="283" TopLine="266"/>
       </Position20>
       <Position21>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="173" TopLine="159"/>
+        <Caret Line="285" TopLine="265"/>
       </Position21>
       <Position22>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="127" TopLine="116"/>
+        <Caret Line="254" TopLine="266"/>
       </Position22>
       <Position23>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="128" TopLine="116"/>
+        <Caret Line="200" TopLine="189"/>
       </Position23>
       <Position24>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="129" TopLine="116"/>
+        <Caret Line="198" TopLine="189"/>
       </Position24>
       <Position25>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="130" TopLine="116"/>
+        <Caret Line="254" TopLine="244"/>
       </Position25>
       <Position26>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="195" Column="73" TopLine="186"/>
+        <Caret Line="207" TopLine="189"/>
       </Position26>
       <Position27>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="168" Column="22" TopLine="147"/>
+        <Caret Line="254" TopLine="237"/>
       </Position27>
       <Position28>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="167" Column="45" TopLine="155"/>
+        <Caret Line="207" TopLine="189"/>
       </Position28>
       <Position29>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="127" TopLine="113"/>
+        <Caret Line="283" TopLine="245"/>
       </Position29>
       <Position30>
         <Filename Value="spectrum.pas"/>
-        <Caret Line="167" Column="29" TopLine="150"/>
+        <Caret Line="254" TopLine="245"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -351,16 +348,38 @@
     </RunParams>
   </ProjectSession>
   <Debugging>
-    <Watches Count="3">
+    <Watches Count="10">
       <Item1>
         <Expression Value="AY1.selreg"/>
       </Item1>
       <Item2>
         <Expression Value="v"/>
+        <DisplayStyle Value="wdfBinary"/>
       </Item2>
       <Item3>
         <Expression Value="AY1.R[7]"/>
       </Item3>
+      <Item4>
+        <Expression Value="AYCHA.sound_level"/>
+      </Item4>
+      <Item5>
+        <Expression Value="AYCH.env.typ"/>
+      </Item5>
+      <Item6>
+        <Expression Value="AYCH.env.enabled"/>
+      </Item6>
+      <Item7>
+        <Expression Value="AYCH.env.period"/>
+      </Item7>
+      <Item8>
+        <Expression Value="AYCH.env.counter"/>
+      </Item8>
+      <Item9>
+        <Expression Value="AYCH.env.value"/>
+      </Item9>
+      <Item10>
+        <Expression Value="AYCH.env.incv"/>
+      </Item10>
     </Watches>
   </Debugging>
 </CONFIG>
