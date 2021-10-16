@@ -7,25 +7,29 @@ unit main;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, uPSComponent, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes,
-  z80Globals, Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file, acs_misc,
-  acs_streams, BCListBox, BCGameGrid, CRT, BGRAGraphicControl,
-  BGRASpriteAnimation, BGRAResizeSpeedButton, BGRAShape, BCPanel, BCImageButton,
-  BCMaterialDesignButton, BCMDButtonFocus, BCButtonFocus, spectrum,
-  epiktimer, SdpoJoystick, global, hardware, fileformats;
+  z80Globals, Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file,
+  acs_misc, acs_mixer, BCListBox, CRT, BGRAGraphicControl,
+  BGRASpriteAnimation, BGRAResizeSpeedButton,
+  spectrum,SdpoJoystick, global, hardware, fileformats, Types;
 type
 
   { TSpecEmu }
 
   TSpecEmu = class(TForm)
-    AcsAudioOut1: TAcsAudioOut;
-    AcsMemoryIn1: TAcsMemoryIn;
+    AudioOut: TAcsAudioOut;
+    ACSEar: TAcsMemoryIn;
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
     Button4: TButton;
     Button5: TButton;
+    Button6: TButton;
+    Button7: TButton;
     ButtonConf: TBGRAResizeSpeedButton;
     ButtonDeleteBlock: TBGRAResizeSpeedButton;
     ButtonDown: TToggleBox;
@@ -80,9 +84,6 @@ type
     Button_cuatro: TBGRAResizeSpeedButton;
     Button_cinco: TBGRAResizeSpeedButton;
     Button_uno: TBGRAResizeSpeedButton;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
     ButtonDebug: TSpeedButton;
     ButtonTap: TSpeedButton;
     ButtonTap1: TSpeedButton;
@@ -97,66 +98,20 @@ type
     Button_M: TBGRAResizeSpeedButton;
     ckAYSound: TCheckBox;
     CheckGroup1: TCheckGroup;
+    DebugPanel: TPanel;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
     EdMem: TEdit;
+    FlagsPanel: TPanel;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    GroupBox4: TGroupBox;
+    GroupBox5: TGroupBox;
     GroupJoystickProtocol: TRadioGroup;
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
     Image3: TImage;
-    odROM: TOpenDialog;
-    OpenSnaFileDialog: TOpenDialog;
-    Panel1: TPanel;
-    GroupLeftJoystick: TRadioGroup;
-    GroupMachine: TRadioGroup;
-    SaveSnaFileDialog: TSaveDialog;
-    OptionsPanel: TPanel;
-    screen_timer: TEpikTimer;
-    GroupBox1: TGroupBox;
-    GroupBox2: TGroupBox;
-    GroupBox3: TGroupBox;
-    Image1: TImage;
-    Image2: TImage;
-    BlockGrid: TStringGrid;
-    OpenTapFileDialog: TOpenDialog;
-    FlagsPanel: TPanel;
-    PanelKeyboard: TPanel;
-    Joystick1: TSdpoJoystick;
-    Joystick2: TSdpoJoystick;
-    SideButtons: TPanel;
-    src_ix: TRadioButton;
-    src_iy: TRadioButton;
-    src_ptr: TRadioButton;
-    StaticText1: TStaticText;
-    StaticText2: TStaticText;
-    StaticText3: TStaticText;
-    StaticText4: TStaticText;
-    StaticText5: TStaticText;
-    StaticText6: TStaticText;
-    stROM0: TStaticText;
-    StatusJoystick1: TShape;
-    StatusJoystick2: TShape;
-    stBreak: TStaticText;
-    stFlags: TStaticText;
-    stMem: TStaticText;
-    stROM1: TStaticText;
-    stROM2: TStaticText;
-    stROM3: TStaticText;
-    stTstates: TStaticText;
-    stTstatesFrame: TStaticText;
-    TapeRecLed: TShape;
-    TapeFileName: TStaticText;
-    TapePanel: TPanel;
-    TapePlayLed: TShape;
-    JoyTimer: TTimer;
-    ZoomOutButton: TBitBtn;
-    ZoomInButton: TBitBtn;
-    Pantalla: TBGRAGraphicControl;
-    PauseButton: TBitBtn;
-    PlayButton: TBitBtn;
-    ResetButton: TBitBtn;
-    StepButton: TBitBtn;
-    TapeImage: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -166,9 +121,8 @@ type
     Label17: TLabel;
     Label18: TLabel;
     Label19: TLabel;
-    Label20: TLabel;
-    labelI: TLabel;
     Label2: TLabel;
+    Label20: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
@@ -176,33 +130,106 @@ type
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
-    BottomButtonsPanel: TPanel;
-    DebugPanel: TPanel;
-    Panel3: TPanel;
-    stAF1: TStaticText;
-    stBCc: TStaticText;
-    stHLc: TStaticText;
-    stDEc: TStaticText;
-    stIM: TStaticText;
-    stIff1: TStaticText;
-    stInstruction: TStaticText;
-    stBC1: TStaticText;
-    stDE1: TStaticText;
-    stHL1: TStaticText;
-    stPC: TStaticText;
-    stAF: TStaticText;
-    stBC: TStaticText;
-    stDE: TStaticText;
-    stHL: TStaticText;
-    stIX: TStaticText;
+    labelI: TLabel;
     memgrid: TStringGrid;
-    stStack: TStaticText;
-    stRR: TStaticText;
-    stSP: TStaticText;
-    stIY: TStaticText;
+    odROM: TOpenDialog;
+    OpenSnaFileDialog: TOpenDialog;
+    Panel1: TPanel;
+    GroupLeftJoystick: TRadioGroup;
+    GroupMachine: TRadioGroup;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    pDebug1: TPanel;
+    pDebug2: TPanel;
+    SaveSnaFileDialog: TSaveDialog;
+    OptionsPanel: TPanel;
+    //screen_timer: TEpikTimer;
+    Image1: TImage;
+    Image2: TImage;
+    BlockGrid: TStringGrid;
+    OpenTapFileDialog: TOpenDialog;
+    PanelKeyboard: TPanel;
+    Joystick1: TSdpoJoystick;
+    Joystick2: TSdpoJoystick;
+    SideButtons: TPanel;
+    src_ix: TRadioButton;
+    src_iy: TRadioButton;
+    src_ptr: TRadioButton;
+    stAF: TStaticText;
+    stAF1: TStaticText;
+    StaticText1: TStaticText;
+    StaticText10: TStaticText;
+    StaticText11: TStaticText;
+    StaticText12: TStaticText;
+    StaticText13: TStaticText;
+    StaticText2: TStaticText;
+    StaticText3: TStaticText;
+    StaticText4: TStaticText;
+    StaticText5: TStaticText;
+    StaticText6: TStaticText;
+    StaticText7: TStaticText;
+    StaticText8: TStaticText;
+    StaticText9: TStaticText;
+    stdiskMotor: TStaticText;
+    stportoutFE: TStaticText;
+    stportinFE: TStaticText;
+    stportoutfffd: TStaticText;
+    stportout7ffd: TStaticText;
+    stportout1ffd: TStaticText;
+    stportoutbffd: TStaticText;
+    stportinfffd: TStaticText;
+    stPrinterStrobe: TStaticText;
+    stSamples: TStaticText;
+    stScreenPage: TStaticText;
+    stBC: TStaticText;
+    stBC1: TStaticText;
+    stBCc: TStaticText;
+    stBreak: TStaticText;
+    stDE: TStaticText;
+    stDE1: TStaticText;
+    stDEc: TStaticText;
+    stFlags: TStaticText;
+    stHL: TStaticText;
+    stHL1: TStaticText;
+    stHLc: TStaticText;
+    stIff1: TStaticText;
     stII: TStaticText;
+    stIM: TStaticText;
+    stInstruction: TStaticText;
+    stIX: TStaticText;
+    stIY: TStaticText;
+    stMem: TStaticText;
+    stPC: TStaticText;
+    MemPages: TStringGrid;
+    stROM0: TStaticText;
+    StatusJoystick1: TShape;
+    StatusJoystick2: TShape;
+    stROM1: TStaticText;
+    stROM2: TStaticText;
+    stROM3: TStaticText;
+    stRR: TStaticText;
+    stPaggingDisabled: TStaticText;
+    stSP: TStaticText;
+    stStack: TStaticText;
+    stTstates: TStaticText;
+    stTstatesFrame: TStaticText;
+    TapeRecLed: TShape;
+    TapeFileName: TStaticText;
+    TapePanel: TPanel;
+    TapePlayLed: TShape;
+    JoyTimer: TTimer;
+    Timer2: TTimer;
+    ZoomOutButton: TBitBtn;
+    ZoomInButton: TBitBtn;
+    Pantalla: TBGRAGraphicControl;
+    PauseButton: TBitBtn;
+    PlayButton: TBitBtn;
+    ResetButton: TBitBtn;
+    StepButton: TBitBtn;
+    TapeImage: TImage;
+    BottomButtonsPanel: TPanel;
     Timer1: TTimer;
-    procedure AcsMemoryIn1BufferDone(Sender: TComponent);
+    procedure ACSEarBufferDone(Sender: TComponent);
     procedure ApplicationProperties1Activate(Sender: TObject);
     procedure AsciiSelectionChange(Sender: TObject);
     procedure BFocusClick(Sender: TObject);
@@ -210,12 +237,17 @@ type
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
     procedure ButtonBlockdownClick(Sender: TObject);
     procedure ButtonBlockUpClick(Sender: TObject);
     procedure ButtonConfClick(Sender: TObject);
     procedure ButtonDownChange(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonEjectClick(Sender: TObject);
+    procedure ButtonEjectMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure ButtonEjectMouseLeave(Sender: TObject);
     procedure ButtonFireChange(Sender: TObject);
     procedure ButtonFireClick(Sender: TObject);
     procedure ButtonFWDClick(Sender: TObject);
@@ -406,6 +438,7 @@ type
     procedure Button_ZMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure ckAYSoundChange(Sender: TObject);
+    procedure FormChangeBounds(Sender: TObject);
     procedure GroupJoystickProtocolClick(Sender: TObject);
     procedure GroupLeftJoystickClick(Sender: TObject);
     procedure GroupMachineClick(Sender: TObject);
@@ -417,11 +450,7 @@ type
     procedure BlockGridBeforeSelection(Sender: TObject; aCol, aRow: Integer);
     procedure ButtonTap1Click(Sender: TObject);
     procedure ButtonTapClick(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
-    procedure OpenTapFileDialogClose(Sender: TObject);
-    procedure OpenTapFileDialogSelectionChange(Sender: TObject);
-    procedure OptionsPanelClick(Sender: TObject);
     procedure PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure PantallaPaint(Sender: TObject);
@@ -468,11 +497,12 @@ type
     procedure stROM3Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure JoyTimerTimer(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
     procedure ZoomOutButtonClick(Sender: TObject);
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
   private
-    saliendo, starting, pause, step, breakpoint_active: boolean;
+    saliendo, starting, pause, debugging, step, breakpoint_active: boolean;
     SS_Status: Byte;
     breakpoint, mem_addr: word;
     empezando : boolean;
@@ -487,6 +517,9 @@ type
     procedure RunEmulation;
     procedure refresh_system;
     procedure refresh_registers;
+    procedure pause_emulation;
+    procedure timed_pause_emulation;
+    procedure restart_emulation;
     procedure start_debug;
     procedure stop_debug;
     procedure set_breakpoint;
@@ -568,7 +601,6 @@ procedure TSpecEmu.move_tap_block(uno,dos: word);
 Var
   F, FBak: File;
   tmp: Word;
-  result: integer;
 begin
   if dos < uno then
   begin
@@ -576,26 +608,39 @@ begin
     dos := uno;
     uno := tmp;
   end;
-  CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  AssignFile (FBak, '$$$$$$$$.$$$');
-  Reset(FBak,1);
+  try
+    CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+  except
+     showmessage('Error opening tap file '+OpenTapFileDialog.FileName);
+     exit;
+  end;
+  try
+    AssignFile (FBak, '$$$$$$$$.$$$');
+    Reset(FBak,1);
+  except
+     showmessage('Error opening temporary file');
+     exit;
+  end;
+  try
+    // copy block from fbak(dos) to f(uno)
+    seek(Fbak, Tape_info[dos].Filepos);
+    blockread(fbak,speaker_buffer,Tape_info[dos].size+2);
+    seek(F, Tape_info[uno].Filepos);
+    blockwrite(f,speaker_buffer,Tape_info[dos].size+2);
 
-  // copy block from fbak(dos) to f(uno)
-  seek(Fbak, Tape_info[dos].Filepos);
-  blockread(fbak,buffer,Tape_info[dos].size+2);
-  seek(F, Tape_info[uno].Filepos);
-  blockwrite(f,buffer,Tape_info[dos].size+2);
+    // copy block from fbak(uno) to f(uno)+size(uno)+2
+    seek(Fbak, Tape_info[uno].Filepos);
+    blockread(fbak,speaker_buffer,Tape_info[uno].size+2);
+    seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
+    blockwrite(f,speaker_buffer,Tape_info[uno].size+2);
 
-  // copy block from fbak(uno) to f(uno)+size(uno)+2
-  seek(Fbak, Tape_info[uno].Filepos);
-  blockread(fbak,buffer,Tape_info[uno].size+2);
-  seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
-  blockwrite(f,buffer,Tape_info[uno].size+2);
-
-  closefile(F);
-  closefile(Fbak);
+    closefile(F);
+    closefile(Fbak);
+  except
+    showmessage('error moving tap block');
+  end;
 end;
 
 procedure TSpecEmu.Delete_Tape_Block(row: word);
@@ -604,23 +649,27 @@ Var
   source_pos, dest_pos: Word;
   result: integer;
 begin
-  //CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  dest_pos := Tape_Info[row].Filepos;
-  Source_pos := dest_pos + Tape_Info[row].Size+2;
-  while Source_pos < filesize(F) do
-  begin
-    seek(f,source_pos);
-    blockread(f, buffer, sizeof(buffer), result);
+  try
+    //CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    dest_pos := Tape_Info[row].Filepos;
+    Source_pos := dest_pos + Tape_Info[row].Size+2;
+    while Source_pos < filesize(F) do
+    begin
+      seek(f,source_pos);
+      blockread(f, speaker_buffer, sizeof(speaker_buffer), result);
+      seek(f,dest_pos);
+      blockwrite(f,speaker_buffer,result);
+      inc(source_pos, result);
+      inc(dest_pos, result);
+    end;
     seek(f,dest_pos);
-    blockwrite(f,buffer,result);
-    inc(source_pos, result);
-    inc(dest_pos, result);
+    truncate(f);
+    closefile(F);
+  except
+    showmessage('Error deleting tap block');
   end;
-  seek(f,dest_pos);
-  truncate(f);
-  closefile(F);
 end;
 
 function TSpecEmu.tap_checksum(flag: byte; addr,len: word): byte;
@@ -637,70 +686,85 @@ end;
 function TSpecEmu.Save_Tape_block(addr, len: word; flag: byte): byte; // IX: Addr; DE: Len; A: Flag byte
 Var
   F, FBak: File;
-  BT,x: Byte;
-  Size, pos: Word;
+  Size, pos,x: Word;
 begin
-  CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  pos := Blockgrid.Row;
-  if pos = 1 then
-    seek(F, 0)
-  else if pos <= Tape_Blocks then
-    seek(F, Tape_Info[pos].Filepos)
-  else
-    seek(F, Tape_Info[pos-1].Filepos+Tape_Info[pos-1].size+2);
+  try
+    CopyFile(OpenTapFileDialog.FileName, '$$$$$$$$.$$$');
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    pos := Blockgrid.Row;
+    if pos = 1 then
+      seek(F, 0)
+    else if pos <= Tape_Blocks then
+      seek(F, Tape_Info[pos].Filepos)
+    else
+      seek(F, Tape_Info[pos-1].Filepos+Tape_Info[pos-1].size+2);
 
-  if flag = 0 then // Es una cabecera
-  begin
-    size := 19;
-  end else begin // Es un bloque de datos
-    size := len+2;
-  end;
-  Blockwrite(F, size, sizeof(size));
-  Blockwrite(F, flag, sizeof(flag));
-//  Blockwrite(F,mem[addr],len);
-  Blockwrite(F,memP[mem_page(addr),mem_offset(addr)],len);
-  Blockwrite(F, tap_checksum(flag,addr,len),1);
-  if pos <= Tape_Blocks then
-  begin
-    AssignFile (FBAK, '$$$$$$$$.$$$');
-    Reset(FBAK,1);
-    for x := pos to Tape_Blocks do
+    if flag = 0 then // Es una cabecera
     begin
-       seek(FBAK, Tape_Info[x].Filepos);
-       blockread(FBAK, buffer, Tape_info[x].Size+2);
-       blockwrite(F, buffer, Tape_info[x].Size+2);
+      size := 19;
+    end else begin // Es un bloque de datos
+      size := len+2;
     end;
-    CloseFile(FBAK);
-    Truncate(F);
+    Blockwrite(F, size, sizeof(size));
+    Blockwrite(F, flag, sizeof(flag));
+  //  Blockwrite(F,mem[addr],len);
+    //Blockwrite(F,memP[mem_page(addr),mem_offset(addr)],len);
+    for x := addr to addr+len-1 do
+        Blockwrite(F,rdmem(x),1);
+    Blockwrite(F, tap_checksum(flag,addr,len),1);
+    if pos <= Tape_Blocks then
+    begin
+      AssignFile (FBAK, '$$$$$$$$.$$$');
+      Reset(FBAK,1);
+      for x := pos to Tape_Blocks do
+      begin
+         seek(FBAK, Tape_Info[x].Filepos);
+         blockread(FBAK, speaker_buffer, Tape_info[x].Size+2);
+         blockwrite(F, speaker_buffer, Tape_info[x].Size+2);
+      end;
+      CloseFile(FBAK);
+      Truncate(F);
+    end;
+    CloseFile(F);
+  //  Tape_info_bak := Tape_info;
+    read_tap_blocs;
+    Blockgrid.Row := pos+1;
+  except
+    ShowMessage('Error saving tap block.');
   end;
-  CloseFile(F);
-//  Tape_info_bak := Tape_info;
-  read_tap_blocs;
-  Blockgrid.Row := pos+1;
 end;
 
 function TSpecEmu.Load_Tape_block(addr, len: word; flag: byte): byte; // IX: Addr; DE: Len; A: Flag byte
 Var
   F: File;
   BT: Byte;
-  Size: Word;
+  Size,k: Word;
 begin
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  Seek(F,Tape_info[Blockgrid.Row].Filepos);
-  Blockgrid.Row := Blockgrid.Row +1;
-  BlockRead(F, size, sizeof(size));
-  BlockRead(F,BT,1);
-  BlockRead(F, buff, size-1);
-  if BT = flag then
-  begin
-       move(buff,memp[mem_page(addr),mem_offset(addr)],len);
+  try
+    if Blockgrid.Row <= Tape_blocks then
+    begin
+      AssignFile (F, OpenTapFileDialog.FileName);
+      Reset(F,1);
+      Seek(F,Tape_info[Blockgrid.Row].Filepos);
+      Blockgrid.Row := Blockgrid.Row +1;
+      BlockRead(F, size, sizeof(size));
+      BlockRead(F,BT,1);
+      BlockRead(F, buff, size-1);
+      if BT = flag then
+      begin
+           for k := 0 to len-1 do
+               wrmem(addr+k,buff[k]);
+           //move(buff,memp[mem_page(addr),mem_offset(addr)],len);
+      end;
+      closefile(F);
+      Load_Tape_block := FLAG_C; // devuelve FLAG_C=0 si error
+    end else Load_Tape_block := 0;
+    BFocus.setfocus;
+  except
+    Showmessage('Error loading tap block.');
+    Load_Tape_block := 0; // devuelve FLAG_C=0 si error
   end;
-  closefile(F);
-  result := FLAG_C; // devuelve FLAG_C=0 si error
-  BFocus.setfocus;
 end;
 
 procedure TSpecEmu.Hideall;
@@ -783,8 +847,7 @@ begin
   if      src_ptr.Checked then S := HexStr(mem_addr,4)
  else if src_ix.Checked then S := HexStr(ix,4)
  else if src_iy.Checked then S := HexStr(iy,4);
-  {+'='+HexStr(mem[mem_addr],2)+HexStr(mem[mem_addr+1],2)};
-  stMem.Caption:= S;
+ stMem.Caption:= S;
 end;
 
 procedure TSpecEmu.set_stack_label;
@@ -805,7 +868,7 @@ end;
 procedure TSpecEmu.set_memory_dump;
 var
   row, addr: word;
-  offset,x,y,n: byte;
+  offset,x,y: byte;
 begin
       if      src_ptr.Checked then addr := mem_addr
      else if src_ix.Checked then addr := ix-127
@@ -832,7 +895,6 @@ end;
 procedure TSpecEmu.set_mem;
   var
     value,code: word;
-    S: String;
 begin
   val(EdMem.Text,value,code);
   if code = 0 then
@@ -1211,6 +1273,18 @@ begin
   DefaultOptions;
 end;
 
+procedure TSpecEmu.Button6Click(Sender: TObject);
+begin
+  pDebug1.Visible:= true;
+  pDebug2.Visible:= false;
+end;
+
+procedure TSpecEmu.Button7Click(Sender: TObject);
+begin
+  pDebug1.Visible:= false;
+  pDebug2.Visible:= true;
+end;
+
 procedure TSpecEmu.ButtonBlockdownClick(Sender: TObject);
 var
    pos: word;
@@ -1239,7 +1313,7 @@ end;
 
 procedure TSpecEmu.ButtonConfClick(Sender: TObject);
 begin
-  if PanelKeyboard.Visible then begin
+  if OptionsPanel.Visible then begin
     HideAll;
   end else begin
     HideAll;
@@ -1263,8 +1337,41 @@ begin
 end;
 
 procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
+var
+  Reply, BoxStyle: Integer;
+  FF: THandle;
 begin
-  OpenTapFileDialog.Execute;
+  pause_emulation;
+  if OpenTapFileDialog.Execute then
+  begin
+     TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
+     TapeImage.Visible := true;
+     TapeFileName.Visible := true;
+
+     if not FileExists(OpenTapFileDialog.FileName) then
+     begin
+       BoxStyle := MB_ICONQUESTION + MB_YESNO;
+       Reply := Application.MessageBox('CREATE A EMPTY TAP FILE?', 'NEW TAP FILE', BoxStyle);
+       if Reply = IDYES then
+          FF := FileCreate(OpenTapFileDialog.FileName);
+          FileClose(FF);
+     end;
+
+     if FileExists(OpenTapFileDialog.FileName) then
+        Read_tap_blocs;
+  end;
+  restart_emulation;
+end;
+
+procedure TSpecEmu.ButtonEjectMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  pause_emulation;
+end;
+
+procedure TSpecEmu.ButtonEjectMouseLeave(Sender: TObject);
+begin
+  restart_emulation;
 end;
 
 procedure TSpecEmu.ButtonFireChange(Sender: TObject);
@@ -1354,11 +1461,13 @@ end;
 
 procedure TSpecEmu.ButtonSnapLoadClick(Sender: TObject);
 begin
+  pause_emulation;
   if OpenSnaFileDialog.Execute then
   begin
     loadSnapshotfile(OpenSnaFileDialog.FileName);
     refresh_system;
   end;
+  restart_emulation;
   BFocus.setfocus;
 end;
 
@@ -1366,6 +1475,7 @@ procedure TSpecEmu.ButtonSnapSaveClick(Sender: TObject);
 var
    reply: boolean;
 begin
+  pause_emulation;
    if SaveSnaFileDialog.Execute then
    begin
      reply := true;
@@ -1375,6 +1485,7 @@ begin
      if reply = true then
         SaveSnapshotfile(SaveSnaFileDialog.FileName);
    end;
+   restart_emulation;
    BFocus.setfocus;
 end;
 
@@ -1390,9 +1501,12 @@ end;
 
 procedure TSpecEmu.ButtonRecPressedClick(Sender: TObject);
 begin
-  ButtonRecPressed.Visible := false;
-  ButtonRec.Visible := true;
-  Set_tape_leds;
+  if tapeImage.Visible then
+  begin
+    ButtonRecPressed.Visible := false;
+    ButtonRec.Visible := true;
+    Set_tape_leds;
+  end;
 end;
 
 procedure TSpecEmu.ButtonRewClick(Sender: TObject);
@@ -1976,7 +2090,16 @@ end;
 procedure TSpecEmu.ckAYSoundChange(Sender: TObject);
 begin
   UpdateOptions;
+  AYCHA.enabled := ckAYSound.Checked;
+  AYCHB.enabled := false;
+  AYCHC.enabled := false;
 end;
+
+procedure TSpecEmu.FormChangeBounds(Sender: TObject);
+begin
+  timed_pause_emulation;
+end;
+
 
 procedure TSpecEmu.GroupJoystickProtocolClick(Sender: TObject);
 begin
@@ -2117,6 +2240,7 @@ begin
   stROM1.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,1]);
   stROM2.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,2]);
   stROM3.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,3]);
+  coldbootrequired := true;
 end;
 
 procedure TSpecEmu.GroupRightJoystickClick(Sender: TObject);
@@ -2213,9 +2337,6 @@ begin
   adjust_window_size;
 end;
 
-procedure TSpecEmu.FormDeactivate(Sender: TObject);
-begin
-end;
 
 procedure TSpecEmu.FormWindowStateChange(Sender: TObject);
 var
@@ -2239,103 +2360,73 @@ end;
 procedure TSpecEmu.Read_tap_blocs;
 var
   F: File;
-  n,size,i,Proglen,blocklen,startAddr: word;
+  n,size,Proglen,startAddr: word;
   AutoStart: word absolute StartAddr;
   Variable: String[2];
-  S: String;
   BlockType: String[6];
   DataType: String[6];
   FileName: String[10];
   BSize: String[6];
   BT: Byte;
+  Blocklen: word;
 begin
-  DataType := 'BYTES';     // If not header next block is RAW
-  n := 1;
-  Blockgrid.Clean;
-  AssignFile (F, OpenTapFileDialog.FileName);
-  Reset(F,1);
-  Seek(F,0);
-  while FilePos(F) < FileSize(F) do
-  begin
-    Tape_info[n].FilePos := FilePos(F);
-    BlockRead(F, size, sizeof(size));
-    Str(size,BSize);
-    if size > 0 then
+  try
+    DataType := 'BYTES';     // If not header next block is RAW
+    n := 1;
+    Blockgrid.Clean;
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    Seek(F,0);
+    while FilePos(F) < FileSize(F) do
     begin
-      BlockRead(F,BT,1);
-      BlockRead(F, buff, size-1);
-      Tape_info[n].Flag := BT;
-      Tape_info[n].Size := size;
-      if BT=0 then begin               // HEADER
-         BlockType := 'HEADER';
-         autostart := Buff[14]*256+Buff[13];
-         case buff[0] of
-           0: DataType := 'BAS';
-           1: DataType := 'NVAR';
-           2: DataType := 'SVAR';
-           3: if startAddr=$4000 then DataType := 'SCR' else DataType := 'BYTES';
-         end;
-         move(buff[1],FileName[1],10);
-         FileName[0]:= #10;
-         Blocklen := Buff[12]*256+Buff[11];
-         if DataType='NVAR' then
-            Variable := chr(byte('A')+buff[14])
-         else if DataType='SVAR' then
-              Variable := chr(byte('A')+buff[14])+'$';
-         Proglen := Buff[16]*256+Buff[15];
-         Blockgrid.InsertRowWithValues(n,['',FileName,BSize,BlockType]);
-      end
-      else begin
-          BlockType := 'DATA';
-          if (DataType='BAS') then
-             Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,IntToStr(ProgLen)])
-          else if(DataType='BYTES') or (DataType='SCR') then
-             Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,''])
-          else
-             Blockgrid.InsertRowWithValues(n,['',Variable,BSize,DataType,'']);
-          DataType := 'BYTES';
+      Tape_info[n].FilePos := FilePos(F);
+      BlockRead(F, size, sizeof(size));
+      Str(size,BSize);
+      if size > 0 then
+      begin
+        BlockRead(F,BT,1);
+        BlockRead(F, buff, size-1);
+        Tape_info[n].Flag := BT;
+        Tape_info[n].Size := size;
+        if BT=0 then begin               // HEADER
+           BlockType := 'HEADER';
+           autostart := Buff[14]*256+Buff[13];
+           case buff[0] of
+             0: DataType := 'BAS';
+             1: DataType := 'NVAR';
+             2: DataType := 'SVAR';
+             3: if startAddr=$4000 then DataType := 'SCR' else DataType := 'BYTES';
+           end;
+           move(buff[1],FileName[1],10);
+           FileName[0]:= #10;
+           Blocklen := Buff[12]*256+Buff[11];
+           if DataType='NVAR' then
+              Variable := chr(byte('A')+buff[14])
+           else if DataType='SVAR' then
+                Variable := chr(byte('A')+buff[14])+'$';
+           Proglen := Buff[16]*256+Buff[15];
+           Blockgrid.InsertRowWithValues(n,['',FileName,BSize,BlockType]);
+        end
+        else begin
+            BlockType := 'DATA';
+            if (DataType='BAS') then
+               Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,IntToStr(ProgLen)])
+            else if(DataType='BYTES') or (DataType='SCR') then
+               Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,''])
+            else
+               Blockgrid.InsertRowWithValues(n,['',Variable,BSize,DataType,'']);
+            DataType := 'BYTES';
+        end;
       end;
+      inc(n);
     end;
-    inc(n);
+    Tape_Blocks := n-1;
+    Blockgrid.cells[0,1] := '>';
+    Blockgrid.row := 1;
+    CloseFile(F);
+  except
+    ShowMessage('Error reading tap blocks');
   end;
-  Tape_Blocks := n-1;
-  Blockgrid.cells[0,1] := '>';
-  Blockgrid.row := 1;
-  CloseFile(F);
-end;
-
-procedure TSpecEmu.OpenTapFileDialogClose(Sender: TObject);
-var
-  Reply, BoxStyle: Integer;
-  F: THandle;
-begin
-  if OpenTapFileDialog.FileName <> '' then begin
-     TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
-     TapeImage.Visible := true;
-     TapeFileName.Visible := true;
-
-     if not FileExists(OpenTapFileDialog.FileName) then
-     begin
-       BoxStyle := MB_ICONQUESTION + MB_YESNO;
-       Reply := Application.MessageBox('CREATE A EMPTY TAP FILE?', 'NEW TAP FILE', BoxStyle);
-       if Reply = IDYES then
-          F := FileCreate(OpenTapFileDialog.FileName);
-          FileClose(F);
-     end;
-
-     if FileExists(OpenTapFileDialog.FileName) then
-        Read_tap_blocs;
-  end;
-end;
-
-procedure TSpecEmu.OpenTapFileDialogSelectionChange(Sender: TObject);
-begin
-
-end;
-
-procedure TSpecEmu.OptionsPanelClick(Sender: TObject);
-begin
-
 end;
 
 procedure TSpecEmu.PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState;
@@ -2354,10 +2445,20 @@ begin
   stop_debug;
 end;
 
+procedure TSpecEmu.restart_emulation;
+begin
+  if not debugging then
+  begin
+    AudioOut.Run();
+    pause := false;
+  end;
+end;
+
 procedure TSpecEmu.stop_debug;
 begin
   empezando := true;
-  pause := false;
+  debugging := false;
+  restart_emulation;
   PauseButton.Visible := not pause;
   PlayButton.Visible := pause;
   if starting then begin
@@ -2368,10 +2469,25 @@ begin
   StepButton.Enabled := false;
 end;
 
+procedure TSpecEmu.pause_emulation;
+begin
+  AudioOut.stop();
+  pause := true;
+end;
+
+procedure TSpecEmu.timed_pause_emulation;
+begin
+  Timer2.enabled := false;
+  Timer2.enabled := true;
+  AudioOut.pause();
+  pause := true;
+end;
+
 procedure TSpecEmu.start_debug;
 begin
+  pause_emulation;
+  debugging := true;
   empezando := false;
-  pause := true;
   PauseButton.Visible := not pause;
   PlayButton.Visible := pause;
   stInstruction.caption := decode_instruction(pc);
@@ -2380,6 +2496,7 @@ begin
   DebugPanel.Enabled := true;
   StepButton.Enabled := true;
   stepbutton.SetFocus;
+  debugging := true;
 end;
 
 procedure TSpecEmu.BitBtn3Click(Sender: TObject);
@@ -2504,9 +2621,8 @@ begin
 //  UpdateOptions;
 end;
 
-procedure TSpecEmu.AcsMemoryIn1BufferDone(Sender: TComponent);
+procedure TSpecEmu.ACSEarBufferDone(Sender: TComponent);
 var
-  k: word;
   bytes_readed: word;
 begin
    if (sound_bytes >= 0) then begin
@@ -2517,37 +2633,37 @@ begin
 
       if soundpos_read + bytes_readed >= spec_buffer_size then
       begin
-         move(data[soundpos_read], buffer[nb,0], spec_buffer_size-soundpos_read);
+         move(speaker_data[soundpos_read], speaker_buffer[0], spec_buffer_size-soundpos_read);
          soundpos_read := bytes_readed-(spec_buffer_size-soundpos_read);
-         move(data[0], buffer[nb,0], soundpos_read);
+         move(speaker_data[0], speaker_buffer[0], soundpos_read);
       end else begin
-         move(data[soundpos_read], buffer[nb,0], bufsize);
+         move(speaker_data[soundpos_read], speaker_buffer[0], bufsize);
          inc(soundpos_read,bufsize);
       end;
       dec(sound_bytes,bytes_readed);
-      ACSMemoryIn1.DataBuffer :=@buffer[nb];
-      ACSMemoryIn1.DataSize := bufsize;
+
+      AYCHA.paused := false;
+      AYCHB.paused := false;
+      AYCHC.paused := false;
+      ACSEar.DataBuffer :=@speaker_buffer;
+      ACSEar.DataSize := bufsize;
    end else begin
-     fillchar(buffer[nb], 1, 128);
-     ACSMemoryIn1.DataBuffer :=@buffer[nb];
-     ACSMemoryIn1.DataSize := 1;
+     AYCHA.paused := true;
+     AYCHB.paused := true;
+     AYCHC.paused := true;
+     fillchar(speaker_buffer, 1, 128);
+     ACSEar.DataBuffer :=@speaker_buffer;
+     ACSEar.DataSize := 1;
    end;
 end;
 
 
 procedure TSpecEmu.ResetButtonClick(Sender: TObject);
-var
-  bits: byte;
-  channels: byte;
-  SampleRate:integer;
-  size: integer;
-  F: File of byte;
-  r: integer;
 begin
   UpdateOptions;
   ReadROM;
   init_spectrum;
-  init_z80;
+  init_z80(coldbootrequired);
   reset_memory_banks;
   pc := 0;
   if pause then begin
@@ -2559,12 +2675,14 @@ end;
 
 procedure TSpecEmu.stROM0Click(Sender: TObject);
 begin
+  pause_emulation;
   odROM.FileName := Options.ROMFileName[groupmachine.itemindex,0];
   if odROM.Execute then
   begin
     stROM0.Caption := ExtractFileName(odROM.FileName);
     options.ROMFilename[groupmachine.itemindex,0] := odROM.FileName;
   end;
+  restart_emulation;
 end;
 
 procedure TSpecEmu.StatusJoystick2ChangeBounds(Sender: TObject);
@@ -2627,36 +2745,85 @@ begin
   set_stack_label;
   set_memory_dump;
   set_mem_label;
+  MemPages.Cells[0,0] := 'C000-FFFF';
+  MemPages.Cells[0,1] := '8000-BFFF';
+  MemPages.Cells[0,2] := '4000-7FFF';
+  MemPages.Cells[0,3] := '0000-3FFF';
+  MemPages.Cells[1,0] := PageToStr(Mem_banks[3]);
+  MemPages.Cells[1,1] := PageToStr(Mem_banks[2]);
+  MemPages.Cells[1,2] := PageToStr(Mem_banks[1]);
+  MemPages.Cells[1,3] := PageToStr(Mem_banks[0]);
+  stScreenPage.Caption := 'SCREEN=RAM'+IntToStr(screen_page);
+  if options.machine = spectrum48 then
+  begin
+    stPaggingDisabled.caption := 'NO PAGGING';
+    stDiskMotor.caption := 'DISK MOTOR: N/A';
+    stprinterStrobe.caption := 'PRINT STRB: N/A';
+  end else begin
+    if disable_pagging then
+      stPaggingDisabled.caption := 'PAG DISABLED'
+    else
+      stPaggingDisabled.caption := 'PAG ENABLED';
+    if options.machine < spectrum_plus2a then
+      stDiskMotor.caption := 'DISK MOTOR: N/A'
+    else if disk_motor then
+      stDiskMotor.caption := 'DISK MOTOR: ON'
+    else
+      stDiskMotor.caption := 'DISK MOTOR: OFF';
+    if options.machine < spectrum_plus2a then
+      stprinterStrobe.caption := 'PRINT STRB: N/A'
+    else if printer_strobe then
+      stprinterStrobe.caption := 'PRINT STRB: ON'
+    else
+      stprinterStrobe.caption := 'PRINT STRB: OFF';
+    stportout7ffd.caption := HexStr(last_out_7ffd,4);
+    stportout1ffd.caption := HexStr(last_out_1ffd,4);
+    stportoutfffd.caption := HexStr(last_out_fffd,4);
+    stportinfffd.caption := HexStr(last_out_fffd,4);
+    stportoutbffd.caption := HexStr(last_out_bffd,4);
+    stportoutfe.caption := HexStr(last_out_fe,4);
+    stportinfe.caption := HexStr(last_in_fe,4);
+  end;
 end;
 
 procedure TSpecEmu.RunEmulation;
 var
-   i: word = 0;
-   dd: longint;
+   ii: word = 0;
+   ss: word;
+   basicrom: boolean;
 
 begin
-  init_z80;
+  AudioOut.Run();
+  init_z80(true);
   init_spectrum;
   reset_memory_banks;
   draw_screen;
-  screen_timer.Start;
+  //screen_timer.Start;
   repaint_screen := false;
   prev_sound_bytes := sound_bytes;
+  //tini := GetTickCount64;
+  //cc := 0;
   while (not saliendo) do begin
     if not pause and (breakpoint_active) and ((breakpoint = pc) and not empezando) then begin
        start_debug;
     end;
     if not pause or step then begin
        empezando := false;
-       if (pc = $556) then
+       basicrom := (options.machine = spectrum48) or
+          ((options.machine = spectrum128)      and (Mem_banks[0]=ROMPAGE1)) or
+          ((options.machine = spectrum_plus2)   and (Mem_banks[0]=ROMPAGE1)) or
+          ((options.machine >= spectrum_plus2a) and (Mem_banks[0]=ROMPAGE3));
+
+       if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6))) and basicrom then
           save_cpu_status;
-       if (pc = $04c2) and TapeRecLed.Visible then // SAVE ROUTINE
+       if (pc >= $04c2) and (pc <= $04d8) and TapeRecLed.Visible and basicrom then // SAVE ROUTINE
        begin
+            restore_cpu_status;
             c_flag := Save_tape_block(IX,DE,A);
             compose_flags;
             ret;
             clear_keyboard;
-       end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible then // LOAD ROUTINE
+       end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible and basicrom then // LOAD ROUTINE
        begin
           restore_cpu_status;
           c_flag := Load_Tape_block(IX, DE, A); // IX: Addr; DE: Len; A: Flag byte
@@ -2664,7 +2831,7 @@ begin
           ix+=de;
           ret;
           clear_keyboard;
-       end else if not screen_tstates_reached then do_z80;
+       end else if not screen_tstates_reached or step then do_z80;
        if pause then
        begin
           stInstruction.caption := decode_instruction(pc);
@@ -2673,10 +2840,10 @@ begin
        end;
        step := false;
     end;
-    inc(i);
-    if (i >= 2048) then begin
+    inc(ii);
+    if (ii >= 2048) then begin
       Application.ProcessMessages;
-      i := 0;
+      ii := 0;
     end;
     t_states_cur_half_scanline := t_states - t_states_ini_half_scanline;
     t_states_cur_instruction := t_states - t_states_prev_instruction;
@@ -2685,32 +2852,46 @@ begin
     t_states_prev_instruction := t_states;
     if t_states_cur_half_scanline >= t_states_sound_bit then
     begin
-      if sonido_acumulado > 0 then
-         a := a;
+      //inc(cc);
+      //if cc = 16500 then
+      //begin
+      //  tt := GetTickCount64-tini;
+      //  tini := GetTickCount64;
+      //  cc := 0;
+      //end;
+      Run_AY_Channel(AYCHA);
+      Run_AY_Channel(AYCHB);
+      Run_AY_Channel(AYCHC);
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
-      data[soundpos_write] := 128 + (sonido_acumulado * 32) div t_states_sound_bit;
+      ss := ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
+                                   AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
+      if ss > 127 then
+         ss := 127;
+      speaker_data[soundpos_write] := 128 + ss;
+
+      //speaker_data[soundpos_write] := 128 + AYCHA.sound_level;
       sonido_acumulado := 0;
       inc(soundpos_write);
       if soundpos_write > spec_buffer_size-1 then soundpos_write := 0;
       inc(sound_bytes);
     end;
     t_states_cur_frame := t_states - t_states_ini_frame;
-    time := screen_timer.Elapsed;
+//    time := screen_timer.Elapsed;
     screen_tstates_reached := (t_states_cur_frame >= screen_testados_total);
     repaint_screen := screen_tstates_reached and (sound_bytes <= 2048);//screen_timer.Elapsed >= 0.020;
     if repaint_screen and screen_tstates_reached then begin
         prev_sound_bytes := sound_bytes;
-        screen_timer.clear;
-        screen_timer.start;
+        //screen_timer.clear;
+        //screen_timer.start;
         t_states_ini_frame := t_states-(t_states_cur_frame-screen_testados_total);
         intpend := true;
         draw_screen;
         repaint_screen := false;
         inc(frames);
-        //if (frames mod 50) = 0 then begin
-        //  stsamples.caption := intToStr(sound_bytes);
-        //  ststatessound.caption := intToStr(t_states_sound_bit);
-        //end;
+        if (frames mod 50) = 0 then begin
+          stsamples.caption := intToStr(sound_bytes);
+          //ststatessound.caption := intToStr(t_states_sound_bit);
+        end;
     end;
   end;
 end;
@@ -2758,8 +2939,8 @@ begin
   options.ROMFilename[1,3]:='';
   options.ROMFilename[2,0]:='ROM\plus2ROM0.rom';
   options.ROMFilename[2,1]:='ROM\plus2ROM1.rom';
-  options.ROMFilename[2,2]:='';
-  options.ROMFilename[2,3]:='';
+  options.ROMFilename[2,2]:='ROM\plus2ROM0.rom';
+  options.ROMFilename[2,3]:='ROM\plus2ROM1.rom';
   options.ROMFilename[3,0]:='ROM\plus3ROM0_4-1.rom';
   options.ROMFilename[3,1]:='ROM\plus3ROM1_4-1.rom';
   options.ROMFilename[3,2]:='ROM\plus3ROM2_4-1.rom';
@@ -2793,7 +2974,7 @@ begin
     except
        showmessage('Error reading ROM ' + filename);
     end;
-    Init_Z80;
+    Init_Z80(true);
     reset_memory_banks
   end;
 end;
@@ -2819,7 +3000,8 @@ begin
       blockread(FF,options,sizeof(options),r);
       UpdateFromOptions;
       CloseFile(FF);
-    finally
+      except
+         showmessage('Error reading options file');
     end;
   end else DefaultOptions;
 
@@ -2832,10 +3014,16 @@ begin
   DebugPanel.Visible := false;
   memgrid.ColWidths[0] := 35;
   adjust_window_size;
-  fillchar(buffer,sizeof(buffer),0);
-  ACSAudioOut1.Run();
-  ACSMemoryIn1.DataBuffer :=@buffer[nb];
-  ACSMemoryIn1.DataSize := bufsize;
+  fillchar(speaker_buffer,sizeof(speaker_buffer),0);
+  //AudioOut.Run();
+  Init_AY_Channel(AYCHA);
+  Init_AY_Channel(AYCHB);
+  Init_AY_Channel(AYCHC);
+  CONFIG_AY_Channel(AYCHA,440,8,false,1,false,444,0,false);
+  CONFIG_AY_Channel(AYCHB,16,8,false,1,false,444,0,false);
+  CONFIG_AY_Channel(AYCHC,16,8,false,1,false,444,0,false);
+  ACSEar.DataBuffer :=@speaker_buffer;
+  ACSEar.DataSize := bufsize;
   sound_bytes := 2048;
   soundpos_write := sound_bytes;
 
@@ -2864,7 +3052,7 @@ end;
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   saliendo := true;
-  ACSAudioOut1.Stop();
+  AudioOut.Stop();
 
 end;
 
@@ -2873,6 +3061,7 @@ begin
      saliendo := false;
      starting := true;
      pause := false;
+     debugging := false;
      step := false;
      mem_addr := 0;
      scale := 1;
@@ -2984,10 +3173,9 @@ end;
 
 procedure TSpecEmu.JoyTimerTimer(Sender: TObject);
 var
-   s: string;
-   x: integer;
    left1,up1,right1,down1,fire1,left2,up2,right2,down2,fire2: boolean;
-   procedure getjoystick1;
+
+    procedure getjoystick1;
    begin
      down1 := (joystick1.axis[1] > 48000);
      up1 := joystick1.axis[1] < 10000;
@@ -3224,6 +3412,13 @@ begin
   end;
 end;
 
+procedure TSpecEmu.Timer2Timer(Sender: TObject);
+begin
+  Audioout.Resume();
+  pause := false;
+  Timer2.Enabled := false;
+end;
+
 procedure TSpecEmu.ZoomInButtonClick(Sender: TObject);
 begin
     if (scale < 10) and (WindowState = wsNormal) then begin
@@ -3271,7 +3466,7 @@ procedure TSpecEmu.draw_screen;
             );
 
   var
-    i, x, y: Integer;
+    x, y: Integer;
     bgra: TBGRABitmap;
     // bitmap: TBitmap;
     p: PBGRAPixel;
@@ -3279,8 +3474,6 @@ procedure TSpecEmu.draw_screen;
     pmem, pattr: word;
 
     function getColor(attr: byte; pixel: boolean): byte;
-    var
-       brigth: byte;
     begin
       if ((attr and 128) <> 0) and ((frame and 16)=0) then begin // flash........
         if pixel then begin
@@ -3364,7 +3557,7 @@ begin
         if (options.machine = spectrum48) or (screen_page = SCREENPAGE) then
            v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0)
         else // SHADOW SCREEN SELECTED
-           v := getColor(rdshadow(pattr+attr_offset), (rdshadow(pmem) and bit) <> 0)
+           v := getColor(rdshadow(pattr+attr_offset), (rdshadow(pmem) and bit) <> 0);
         p^.red:= getRedComponent(v);
         p^.blue:= getBlueComponent(v);
         p^.green:= getGreenComponent(v);

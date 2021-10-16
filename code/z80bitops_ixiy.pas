@@ -94,7 +94,6 @@ end;
 procedure bit_ixiy(n: byte; addr: word);
 var
   valor_and,v: byte;
-  a:char;
 begin
   v := rdmem(addr);
   valor_and:=1;

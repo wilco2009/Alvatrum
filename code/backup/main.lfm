@@ -1,9 +1,9 @@
 object SpecEmu: TSpecEmu
-  Left = 244
+  Left = 44
   Height = 659
-  Top = 181
+  Top = 332
   Width = 1039
-  Caption = 'Alvatrum'
+  Caption = 'Alvatrum Beta 0.1'
   ClientHeight = 659
   ClientWidth = 1039
   DesignTimePPI = 120
@@ -2125,13 +2125,1874 @@ object SpecEmu: TSpecEmu
     0000
   }
   OnActivate = FormActivate
+  OnChangeBounds = FormChangeBounds
   OnClose = FormClose
   OnCreate = FormCreate
-  OnDeactivate = FormDeactivate
   OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
   UseDockManager = True
   LCLVersion = '2.0.12.0'
+  object DebugPanel: TPanel
+    Left = 256
+    Height = 310
+    Top = 0
+    Width = 464
+    ClientHeight = 310
+    ClientWidth = 464
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Consolas'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 5
+    Visible = False
+    object pDebug2: TPanel
+      Left = 3
+      Height = 206
+      Top = 104
+      Width = 461
+      ClientHeight = 206
+      ClientWidth = 461
+      TabOrder = 25
+      Visible = False
+      object GroupBox4: TGroupBox
+        Left = 4
+        Height = 123
+        Top = 5
+        Width = 132
+        Caption = 'Memory Pages'
+        ClientHeight = 103
+        ClientWidth = 128
+        TabOrder = 0
+        object MemPages: TStringGrid
+          Left = 2
+          Height = 64
+          Top = 0
+          Width = 114
+          AutoEdit = False
+          ColCount = 2
+          Columns = <          
+            item
+              Title.Caption = 'Title'
+              Width = 40
+            end>
+          DefaultColWidth = 70
+          DefaultRowHeight = 15
+          FixedRows = 0
+          RowCount = 4
+          TabOrder = 0
+        end
+        object stScreenPage: TStaticText
+          Left = 3
+          Height = 16
+          Top = 64
+          Width = 84
+          AutoSize = True
+          Caption = 'stScreenPage'
+          TabOrder = 1
+        end
+        object stPaggingDisabled: TStaticText
+          Left = 3
+          Height = 16
+          Top = 80
+          Width = 119
+          AutoSize = True
+          Caption = 'stPaggingDisabled'
+          TabOrder = 2
+        end
+      end
+      object stdiskMotor: TStaticText
+        Left = 152
+        Height = 16
+        Top = 9
+        Width = 77
+        AutoSize = True
+        Caption = 'stdiskMotor'
+        TabOrder = 1
+      end
+      object stPrinterStrobe: TStaticText
+        Left = 152
+        Height = 16
+        Top = 24
+        Width = 105
+        AutoSize = True
+        Caption = 'stPrinterStrobe'
+        TabOrder = 2
+      end
+      object GroupBox5: TGroupBox
+        Left = 311
+        Height = 115
+        Top = 10
+        Width = 127
+        Caption = 'Port status'
+        ClientHeight = 95
+        ClientWidth = 123
+        TabOrder = 3
+        object stportout7ffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 24
+          Width = 28
+          AutoSize = True
+          Caption = '7FFD'
+          TabOrder = 0
+        end
+        object stportout1ffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 38
+          Width = 28
+          AutoSize = True
+          Caption = '1FFD'
+          TabOrder = 1
+        end
+        object stportoutfffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 52
+          Width = 28
+          AutoSize = True
+          Caption = 'FFFD'
+          TabOrder = 2
+        end
+        object stportoutbffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 66
+          Width = 28
+          AutoSize = True
+          Caption = 'BFFD'
+          TabOrder = 3
+        end
+        object stportinfffd: TStaticText
+          Left = 80
+          Height = 16
+          Top = 52
+          Width = 28
+          AutoSize = True
+          Caption = 'FFFD'
+          TabOrder = 4
+        end
+        object StaticText7: TStaticText
+          Left = 0
+          Height = 16
+          Top = 24
+          Width = 28
+          AutoSize = True
+          Caption = '7FFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 5
+        end
+        object StaticText8: TStaticText
+          Left = 0
+          Height = 16
+          Top = 38
+          Width = 28
+          AutoSize = True
+          Caption = '1FFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 6
+        end
+        object StaticText9: TStaticText
+          Left = 0
+          Height = 16
+          Top = 52
+          Width = 28
+          AutoSize = True
+          Caption = 'FFFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 7
+        end
+        object StaticText10: TStaticText
+          Left = 0
+          Height = 16
+          Top = 66
+          Width = 28
+          AutoSize = True
+          Caption = 'BFFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 8
+        end
+        object StaticText11: TStaticText
+          Left = 44
+          Height = 16
+          Top = -3
+          Width = 21
+          AutoSize = True
+          Caption = 'OUT'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 9
+        end
+        object StaticText12: TStaticText
+          Left = 87
+          Height = 16
+          Top = -3
+          Width = 14
+          AutoSize = True
+          Caption = 'IN'
+          DoubleBuffered = False
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          ParentDoubleBuffered = False
+          TabOrder = 10
+        end
+        object StaticText13: TStaticText
+          Left = 0
+          Height = 16
+          Top = 10
+          Width = 28
+          AutoSize = True
+          Caption = 'xxFE'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 11
+        end
+        object stportoutFE: TStaticText
+          Left = 40
+          Height = 16
+          Top = 10
+          Width = 28
+          AutoSize = True
+          Caption = 'xxFE'
+          TabOrder = 12
+        end
+        object stportinFE: TStaticText
+          Left = 80
+          Height = 16
+          Top = 10
+          Width = 28
+          AutoSize = True
+          Caption = 'xxFE'
+          TabOrder = 13
+        end
+      end
+      object stSamples: TStaticText
+        Left = 4
+        Height = 21
+        Top = 136
+        Width = 52
+        Caption = 'Buffer'
+        TabOrder = 4
+      end
+    end
+    object pDebug1: TPanel
+      Left = 1
+      Height = 206
+      Top = 103
+      Width = 461
+      ClientHeight = 206
+      ClientWidth = 461
+      TabOrder = 22
+      object memgrid: TStringGrid
+        Left = 0
+        Height = 145
+        Top = 56
+        Width = 379
+        ColCount = 17
+        Columns = <        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '00'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '01'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '02'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '03'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '04'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '05'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '06'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '07'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '08'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '09'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '0A'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '0B'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '0C'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '0D'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '0E'
+            Width = 20
+          end        
+          item
+            MinSize = 6
+            MaxSize = 125
+            Title.Caption = '0F'
+            Width = 20
+          end>
+        DefaultColWidth = 18
+        DefaultRowHeight = 15
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        ParentFont = False
+        RowCount = 17
+        TabOrder = 0
+      end
+      object GroupBox1: TGroupBox
+        Left = 1
+        Height = 54
+        Top = 1
+        Width = 177
+        Caption = 'Breakpoint'
+        ClientHeight = 34
+        ClientWidth = 173
+        TabOrder = 1
+        object EdBreak: TEdit
+          Left = 8
+          Height = 23
+          Top = 0
+          Width = 56
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnKeyDown = EdBreakKeyDown
+          ParentFont = False
+          TabOrder = 0
+        end
+        object Button2: TButton
+          Left = 132
+          Height = 16
+          Top = 12
+          Width = 31
+          Caption = 'Clr'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnClick = Button2Click
+          ParentFont = False
+          TabOrder = 1
+        end
+        object Button1: TButton
+          Left = 132
+          Height = 16
+          Top = -4
+          Width = 31
+          Caption = 'Set'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnClick = Button1Click
+          ParentFont = False
+          TabOrder = 2
+        end
+        object stBreak: TStaticText
+          AnchorSideRight.Side = asrBottom
+          Left = 72
+          Height = 23
+          Top = 2
+          Width = 48
+          Anchors = [akTop, akRight]
+          Color = 8421631
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnClick = stBreakClick
+          ParentFont = False
+          ParentColor = False
+          TabOrder = 3
+        end
+      end
+      object GroupBox2: TGroupBox
+        Left = 184
+        Height = 54
+        Top = 1
+        Width = 181
+        Caption = 'TSTATES'
+        ClientHeight = 34
+        ClientWidth = 177
+        TabOrder = 2
+        object stTstatesFrame: TStaticText
+          Left = 8
+          Height = 12
+          Top = 0
+          Width = 64
+          Caption = 'FFFFFFFF'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          ParentFont = False
+          TabOrder = 0
+        end
+        object stTstates: TStaticText
+          Left = 8
+          Height = 12
+          Top = 16
+          Width = 127
+          Caption = 'FFFFFFFFFFFFFFFF'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          ParentFont = False
+          TabOrder = 1
+        end
+      end
+      object GroupBox3: TGroupBox
+        Left = 384
+        Height = 180
+        Top = 1
+        Width = 72
+        Caption = 'Memory'
+        ClientHeight = 160
+        ClientWidth = 68
+        TabOrder = 3
+        object EdMem: TEdit
+          Left = 2
+          Height = 23
+          Top = 0
+          Width = 62
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnKeyDown = EdMemKeyDown
+          ParentFont = False
+          TabOrder = 0
+        end
+        object stMem: TStaticText
+          Left = 2
+          Height = 12
+          Top = 24
+          Width = 41
+          Color = 8421631
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          ParentFont = False
+          ParentColor = False
+          TabOrder = 1
+        end
+        object Button3: TButton
+          Left = 2
+          Height = 16
+          Top = 40
+          Width = 31
+          Caption = 'Set'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnClick = Button3Click
+          ParentFont = False
+          TabOrder = 2
+        end
+        object DumpSource: TRadioGroup
+          Left = 2
+          Height = 76
+          Top = 56
+          Width = 55
+          AutoFill = True
+          ChildSizing.LeftRightSpacing = 6
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.EnlargeVertical = crsHomogenousChildResize
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 1
+          ClientHeight = 56
+          ClientWidth = 51
+          Constraints.OnChange = DumpSourceSizeConstraintsChange
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnSelectionChanged = DumpSourceSelectionChanged
+          ParentFont = False
+          TabOrder = 3
+          object src_ptr: TRadioButton
+            Left = 6
+            Height = 18
+            Top = 0
+            Width = 39
+            Caption = 'PTR'
+            Checked = True
+            Constraints.OnChange = src_ptrSizeConstraintsChange
+            Font.CharSet = ANSI_CHARSET
+            Font.Height = -10
+            Font.Pitch = fpVariable
+            Font.Quality = fqDraft
+            OnChange = src_ptrChange
+            ParentFont = False
+            TabOrder = 2
+            TabStop = True
+          end
+          object src_ix: TRadioButton
+            Left = 6
+            Height = 18
+            Top = 18
+            Width = 39
+            Caption = 'IX'
+            Font.CharSet = ANSI_CHARSET
+            Font.Height = -10
+            Font.Pitch = fpVariable
+            Font.Quality = fqDraft
+            OnChange = src_ixChange
+            ParentFont = False
+            TabOrder = 0
+          end
+          object src_iy: TRadioButton
+            Left = 6
+            Height = 19
+            Top = 36
+            Width = 39
+            Caption = 'IY'
+            Font.CharSet = ANSI_CHARSET
+            Font.Height = -10
+            Font.Pitch = fpVariable
+            Font.Quality = fqDraft
+            OnChange = src_iyChange
+            ParentFont = False
+            TabOrder = 1
+          end
+          object Panel2: TPanel
+            Left = 6
+            Height = 1
+            Top = 55
+            Width = 39
+            Caption = 'Panel2'
+            TabOrder = 3
+          end
+        end
+        object AsciiSelection: TCheckBox
+          Left = 2
+          Height = 23
+          Top = 136
+          Width = 59
+          Caption = 'ASCII'
+          OnChange = AsciiSelectionChange
+          TabOrder = 4
+        end
+      end
+    end
+    object FlagsPanel: TPanel
+      Left = 163
+      Height = 12
+      Top = 4
+      Width = 93
+      ClientHeight = 12
+      ClientWidth = 93
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -10
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 21
+      object stFlags: TStaticText
+        Left = 3
+        Height = 13
+        Top = -2
+        Width = 80
+        AutoSize = True
+        Caption = ' S Z 5 H 3 P N C'
+        TabOrder = 0
+      end
+    end
+    object stIY: TStaticText
+      Left = 101
+      Height = 15
+      Top = 44
+      Width = 29
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      OnClick = stIYClick
+      ParentFont = False
+      TabOrder = 0
+    end
+    object stIX: TStaticText
+      Left = 35
+      Height = 15
+      Top = 44
+      Width = 29
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 1
+    end
+    object Label13: TLabel
+      Left = 80
+      Height = 15
+      Top = 44
+      Width = 14
+      Caption = 'IY'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label12: TLabel
+      Left = 15
+      Height = 15
+      Top = 44
+      Width = 14
+      Caption = 'IX'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object stHL1: TStaticText
+      Left = 251
+      Height = 16
+      Top = 30
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 2
+    end
+    object stDE1: TStaticText
+      Left = 176
+      Height = 16
+      Top = 30
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 3
+    end
+    object stBC1: TStaticText
+      Left = 101
+      Height = 16
+      Top = 30
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 4
+    end
+    object stAF1: TStaticText
+      Left = 35
+      Height = 16
+      Top = 30
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 5
+    end
+    object Label11: TLabel
+      Left = 227
+      Height = 15
+      Top = 30
+      Width = 21
+      Caption = 'HL'''
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label10: TLabel
+      Left = 151
+      Height = 15
+      Top = 30
+      Width = 21
+      Caption = 'DE'''
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label9: TLabel
+      Left = 80
+      Height = 15
+      Top = 30
+      Width = 21
+      Caption = 'BC'''
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label8: TLabel
+      Left = 15
+      Height = 15
+      Top = 30
+      Width = 21
+      Caption = 'AF'''
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object stHL: TStaticText
+      Left = 251
+      Height = 16
+      Top = 16
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 6
+    end
+    object stDE: TStaticText
+      Left = 176
+      Height = 16
+      Top = 16
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 7
+    end
+    object stBC: TStaticText
+      Left = 101
+      Height = 16
+      Top = 16
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 8
+    end
+    object stAF: TStaticText
+      Left = 35
+      Height = 16
+      Top = 16
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 9
+    end
+    object stSP: TStaticText
+      Left = 101
+      Height = 16
+      Top = 0
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 10
+    end
+    object stPC: TStaticText
+      Left = 35
+      Height = 16
+      Top = 0
+      Width = 14
+      AutoSize = True
+      Caption = 'FF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      OnClick = stPCClick
+      ParentFont = False
+      TabOrder = 11
+    end
+    object Label7: TLabel
+      Left = 151
+      Height = 15
+      Top = 0
+      Width = 7
+      Caption = 'F'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label6: TLabel
+      Left = 227
+      Height = 15
+      Top = 16
+      Width = 14
+      Caption = 'HL'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label5: TLabel
+      Left = 151
+      Height = 15
+      Top = 16
+      Width = 14
+      Caption = 'DE'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label4: TLabel
+      Left = 80
+      Height = 15
+      Top = 16
+      Width = 14
+      Caption = 'BC'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label3: TLabel
+      Left = 15
+      Height = 15
+      Top = 16
+      Width = 14
+      Caption = 'AF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label2: TLabel
+      Left = 80
+      Height = 15
+      Top = 0
+      Width = 14
+      Caption = 'SP'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label1: TLabel
+      Left = 15
+      Height = 15
+      Top = 0
+      Width = 14
+      Caption = 'PC'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label14: TLabel
+      Left = 151
+      Height = 15
+      Top = 44
+      Width = 7
+      Caption = 'R'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object labelI: TLabel
+      Left = 184
+      Height = 15
+      Top = 44
+      Width = 7
+      Caption = 'I'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object stRR: TStaticText
+      Left = 161
+      Height = 15
+      Top = 44
+      Width = 14
+      Caption = 'F'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 12
+    end
+    object stII: TStaticText
+      Left = 193
+      Height = 15
+      Top = 44
+      Width = 15
+      Caption = 'F'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 13
+    end
+    object Panel3: TPanel
+      Left = 15
+      Height = 20
+      Top = 78
+      Width = 357
+      ClientHeight = 20
+      ClientWidth = 357
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 14
+      object stInstruction: TStaticText
+        Left = 8
+        Height = 15
+        Top = 1
+        Width = 344
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        OnClick = stInstructionClick
+        ParentFont = False
+        TabOrder = 0
+      end
+    end
+    object stIM: TStaticText
+      Left = 227
+      Height = 15
+      Top = 44
+      Width = 21
+      Caption = 'IM'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 15
+    end
+    object stIff1: TStaticText
+      Left = 260
+      Height = 15
+      Top = 44
+      Width = 21
+      Caption = 'DI'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 16
+    end
+    object Label17: TLabel
+      Left = 16
+      Height = 15
+      Top = 62
+      Width = 35
+      Caption = 'STACK'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object stStack: TStaticText
+      Left = 64
+      Height = 16
+      Top = 62
+      Width = 232
+      Caption = 'FFFFFFFFFFFFFFFFFF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 17
+    end
+    object Label18: TLabel
+      Left = 304
+      Height = 15
+      Top = 30
+      Width = 28
+      Caption = '(HL)'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label19: TLabel
+      Left = 304
+      Height = 15
+      Top = 1
+      Width = 28
+      Caption = '(BC)'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object stBCc: TStaticText
+      Left = 336
+      Height = 12
+      Top = 1
+      Width = 30
+      Caption = 'FFFF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 18
+    end
+    object stHLc: TStaticText
+      Left = 336
+      Height = 16
+      Top = 30
+      Width = 28
+      AutoSize = True
+      Caption = 'FFFF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 19
+    end
+    object Label20: TLabel
+      Left = 304
+      Height = 15
+      Top = 16
+      Width = 28
+      Caption = '(DE)'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object stDEc: TStaticText
+      Left = 336
+      Height = 16
+      Top = 16
+      Width = 28
+      AutoSize = True
+      Caption = 'FFFF'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabOrder = 20
+    end
+    object Button6: TButton
+      Left = 383
+      Height = 19
+      Top = 84
+      Width = 25
+      Caption = '1'
+      OnClick = Button6Click
+      TabOrder = 23
+    end
+    object Button7: TButton
+      Left = 407
+      Height = 19
+      Top = 84
+      Width = 25
+      Caption = '2'
+      OnClick = Button7Click
+      TabOrder = 24
+    end
+  end
+  object OptionsPanel: TPanel
+    Left = 256
+    Height = 317
+    Top = -7
+    Width = 463
+    ClientHeight = 317
+    ClientWidth = 463
+    TabOrder = 4
+    Visible = False
+    object Panel1: TPanel
+      Left = 5
+      Height = 245
+      Top = 1
+      Width = 250
+      ClientHeight = 245
+      ClientWidth = 250
+      TabOrder = 0
+      object StatusJoystick1: TShape
+        Left = 112
+        Height = 16
+        Top = 77
+        Width = 14
+        Brush.Color = clGray
+        Shape = stCircle
+      end
+      object StatusJoystick2: TShape
+        Left = 112
+        Height = 16
+        Top = 101
+        Width = 14
+        Brush.Color = clGray
+        OnChangeBounds = StatusJoystick2ChangeBounds
+        Shape = stCircle
+      end
+      object grUserJoy: TGroupBox
+        Left = 128
+        Height = 118
+        Top = 119
+        Width = 108
+        Caption = 'User Joystick'
+        ClientHeight = 93
+        ClientWidth = 104
+        Enabled = False
+        TabOrder = 0
+        OnClick = grUserJoyClick
+        object Image3: TImage
+          Left = 14
+          Height = 68
+          Top = 7
+          Width = 69
+          Picture.Data = {
+            1754506F727461626C654E6574776F726B47726170686963C511000089504E47
+            0D0A1A0A0000000D49484452000000830000008008060000002809DAC8000001
+            84694343504943432070726F66696C65000028917D913D48C3401CC55FD38A52
+            2A1DEC20E290A1BA684154C451AA58040BA5ADD0AA83C9A55FD0A42149717114
+            5C0B0E7E2C561D5C9C7575701504C10F10373727451729F17F49A1458C07C7FD
+            7877EF71F70E109A55A69A810940D52C239D888BB9FCAAD8FB8A200208238A31
+            89997A32B39885E7F8BA878FAF77319EE57DEECFD1AF144C06F844E239A61B16
+            F106F1CCA6A573DE278EB0B2A4109F138F1B7441E247AECB2EBF712E392CF0CC
+            88914DCF134788C55217CB5DCCCA864A3C4D1C55548DF2859CCB0AE72DCE6AB5
+            CEDAF7E42F0C15B4950CD7690E2381252491820819755450858518AD1A2926D2
+            B41FF7F00F39FE14B9647255C0C8B1801A54488E1FFC0F7E776B16A726DDA450
+            1CE879B1ED8F11A0771768356CFBFBD8B65B2780FF19B8D23AFE5A1398FD24BD
+            D1D1A24740781BB8B8EE68F21E70B9030C3EE9922139929FA6502C02EF67F44D
+            7960E01608AEB9BDB5F771FA0064A9ABE51BE0E010182D51F6BAC7BBFBBA7BFB
+            F74CBBBF1F9A5F72B7C58177A4000000097048597300002E2300002E230178A5
+            3F760000000774494D4507E50A08071B14B3FA19BD0000001974455874436F6D
+            6D656E74004372656174656420776974682047494D5057810E1700000FAF4944
+            415478DAED9D7B6C54577EC73FE78E1FF8815FD8BC090F93E0079E98AD4D8078
+            521B626825C48ADD46A1344D50A5A0544BC4464DAAED26299BE6B1ADD815A122
+            0A69D56EA00922CD8668571BB5E080A799C1091E2B203BC6BC5F4B1C07633006
+            1B3FEFE91FBE24F8C178ECB977E6CCF87E25FF3382FB38BFCFFD9DDFEF775E82
+            285751A5374D48391B8D2C2493804940221067FC01741B7F1D400B8216749AA5
+            10176BCA4A5A192712D1F222C5073D19682C069C4001900FCC05D282BC742B70
+            1EA807EA805A74AA7D2B5CD76C185431FEA79E0C1CAC0496030F03B9217C1F09
+            3400878143F471C0F768E4C31151303C74C83B47D7E46348D6028B0187228FD6
+            075423F858D3C5874796975CB061B0408BDD875324FA7A244F014B22A45DBF40
+            B04BA0EDA92E7DB8CD8621D8C0CFED750A2937038F034911EA79DB810FA410DB
+            6B4A4B6A6D18461B0B547E560EE205A03CCAE2B303207FE52B7BA4C286612408
+            DCDE52A47CCD0806A3598711E2255F6989DB8661481DE0B37C81D816859E6024
+            5548E47335658FD48F7B181E727BD374295F059E0162189FEA05766A42BC7CA4
+            34FCC5ADB0C0505CE9F931B003988A2D80266093AFCCF5D1B881A1D8ED9984E4
+            DF801FD9F61F56FB106CF495BA5AA21A86E24A4F39F02E30DDB6B95F35021B7C
+            65AE8AA88361695595D6DBD5F70AF0A24AD94B8A432327610247DB6FD323A56A
+            4048E0F59878C796CF972DD3A3028622B7374348B90758A5524BBB929378B920
+            9F8971B134B577B0F1581DCDBDBD2A7A89FD5288F535A525D7221A86E283DE1C
+            34F907205BA5D6CD8E8FE35F0B9D64254CF8EEB7F36D6D3C75AC8E4E5DAA08C4
+            5974B1DAB7A2E484D537D22C0A145D68B24A3510D21C0EB616E40F0001606E4A
+            0A6FE62EB0A6314CE0174D5615BB3DAE8883A1A8D2B306C97E205DA5168D1182
+            B70AF298993CFC30C7A2AC4CB6CC9BA36A50998E647F51A5674DC4C05054E959
+            27E0B740826AADF9EB05F7333F2DD56F7FF967B366F293E9CA963E1204FCB6A8
+            D2B34E79180C10DE0362556BC59FCD9EC5922993470C908480BFBE3F9BF59919
+            AA02112BE03DAB80D04C02618D80DDA833D9E43B3D3D75326BE7CC4604182A6B
+            42F04CEE02CA5326AA0A8443C06E2BBA8CA06128767B5C02F6AAE811FE22239D
+            BF59707FC020DCD1048783E7F3735838215E650FB1D7ECA03228188A0F7A7390
+            FC4EC518C1959CC44FF216E01063CB9ED3E3E379AD208FAC1865C7D01290FCAE
+            F8A03727EC3014B9BD19461D215DB556CA8E8FE367F9B9240569C8E94949EC70
+            E6314113C6E7A8DC5CA07434F98722B737236C302CADAAD28CCA62B66AAD73AF
+            5AC25875770D42C1B23540B69072CFD2AA2A2D2C3018630DAB546B95916A0963
+            95E235088055864D82D2A8FD9E31FAB81F05E74F6ECF79802553275BF26052C2
+            EED36778ABB149552024B02A98D1CE51798662B76712FDC3D0CA8110682D61CC
+            5F8DFA350801BC6BD82804DD44FFC414E5E6238CB69630E6C652BF0631DDB091
+            B5301853D5949BA134D65AC258150135881F19B6B226663026AF36A0D89C4557
+            7212FF545810740A391635B6B7F3F45165E741346942E48E76926D409EC198C5
+            AC140866D512CCAA4128A6A986CDCCF50CC6BA866328349D3D5E08F6FCE04166
+            4D4C0EFBB3547F7B854D0DA75404A257220B47B32E431B9916B10DC5D63594A7
+            A53053011000FE647216A90E878A30C418B633A79B28767B4B5170A5D399DB9D
+            F4EABA12CFD2DAD5C5ADBE3E5583C972C38681D13342A5E53515DFF0446717DB
+            BE3ACE92CC4C1C6228CFF725279ADA855CBC798BCBB73A86FCDEA3F7B1AFF11B
+            9445E17B1B9604153318ABA10F10817A63DE6C1EBD6F9669D7FB9F0B97D872E1
+            12912BB93290D5DF7EBA09F102B6A244E2F931C70C456EAF93F1B72A3A9AB5D2
+            B0E9E86130764CB1154DBE21009B0E8161B1FB700AFD5BE7D88A2E3D6ED83670
+            1824FA7A22770F255BF7569261DB517413FDBBAAD98A468D60DB01303C74C83B
+            87C8D95ECFD6E8B5C4B0F1C830E89A7CCC6EAFE8963F1B6B83DCC85ABBB9A2BE
+            AB583B220CC59F7A32E8DF8237649A191BCBBBCE7C2A4B96F06AF69CE84FEF80
+            5FCE9F87BB6409FFE9CC636A7886DF171BB6F6E319FA37E50ED9F05B5162026F
+            2F729297914E524C0CE53367E0526424D22AAD484DA16CC634126362589891C1
+            3B8B9C384D9AD23F0A390C5BFBED269687EA6956A7A5F2CF854EA6247EBF104B
+            1382FB42DF3021D594F838B4BBE6E74D4B4AE457854EFE3C3525D48FB27C2418
+            42B233EB86C999FC83339F94B8586C415A7C1C3F772EE489AC49A1BCEDC3F784
+            A1F8A02783FEF31A2CD5733367F04CEE026235CDA6E02EC53B3436E5E5F0EC8C
+            69A1BA65AE61F3613C43FF092E964DE6D304FCCBFDD9ACCB9E3BC04DDA624037
+            F9C4FC6C5ECD9E1B8AED848461F361BB09A755774DD634FE63613EA533A66173
+            30828504AC9C35837716E69268BDF71C62F33BB94D8155A9E3B6823C6607B8E8
+            E44FB332C937619DE4FCD45453DF63415A2A6FCC9B1DF47532131202F864E1C1
+            CC49FCA6B080CDB5F534593715BFE05E30E45B913A6E59983720631849855999
+            4A7EB1F3D2529997961AD27BCE4D99C83B8B9CBCFCD5716A6F775A718BFC7B75
+            1373AD4E1D6D8D5E16A79E436C2E8A2ABD690279DDCCD4F1E99C07EC8CC14475
+            F5E9BC73E224EF359BBBBFB844A4DF7D6EA726A49C6DD6C5EDD431B252CFC1B6
+            D7A4105976EA384E534F8DAC4176944195BEECD4318253CFFEE3A00704906386
+            61666C2CBF292C207F523A36072102E2AED4D38451CF2130248E35757C7B9133
+            E01A822D6B52CF20473D1307C31037DA2B142726F0CBC2023B755420F5DC5AE8
+            E4C1B1031117340C6BA74E21352ECEB686024A8F8FE3B1A9534C8361D4FAA6B3
+            1369DB410949E0EB4E732A941AD03DDAFFF4566313072F37226D22C20B8284FF
+            BD74999DDF7C3BD64B74070D830EFCFCCC39F69C3D876E131116E952B2FBF419
+            B69CBB108C971E60FB18A063AC57DA7EB991D6AE6E9ECE7D8038BBEA183275F5
+            F5B1B3E124EF5F0DFA1CB38EC1300455F0DED57C95ABDDDDFC343FC70E2A43A0
+            EB5D5DFCBAFE0407DA6E9A71B901B6D72422E8D18F4F6EB4F1F7C7EA68EAE8B0
+            AD65A11ADBDB79FE68AD59208018048390B2D98CEB1EEDB8CD335FD672D1AC07
+            B53540E7DBDAD878B48EBACE2E13030F9A077A06212E9A466E6F2F1B8ED551D7
+            72CD4E3D4DCC188E365FE5A963755C3179D6D360DB0B80E24ACF7520CDAC9B38
+            8057E7CF63C58CE9F6E0559020ECFFE3657E71EE0216EC6DD7EA2B73A50F0E20
+            01CE038BCCBA4B9F917A6EEEECE42F4731ACFDE59566BEEDB81DF4FD17983C4D
+            EDCCF51B9CBE7123E8EB4C494CE00793039B31A04BC97F9D3E6BE59106E707FF
+            7007867A3361186BEAE9B9DAC2FB57AE067DDF37E6CD361586D3376E98B2DBDB
+            5F4DCE0C08061353477FAABF170C7556DDD14E3DC39A3AFAD3109BDFF95C6BAD
+            BCAB9D7A862975F4AFDAE161D0A9066B13003BF50C43EAE82736356C3E1406DF
+            0AD735A0C172F2EDD433A4A9A31F3518361FB69B00381C8AA768D77536D61D1F
+            76D4B35B91CDC1AD52DFA017BE933AFE6DFD093AF5907E1EC3DAFA6E180E85AC
+            51183AEAD9DAD5CDFFB5B645350C9ED636DABA7BBE0363F7E933FCA335358491
+            34ACAD63EEB2D0011CF411C2DD5BB65F6EE4ABB69B14A5A6F0F195E650BAC9B0
+            E8EB9E1E9EFDF2186B266772E4FA0DDC376F85C541D1C701BF30F81E755D2BAE
+            F454034B43F96407DB6E72701C05950D9D5D345CFA3A9C8F50ED7BD4756DA46E
+            02041FDB215D94CB8F8D07C0A0E9E243BBB5A25BFE6C3C008623CB4B2E005FD8
+            4D16B5FAC2B0F1C830186E6497DD6651DB45F8B5AD36F4DF6B7B8076BBE5A24E
+            ED866D0387A1BAF4E136E003BBEDA24E1F18B60D1C060029C476BBEDA24B81D8
+            7458186A4A4B6A810ABB09A34615864DFDCACF9A6EB91584B28796954E4C66F5
+            B429C39E6B392BD9DC8374F23232D8161F3FE4775D4A8EB4B4F0DF2DD755F70B
+            5B038B2FFDA8B8D2E32544DB088F46B142F0C99262D2E2C33F59A647D779F248
+            0D67BBBA5525E1B0AFCC15D021A7FEE7A209F1928A6F97EA7090ACC8DED3319A
+            C6DC090A6F803E0A1BFA85C1575AE2563176B8DADBCB5113E64A9AA14B6D3771
+            AB3BB65261D83078180024F23940B9E1C4BF3B798AF36DE11DF2FEB6E3363FAD
+            ABA757CDC5C7BD86ED300D869AB247EA819DAABD69A72E79B6F638DFB487A73E
+            76A3BB9B57BE3ACED73DCA0EBBEF346C671E0C009A102F034DAABDED95DE5E5E
+            AA3BCEF5AEAE90DEB75BD779F3F8496A4C58E361919A0C9B613A0C474A4B5A81
+            4D2ABE755D67FFD4F2AEBEBE90DC4F97927F3F718A4F5A6FA0B0361936331F06
+            005F99EB23609F8A6F7EA0ED263B1B4E59BE718894B0F7EC79762912BCDE43FB
+            0C5B61190C46556223D0A8620BBC7FB585F74E9FB56C6B21091C6A6CE4CDCB8D
+            2A83D068D808CB61F095BA5A800DA0E64CF71D8D4DECFFE3654B1EAEBEE51A2F
+            9E39A7320812D860D8C87A188CEEA202785DD516F9C5B90B1C6B36D78D5F6CBB
+            C9B3F527D0D55EECF1BA611B420603404CBC630BB05FC516D181CD0D274DAB41
+            DCA925B4ABBDA663BF6113420EC3E7CB96E95288F5C059155BC6AC1A4404D412
+            00CE4A21D67FBE6C991E1618006A4A4BAEA18BD580924376C1D62022A0960070
+            1D5DACAE292D3165ED7E50FBF5F956949C40F04340C9161B6B0D22426A09B711
+            FCD0B7A2E48459170C7AF3465FA9CB23611DD0130D358808A925F44858E72B75
+            79CCBCA8293B79D694B97E2FE149FA9751466C0D22426A097D129EAC2973FDDE
+            EC0B9BB6AD6B4D996BAF842754F51081D42022A096D023E1899A32D75E2B2E6E
+            FA5E6C45959E3502F602CA1D46A1016FE7E7B06898F3332FB6DD64C3B13A9553
+            C8DB12D659E1114CF70C7777190856A99865DCAB061101B584EB085659098225
+            30DC092AD1C53215EB10776A10976FB5D3A74B5A3ABB54AF259C4517CBCC0E16
+            43D24D0CE832DCDE0C21E51E60956A2D1C23040509099CEAEC54D923EC9742AC
+            37AB8E1056180096565569BD5D7DAF002F86E27E512209BC1E13EFD862466551
+            1918EEA8B8D2530EBC0B4CB76DED578DC08660079D948919868D23CA5C15089C
+            283A414611ED43E00C070821F50C83BCC48F811DC054DBFE40FFFCD24D639DA1
+            14719E619097F8481322D700A2771C43D00BECD084C80D370861F30C03328ECA
+            CFF205621B503ECE40A890C8E7463B9D3DAA61F8AEEB707B4B91F235145CDB69
+            B20E23C44BA359E934EE60F83E9EF8AC1CC40B51E8292A406EF5953DA2EC5607
+            CAE6FD456EAF5348B919781C488A5000DA810FA410DB03D91FC18661042D761F
+            4E91E8EB913C052C891008BE40B04BA0ED1969EB1C1B8631EAA143DE39BA261F
+            43B216584C08B7361E417D4035828F355D7CE86F7B3D1B062B628B4F3D193858
+            092C3782CEDC10BE8FA4FF4886C3C021FA3870AF2D786D18C201C7414F061A8B
+            01275000E4037309FE54BE56FA0FF7AAA7FF289F5A74AA873BAFC18641711555
+            7AD38494B3A510590239099804240271C61FF41F10DE4DFFD9D02D12D122A46C
+            96425CAC291BFD02D648D5FF039D4CD8A6BE3B421E0000000049454E44AE4260
+            82
+          }
+          Stretch = True
+        end
+        object ButtonUp: TToggleBox
+          Left = 39
+          Height = 17
+          Top = 1
+          Width = 17
+          Caption = 'Q'
+          Color = clSkyBlue
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnChange = ButtonUpChange
+          OnExit = ButtonUpClick
+          ParentFont = False
+          TabOrder = 0
+        end
+        object ButtonLeft: TToggleBox
+          Left = 7
+          Height = 17
+          Top = 31
+          Width = 17
+          Caption = 'O'
+          Color = clSkyBlue
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnChange = ButtonLeftChange
+          OnExit = ButtonLeftExit
+          ParentFont = False
+          TabOrder = 1
+        end
+        object ButtonDown: TToggleBox
+          Left = 39
+          Height = 17
+          Top = 65
+          Width = 17
+          Caption = 'A'
+          Color = clSkyBlue
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnChange = ButtonDownChange
+          OnExit = ButtonDownClick
+          ParentFont = False
+          TabOrder = 2
+        end
+        object ButtonRight: TToggleBox
+          Left = 70
+          Height = 17
+          Top = 31
+          Width = 17
+          Caption = 'P'
+          Color = clSkyBlue
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnChange = ButtonRightChange
+          OnExit = ButtonRightExit
+          ParentFont = False
+          TabOrder = 3
+        end
+        object ButtonFire: TToggleBox
+          Left = 86
+          Height = 17
+          Top = 11
+          Width = 17
+          Caption = '_'
+          Color = clSkyBlue
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          OnChange = ButtonFireChange
+          OnExit = ButtonFireClick
+          ParentFont = False
+          TabOrder = 4
+        end
+      end
+    end
+    object CheckGroup1: TCheckGroup
+      Left = 5
+      Height = 68
+      Top = 248
+      Width = 115
+      AutoFill = True
+      Caption = 'Sound'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.TopBottomSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ClientHeight = 43
+      ClientWidth = 111
+      TabOrder = 1
+      object ckAYSound: TCheckBox
+        Left = 6
+        Height = 31
+        Top = 6
+        Width = 99
+        Caption = 'AY Sound'
+        Checked = True
+        OnChange = ckAYSoundChange
+        State = cbChecked
+        TabOrder = 0
+      end
+    end
+    object GroupLeftJoystick: TRadioGroup
+      Left = 5
+      Height = 118
+      Top = 5
+      Width = 108
+      AutoFill = True
+      Caption = 'LeftJoystick'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ClientHeight = 93
+      ClientWidth = 104
+      ItemIndex = 0
+      Items.Strings = (
+        'None'
+        'Cursor'
+        'Joystick1'
+        'Joystick2'
+      )
+      OnClick = GroupLeftJoystickClick
+      TabOrder = 2
+    end
+    object GroupRightJoystick: TRadioGroup
+      Left = 135
+      Height = 118
+      Top = 5
+      Width = 108
+      AutoFill = True
+      Caption = 'RightJoystick'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ClientHeight = 93
+      ClientWidth = 104
+      ItemIndex = 0
+      Items.Strings = (
+        'None'
+        'Cursor'
+        'Joystick1'
+        'Joystick2'
+      )
+      OnClick = GroupRightJoystickClick
+      TabOrder = 3
+    end
+    object GroupJoystickProtocol: TRadioGroup
+      Left = 5
+      Height = 118
+      Top = 120
+      Width = 108
+      AutoFill = True
+      Caption = 'JoyProtocol'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ClientHeight = 93
+      ClientWidth = 104
+      ItemIndex = 0
+      Items.Strings = (
+        'None'
+        'Kempston'
+        'Sinclair'
+        'User'
+      )
+      OnClick = GroupJoystickProtocolClick
+      TabOrder = 4
+    end
+    object GroupMachine: TRadioGroup
+      Left = 260
+      Height = 131
+      Top = 7
+      Width = 196
+      AutoFill = True
+      Caption = 'Machine'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ClientHeight = 106
+      ClientWidth = 192
+      ItemIndex = 0
+      Items.Strings = (
+        'Spectrum 48K'
+        'Spectrum 128K'
+        'Spectrum +2 gray'
+        'Spectrum +2A'
+        'Spectrum +3 (Future)'
+      )
+      OnClick = GroupMachineClick
+      TabOrder = 5
+    end
+    object Button4: TButton
+      Left = 392
+      Height = 29
+      Top = 282
+      Width = 61
+      Caption = 'Save'
+      OnClick = Button4Click
+      TabOrder = 6
+    end
+    object Button5: TButton
+      Left = 320
+      Height = 29
+      Top = 283
+      Width = 61
+      Caption = 'Default'
+      OnClick = Button5Click
+      TabOrder = 7
+    end
+    object stROM0: TStaticText
+      Left = 259
+      Height = 23
+      Top = 144
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM0Click
+      ParentColor = False
+      TabOrder = 8
+      Transparent = False
+    end
+    object stROM1: TStaticText
+      Left = 259
+      Height = 23
+      Top = 173
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM1Click
+      ParentColor = False
+      TabOrder = 9
+      Transparent = False
+    end
+    object stROM2: TStaticText
+      Left = 259
+      Height = 23
+      Top = 202
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM2Click
+      ParentColor = False
+      TabOrder = 10
+      Transparent = False
+    end
+    object stROM3: TStaticText
+      Left = 259
+      Height = 23
+      Top = 231
+      Width = 194
+      Caption = 'ROM\48.rom'
+      Color = clWindow
+      OnClick = stROM3Click
+      ParentColor = False
+      TabOrder = 11
+      Transparent = False
+    end
+  end
   object Pantalla: TBGRAGraphicControl
     Left = 0
     Height = 152
@@ -2702,1064 +4563,6 @@ object SpecEmu: TSpecEmu
       TabOrder = 5
     end
   end
-  object DebugPanel: TPanel
-    Left = 256
-    Height = 310
-    Top = 0
-    Width = 464
-    ClientHeight = 310
-    ClientWidth = 464
-    Font.CharSet = ANSI_CHARSET
-    Font.Color = clBlack
-    Font.Height = -13
-    Font.Name = 'Consolas'
-    Font.Pitch = fpFixed
-    Font.Quality = fqDraft
-    ParentFont = False
-    TabOrder = 1
-    Visible = False
-    object FlagsPanel: TPanel
-      Left = 163
-      Height = 12
-      Top = 4
-      Width = 93
-      ClientHeight = 12
-      ClientWidth = 93
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -10
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 22
-      object stFlags: TStaticText
-        Left = 3
-        Height = 13
-        Top = -2
-        Width = 80
-        AutoSize = True
-        Caption = ' S Z 5 H 3 P N C'
-        TabOrder = 0
-      end
-    end
-    object stIY: TStaticText
-      Left = 101
-      Height = 15
-      Top = 44
-      Width = 29
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      OnClick = stIYClick
-      ParentFont = False
-      TabOrder = 0
-    end
-    object stIX: TStaticText
-      Left = 35
-      Height = 15
-      Top = 44
-      Width = 29
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 1
-    end
-    object Label13: TLabel
-      Left = 80
-      Height = 15
-      Top = 44
-      Width = 14
-      Caption = 'IY'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label12: TLabel
-      Left = 15
-      Height = 15
-      Top = 44
-      Width = 14
-      Caption = 'IX'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object stHL1: TStaticText
-      Left = 251
-      Height = 16
-      Top = 30
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 2
-    end
-    object stDE1: TStaticText
-      Left = 176
-      Height = 16
-      Top = 30
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 3
-    end
-    object stBC1: TStaticText
-      Left = 101
-      Height = 16
-      Top = 30
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 4
-    end
-    object stAF1: TStaticText
-      Left = 35
-      Height = 16
-      Top = 30
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 5
-    end
-    object Label11: TLabel
-      Left = 227
-      Height = 15
-      Top = 30
-      Width = 21
-      Caption = 'HL'''
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label10: TLabel
-      Left = 151
-      Height = 15
-      Top = 30
-      Width = 21
-      Caption = 'DE'''
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label9: TLabel
-      Left = 80
-      Height = 15
-      Top = 30
-      Width = 21
-      Caption = 'BC'''
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label8: TLabel
-      Left = 15
-      Height = 15
-      Top = 30
-      Width = 21
-      Caption = 'AF'''
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object stHL: TStaticText
-      Left = 251
-      Height = 16
-      Top = 16
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 6
-    end
-    object stDE: TStaticText
-      Left = 176
-      Height = 16
-      Top = 16
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 7
-    end
-    object stBC: TStaticText
-      Left = 101
-      Height = 16
-      Top = 16
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 8
-    end
-    object stAF: TStaticText
-      Left = 35
-      Height = 16
-      Top = 16
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 9
-    end
-    object stSP: TStaticText
-      Left = 101
-      Height = 16
-      Top = 0
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 10
-    end
-    object stPC: TStaticText
-      Left = 35
-      Height = 16
-      Top = 0
-      Width = 14
-      AutoSize = True
-      Caption = 'FF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      OnClick = stPCClick
-      ParentFont = False
-      TabOrder = 11
-    end
-    object Label7: TLabel
-      Left = 151
-      Height = 15
-      Top = 0
-      Width = 7
-      Caption = 'F'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label6: TLabel
-      Left = 227
-      Height = 15
-      Top = 16
-      Width = 14
-      Caption = 'HL'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label5: TLabel
-      Left = 151
-      Height = 15
-      Top = 16
-      Width = 14
-      Caption = 'DE'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label4: TLabel
-      Left = 80
-      Height = 15
-      Top = 16
-      Width = 14
-      Caption = 'BC'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label3: TLabel
-      Left = 15
-      Height = 15
-      Top = 16
-      Width = 14
-      Caption = 'AF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label2: TLabel
-      Left = 80
-      Height = 15
-      Top = 0
-      Width = 14
-      Caption = 'SP'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label1: TLabel
-      Left = 15
-      Height = 15
-      Top = 0
-      Width = 14
-      Caption = 'PC'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label14: TLabel
-      Left = 151
-      Height = 15
-      Top = 44
-      Width = 7
-      Caption = 'R'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object labelI: TLabel
-      Left = 184
-      Height = 15
-      Top = 44
-      Width = 7
-      Caption = 'I'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object stRR: TStaticText
-      Left = 161
-      Height = 15
-      Top = 44
-      Width = 14
-      Caption = 'F'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 12
-    end
-    object stII: TStaticText
-      Left = 193
-      Height = 15
-      Top = 44
-      Width = 15
-      Caption = 'F'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 13
-    end
-    object Panel3: TPanel
-      Left = 15
-      Height = 20
-      Top = 78
-      Width = 357
-      ClientHeight = 20
-      ClientWidth = 357
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 14
-      object stInstruction: TStaticText
-        Left = 8
-        Height = 15
-        Top = 1
-        Width = 344
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnClick = stInstructionClick
-        ParentFont = False
-        TabOrder = 0
-      end
-    end
-    object stIM: TStaticText
-      Left = 227
-      Height = 15
-      Top = 44
-      Width = 21
-      Caption = 'IM'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 15
-    end
-    object stIff1: TStaticText
-      Left = 260
-      Height = 15
-      Top = 44
-      Width = 21
-      Caption = 'DI'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 16
-    end
-    object Label17: TLabel
-      Left = 16
-      Height = 15
-      Top = 62
-      Width = 35
-      Caption = 'STACK'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentColor = False
-      ParentFont = False
-    end
-    object stStack: TStaticText
-      Left = 64
-      Height = 16
-      Top = 62
-      Width = 232
-      Caption = 'FFFFFFFFFFFFFFFFFF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 17
-    end
-    object memgrid: TStringGrid
-      Left = 5
-      Height = 149
-      Top = 155
-      Width = 379
-      ColCount = 17
-      Columns = <      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '00'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '01'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '02'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '03'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '04'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '05'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '06'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '07'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '08'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '09'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '0A'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '0B'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '0C'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '0D'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '0E'
-          Width = 20
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = '0F'
-          Width = 20
-        end>
-      DefaultColWidth = 18
-      DefaultRowHeight = 15
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      RowCount = 17
-      TabOrder = 18
-    end
-    object Label18: TLabel
-      Left = 304
-      Height = 15
-      Top = 30
-      Width = 28
-      Caption = '(HL)'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object Label19: TLabel
-      Left = 304
-      Height = 15
-      Top = 1
-      Width = 28
-      Caption = '(BC)'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object stBCc: TStaticText
-      Left = 336
-      Height = 12
-      Top = 1
-      Width = 30
-      Caption = 'FFFF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 19
-    end
-    object stHLc: TStaticText
-      Left = 336
-      Height = 16
-      Top = 30
-      Width = 28
-      AutoSize = True
-      Caption = 'FFFF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 20
-    end
-    object Label20: TLabel
-      Left = 304
-      Height = 15
-      Top = 16
-      Width = 28
-      Caption = '(DE)'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-    end
-    object stDEc: TStaticText
-      Left = 336
-      Height = 16
-      Top = 16
-      Width = 28
-      AutoSize = True
-      Caption = 'FFFF'
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      ParentFont = False
-      TabOrder = 21
-    end
-    object GroupBox1: TGroupBox
-      Left = 5
-      Height = 54
-      Top = 99
-      Width = 177
-      Caption = 'Breakpoint'
-      ClientHeight = 34
-      ClientWidth = 173
-      TabOrder = 23
-      object EdBreak: TEdit
-        Left = 8
-        Height = 23
-        Top = 0
-        Width = 56
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnKeyDown = EdBreakKeyDown
-        ParentFont = False
-        TabOrder = 0
-      end
-      object Button2: TButton
-        Left = 132
-        Height = 16
-        Top = 12
-        Width = 31
-        Caption = 'Clr'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnClick = Button2Click
-        ParentFont = False
-        TabOrder = 1
-      end
-      object Button1: TButton
-        Left = 132
-        Height = 16
-        Top = -4
-        Width = 31
-        Caption = 'Set'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnClick = Button1Click
-        ParentFont = False
-        TabOrder = 2
-      end
-      object stBreak: TStaticText
-        AnchorSideRight.Side = asrBottom
-        Left = 72
-        Height = 23
-        Top = 2
-        Width = 48
-        Anchors = [akTop, akRight]
-        Color = 8421631
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnClick = stBreakClick
-        ParentFont = False
-        ParentColor = False
-        TabOrder = 3
-      end
-    end
-    object GroupBox2: TGroupBox
-      Left = 193
-      Height = 54
-      Top = 99
-      Width = 181
-      Caption = 'TSTATES'
-      ClientHeight = 34
-      ClientWidth = 177
-      TabOrder = 24
-      object stTstatesFrame: TStaticText
-        Left = 8
-        Height = 12
-        Top = 0
-        Width = 64
-        Caption = 'FFFFFFFF'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        ParentFont = False
-        TabOrder = 0
-      end
-      object stTstates: TStaticText
-        Left = 8
-        Height = 12
-        Top = 16
-        Width = 127
-        Caption = 'FFFFFFFFFFFFFFFF'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        ParentFont = False
-        TabOrder = 1
-      end
-    end
-    object GroupBox3: TGroupBox
-      Left = 389
-      Height = 180
-      Top = 124
-      Width = 72
-      Caption = 'Memory'
-      ClientHeight = 160
-      ClientWidth = 68
-      TabOrder = 25
-      object EdMem: TEdit
-        Left = 2
-        Height = 23
-        Top = 0
-        Width = 62
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnKeyDown = EdMemKeyDown
-        ParentFont = False
-        TabOrder = 0
-      end
-      object stMem: TStaticText
-        Left = 2
-        Height = 12
-        Top = 24
-        Width = 41
-        Color = 8421631
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        ParentFont = False
-        ParentColor = False
-        TabOrder = 1
-      end
-      object Button3: TButton
-        Left = 2
-        Height = 16
-        Top = 40
-        Width = 31
-        Caption = 'Set'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnClick = Button3Click
-        ParentFont = False
-        TabOrder = 2
-      end
-      object DumpSource: TRadioGroup
-        Left = 2
-        Height = 76
-        Top = 56
-        Width = 55
-        AutoFill = True
-        ChildSizing.LeftRightSpacing = 6
-        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-        ChildSizing.EnlargeVertical = crsHomogenousChildResize
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 1
-        ClientHeight = 56
-        ClientWidth = 51
-        Constraints.OnChange = DumpSourceSizeConstraintsChange
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        OnSelectionChanged = DumpSourceSelectionChanged
-        ParentFont = False
-        TabOrder = 3
-        object src_ptr: TRadioButton
-          Left = 6
-          Height = 18
-          Top = 0
-          Width = 39
-          Caption = 'PTR'
-          Checked = True
-          Constraints.OnChange = src_ptrSizeConstraintsChange
-          Font.CharSet = ANSI_CHARSET
-          Font.Height = -10
-          Font.Pitch = fpVariable
-          Font.Quality = fqDraft
-          OnChange = src_ptrChange
-          ParentFont = False
-          TabOrder = 2
-          TabStop = True
-        end
-        object src_ix: TRadioButton
-          Left = 6
-          Height = 19
-          Top = 18
-          Width = 39
-          Caption = 'IX'
-          Font.CharSet = ANSI_CHARSET
-          Font.Height = -10
-          Font.Pitch = fpVariable
-          Font.Quality = fqDraft
-          OnChange = src_ixChange
-          ParentFont = False
-          TabOrder = 0
-        end
-        object src_iy: TRadioButton
-          Left = 6
-          Height = 19
-          Top = 37
-          Width = 39
-          Caption = 'IY'
-          Font.CharSet = ANSI_CHARSET
-          Font.Height = -10
-          Font.Pitch = fpVariable
-          Font.Quality = fqDraft
-          OnChange = src_iyChange
-          ParentFont = False
-          TabOrder = 1
-        end
-      end
-      object AsciiSelection: TCheckBox
-        Left = 2
-        Height = 23
-        Top = 136
-        Width = 59
-        Caption = 'ASCII'
-        OnChange = AsciiSelectionChange
-        TabOrder = 4
-      end
-    end
-  end
   object TapePanel: TPanel
     Left = 776
     Height = 310
@@ -3774,7 +4577,7 @@ object SpecEmu: TSpecEmu
     Font.Pitch = fpFixed
     Font.Quality = fqDraft
     ParentFont = False
-    TabOrder = 2
+    TabOrder = 1
     object Image2: TImage
       Left = 1
       Height = 191
@@ -16502,6 +17305,8 @@ object SpecEmu: TSpecEmu
         4EFF4D4D4DFF
       }
       OnClick = ButtonEjectClick
+      OnMouseDown = ButtonEjectMouseDown
+      OnMouseLeave = ButtonEjectMouseLeave
     end
     object ButtonStop: TBGRAResizeSpeedButton
       Left = 112
@@ -20299,7 +21104,7 @@ object SpecEmu: TSpecEmu
     Width = 38
     ClientHeight = 150
     ClientWidth = 38
-    TabOrder = 3
+    TabOrder = 2
     object ButtonDebug: TSpeedButton
       Left = 3
       Height = 28
@@ -20631,7 +21436,7 @@ object SpecEmu: TSpecEmu
     Width = 463
     ClientHeight = 293
     ClientWidth = 463
-    TabOrder = 4
+    TabOrder = 3
     Visible = False
     OnMouseMove = PanelKeyboardMouseMove
     object Image1: TImage
@@ -53633,498 +54438,6 @@ object SpecEmu: TSpecEmu
       ParentShowHint = False
     end
   end
-  object OptionsPanel: TPanel
-    Left = 256
-    Height = 317
-    Top = -7
-    Width = 463
-    ClientHeight = 317
-    ClientWidth = 463
-    TabOrder = 5
-    Visible = False
-    OnClick = OptionsPanelClick
-    object Panel1: TPanel
-      Left = 5
-      Height = 245
-      Top = 1
-      Width = 250
-      ClientHeight = 245
-      ClientWidth = 250
-      TabOrder = 0
-      object StatusJoystick1: TShape
-        Left = 112
-        Height = 16
-        Top = 77
-        Width = 14
-        Brush.Color = clGray
-        Shape = stCircle
-      end
-      object StatusJoystick2: TShape
-        Left = 112
-        Height = 16
-        Top = 101
-        Width = 14
-        Brush.Color = clGray
-        OnChangeBounds = StatusJoystick2ChangeBounds
-        Shape = stCircle
-      end
-      object grUserJoy: TGroupBox
-        Left = 128
-        Height = 118
-        Top = 119
-        Width = 108
-        Caption = 'User Joystick'
-        ClientHeight = 93
-        ClientWidth = 104
-        Enabled = False
-        TabOrder = 0
-        OnClick = grUserJoyClick
-        object Image3: TImage
-          Left = 14
-          Height = 68
-          Top = 7
-          Width = 69
-          Picture.Data = {
-            1754506F727461626C654E6574776F726B47726170686963C511000089504E47
-            0D0A1A0A0000000D49484452000000830000008008060000002809DAC8000001
-            84694343504943432070726F66696C65000028917D913D48C3401CC55FD38A52
-            2A1DEC20E290A1BA684154C451AA58040BA5ADD0AA83C9A55FD0A42149717114
-            5C0B0E7E2C561D5C9C7575701504C10F10373727451729F17F49A1458C07C7FD
-            7877EF71F70E109A55A69A810940D52C239D888BB9FCAAD8FB8A200208238A31
-            89997A32B39885E7F8BA878FAF77319EE57DEECFD1AF144C06F844E239A61B16
-            F106F1CCA6A573DE278EB0B2A4109F138F1B7441E247AECB2EBF712E392CF0CC
-            88914DCF134788C55217CB5DCCCA864A3C4D1C55548DF2859CCB0AE72DCE6AB5
-            CEDAF7E42F0C15B4950CD7690E2381252491820819755450858518AD1A2926D2
-            B41FF7F00F39FE14B9647255C0C8B1801A54488E1FFC0F7E776B16A726DDA450
-            1CE879B1ED8F11A0771768356CFBFBD8B65B2780FF19B8D23AFE5A1398FD24BD
-            D1D1A24740781BB8B8EE68F21E70B9030C3EE9922139929FA6502C02EF67F44D
-            7960E01608AEB9BDB5F771FA0064A9ABE51BE0E010182D51F6BAC7BBFBBA7BFB
-            F74CBBBF1F9A5F72B7C58177A4000000097048597300002E2300002E230178A5
-            3F760000000774494D4507E50A08071B14B3FA19BD0000001974455874436F6D
-            6D656E74004372656174656420776974682047494D5057810E1700000FAF4944
-            415478DAED9D7B6C54577EC73FE78E1FF8815FD8BC090F93E0079E98AD4D8078
-            521B626825C48ADD46A1344D50A5A0544BC4464DAAED26299BE6B1ADD815A122
-            0A69D56EA00922CD8668571BB5E080A799C1091E2B203BC6BC5F4B1C07633006
-            1B3FEFE91FBE24F8C178ECB977E6CCF87E25FF3382FB38BFCFFD9DDFEF775E82
-            285751A5374D48391B8D2C2493804940221067FC01741B7F1D400B8216749AA5
-            10176BCA4A5A192712D1F222C5073D19682C069C4001900FCC05D282BC742B70
-            1EA807EA805A74AA7D2B5CD76C185431FEA79E0C1CAC0496030F03B9217C1F09
-            3400878143F471C0F768E4C31151303C74C83B47D7E46348D6028B0187228FD6
-            075423F858D3C5874796975CB061B0408BDD875324FA7A244F014B22A45DBF40
-            B04BA0EDA92E7DB8CD8621D8C0CFED750A2937038F034911EA79DB810FA410DB
-            6B4A4B6A6D18461B0B547E560EE205A03CCAE2B303207FE52B7BA4C286612408
-            DCDE52A47CCD0806A3598711E2255F6989DB8661481DE0B37C81D816859E6024
-            5548E47335658FD48F7B181E727BD374295F059E0162189FEA05766A42BC7CA4
-            34FCC5ADB0C0505CE9F931B003988A2D80266093AFCCF5D1B881A1D8ED9984E4
-            DF801FD9F61F56FB106CF495BA5AA21A86E24A4F39F02E30DDB6B95F35021B7C
-            65AE8AA88361695595D6DBD5F70AF0A24AD94B8A432327610247DB6FD323A56A
-            4048E0F59878C796CF972DD3A3028622B7374348B90758A5524BBB929378B920
-            9F8971B134B577B0F1581DCDBDBD2A7A89FD5288F535A525D7221A86E283DE1C
-            34F907205BA5D6CD8E8FE35F0B9D64254CF8EEB7F36D6D3C75AC8E4E5DAA08C4
-            5974B1DAB7A2E484D537D22C0A145D68B24A3510D21C0EB616E40F0001606E4A
-            0A6FE62EB0A6314CE0174D5615BB3DAE8883A1A8D2B306C97E205DA5168D1182
-            B70AF298993CFC30C7A2AC4CB6CC9BA36A50998E647F51A5674DC4C05054E959
-            27E0B740826AADF9EB05F7333F2DD56F7FF967B366F293E9CA963E1204FCB6A8
-            D2B34E79180C10DE0362556BC59FCD9EC5922993470C908480BFBE3F9BF59919
-            AA02112BE03DAB80D04C02618D80DDA833D9E43B3D3D75326BE7CC4604182A6B
-            42F04CEE02CA5326AA0A8443C06E2BBA8CA06128767B5C02F6AAE811FE22239D
-            BF59707FC020DCD1048783E7F3735838215E650FB1D7ECA03228188A0F7A7390
-            FC4EC518C1959CC44FF216E01063CB9ED3E3E379AD208FAC1865C7D01290FCAE
-            F8A03727EC3014B9BD19461D215DB556CA8E8FE367F9B9240569C8E94949EC70
-            E6314113C6E7A8DC5CA07434F98722B737236C302CADAAD28CCA62B66AAD73AF
-            5AC25875770D42C1B23540B69072CFD2AA2A2D2C3018630DAB546B95916A0963
-            95E235088055864D82D2A8FD9E31FAB81F05E74F6ECF79802553275BF26052C2
-            EED36778ABB149552024B02A98D1CE51798662B76712FDC3D0CA8110682D61CC
-            5F8DFA350801BC6BD82804DD44FFC414E5E6238CB69630E6C652BF0631DDB091
-            B5301853D5949BA134D65AC258150135881F19B6B226663026AF36A0D89C4557
-            7212FF545810740A391635B6B7F3F45165E741346942E48E76926D409EC198C5
-            AC140866D512CCAA4128A6A986CDCCF50CC6BA866328349D3D5E08F6FCE04166
-            4D4C0EFBB3547F7B854D0DA75404A257220B47B32E431B9916B10DC5D63594A7
-            A53053011000FE647216A90E878A30C418B633A79B28767B4B5170A5D399DB9D
-            F4EABA12CFD2DAD5C5ADBE3E5583C972C38681D13342A5E53515DFF0446717DB
-            BE3ACE92CC4C1C6228CFF725279ADA855CBC798BCBB73A86FCDEA3F7B1AFF11B
-            9445E17B1B9604153318ABA10F10817A63DE6C1EBD6F9669D7FB9F0B97D872E1
-            12912BB93290D5DF7EBA09F102B6A244E2F931C70C456EAF93F1B72A3A9AB5D2
-            B0E9E86130764CB1154DBE21009B0E8161B1FB700AFD5BE7D88A2E3D6ED83670
-            1824FA7A22770F255BF7569261DB517413FDBBAAD98A468D60DB01303C74C83B
-            87C8D95ECFD6E8B5C4B0F1C830E89A7CCC6EAFE8963F1B6B83DCC85ABBB9A2BE
-            AB583B220CC59F7A32E8DF8237649A191BCBBBCE7C2A4B96F06AF69CE84FEF80
-            5FCE9F87BB6409FFE9CC636A7886DF171BB6F6E319FA37E50ED9F05B5162026F
-            2F729297914E524C0CE53367E0526424D22AAD484DA16CC634126362589891C1
-            3B8B9C384D9AD23F0A390C5BFBED269687EA6956A7A5F2CF854EA6247EBF104B
-            1382FB42DF3021D594F838B4BBE6E74D4B4AE457854EFE3C3525D48FB27C2418
-            42B233EB86C999FC83339F94B8586C415A7C1C3F772EE489AC49A1BCEDC3F784
-            A1F8A02783FEF31A2CD5733367F04CEE026235CDA6E02EC53B3436E5E5F0EC8C
-            69A1BA65AE61F3613C43FF092E964DE6D304FCCBFDD9ACCB9E3BC04DDA624037
-            F9C4FC6C5ECD9E1B8AED848461F361BB09A755774DD634FE63613EA533A66173
-            30828504AC9C35837716E69268BDF71C62F33BB94D8155A9E3B6823C6607B8E8
-            E44FB332C937619DE4FCD45453DF63415A2A6FCC9B1DF47532131202F864E1C1
-            CC49FCA6B080CDB5F534593715BFE05E30E45B913A6E59983720631849855999
-            4A7EB1F3D2529997961AD27BCE4D99C83B8B9CBCFCD5716A6F775A718BFC7B75
-            1373AD4E1D6D8D5E16A79E436C2E8A2ABD690279DDCCD4F1E99C07EC8CC14475
-            F5E9BC73E224EF359BBBBFB844A4DF7D6EA726A49C6DD6C5EDD431B252CFC1B6
-            D7A4105976EA384E534F8DAC4176944195BEECD4318253CFFEE3A00704906386
-            61666C2CBF292C207F523A36072102E2AED4D38451CF2130248E35757C7B9133
-            E01A822D6B52CF20473D1307C31037DA2B142726F0CBC2023B755420F5DC5AE8
-            E4C1B1031117340C6BA74E21352ECEB686024A8F8FE3B1A9534C8361D4FAA6B3
-            1369DB410949E0EB4E732A941AD03DDAFFF4566313072F37226D22C20B8284FF
-            BD74999DDF7C3BD64B74070D830EFCFCCC39F69C3D876E131116E952B2FBF419
-            B69CBB108C971E60FB18A063AC57DA7EB991D6AE6E9ECE7D8038BBEA183275F5
-            F5B1B3E124EF5F0DFA1CB38EC1300455F0DED57C95ABDDDDFC343FC70E2A43A0
-            EB5D5DFCBAFE0407DA6E9A71B901B6D72422E8D18F4F6EB4F1F7C7EA68EAE8B0
-            AD65A11ADBDB79FE68AD59208018048390B2D98CEB1EEDB8CD335FD672D1AC07
-            B53540E7DBDAD878B48EBACE2E13030F9A077A06212E9A466E6F2F1B8ED551D7
-            72CD4E3D4DCC188E365FE5A963755C3179D6D360DB0B80E24ACF7520CDAC9B38
-            8057E7CF63C58CE9F6E0559020ECFFE3657E71EE0216EC6DD7EA2B73A50F0E20
-            01CE038BCCBA4B9F917A6EEEECE42F4731ACFDE59566BEEDB81DF4FD17983C4D
-            EDCCF51B9CBE7123E8EB4C494CE00793039B31A04BC97F9D3E6BE59106E707FF
-            7007867A3361186BEAE9B9DAC2FB57AE067DDF37E6CD361586D3376E98B2DBDB
-            5F4DCE0C08061353477FAABF170C7556DDD14E3DC39A3AFAD3109BDFF95C6BAD
-            BCAB9D7A862975F4AFDAE161D0A9066B13003BF50C43EAE82736356C3E1406DF
-            0AD735A0C172F2EDD433A4A9A31F3518361FB69B00381C8AA768D77536D61D1F
-            76D4B35B91CDC1AD52DFA017BE933AFE6DFD093AF5907E1EC3DAFA6E180E85AC
-            51183AEAD9DAD5CDFFB5B645350C9ED636DABA7BBE0363F7E933FCA335358491
-            34ACAD63EEB2D0011CF411C2DD5BB65F6EE4ABB69B14A5A6F0F195E650BAC9B0
-            E8EB9E1E9EFDF2186B266772E4FA0DDC376F85C541D1C701BF30F81E755D2BAE
-            F454034B43F96407DB6E72701C05950D9D5D345CFA3A9C8F50ED7BD4756DA46E
-            02041FDB215D94CB8F8D07C0A0E9E243BBB5A25BFE6C3C008623CB4B2E005FD8
-            4D16B5FAC2B0F1C830186E6497DD6651DB45F8B5AD36F4DF6B7B8076BBE5A24E
-            ED866D0387A1BAF4E136E003BBEDA24E1F18B60D1C060029C476BBEDA24B81D8
-            7458186A4A4B6A810ABB09A34615864DFDCACF9A6EB91584B28796954E4C66F5
-            B429C39E6B392BD9DC8374F23232D8161F3FE4775D4A8EB4B4F0DF2DD755F70B
-            5B038B2FFDA8B8D2E32544DB088F46B142F0C99262D2E2C33F59A647D779F248
-            0D67BBBA5525E1B0AFCC15D021A7FEE7A209F1928A6F97EA7090ACC8DED3319A
-            C6DC090A6F803E0A1BFA85C1575AE2563176B8DADBCB5113E64A9AA14B6D3771
-            AB3BB65261D83078180024F23940B9E1C4BF3B798AF36DE11DF2FEB6E3363FAD
-            ABA757CDC5C7BD86ED300D869AB247EA819DAABD69A72E79B6F638DFB487A73E
-            76A3BB9B57BE3ACED73DCA0EBBEF346C671E0C009A102F034DAABDED95DE5E5E
-            AA3BCEF5AEAE90DEB75BD779F3F8496A4C58E361919A0C9B613A0C474A4B5A81
-            4D2ABE755D67FFD4F2AEBEBE90DC4F97927F3F718A4F5A6FA0B0361936331F06
-            005F99EB23609F8A6F7EA0ED263B1B4E59BE718894B0F7EC79762912BCDE43FB
-            0C5B61190C46556223D0A8620BBC7FB585F74E9FB56C6B21091C6A6CE4CDCB8D
-            2A83D068D808CB61F095BA5A800DA0E64CF71D8D4DECFFE3654B1EAEBEE51A2F
-            9E39A7320812D860D8C87A188CEEA202785DD516F9C5B90B1C6B36D78D5F6CBB
-            C9B3F527D0D55EECF1BA611B420603404CBC630BB05FC516D181CD0D274DAB41
-            DCA925B4ABBDA663BF6113420EC3E7CB96E95288F5C059155BC6AC1A4404D412
-            00CE4A21D67FBE6C991E1618006A4A4BAEA18BD580924376C1D62022A0960070
-            1D5DACAE292D3165ED7E50FBF5F956949C40F04340C9161B6B0D22426A09B711
-            FCD0B7A2E48459170C7AF3465FA9CB23611DD0130D358808A925F44858E72B75
-            79CCBCA8293B79D694B97E2FE149FA9751466C0D22426A097D129EAC2973FDDE
-            EC0B9BB6AD6B4D996BAF842754F51081D42022A096D023E1899A32D75E2B2E6E
-            FA5E6C45959E3502F602CA1D46A1016FE7E7B06898F3332FB6DD64C3B13A9553
-            C8DB12D659E1114CF70C7777190856A99865DCAB061101B584EB085659098225
-            30DC092AD1C53215EB10776A10976FB5D3A74B5A3ABB54AF259C4517CBCC0E16
-            43D24D0CE832DCDE0C21E51E60956A2D1C23040509099CEAEC54D923EC9742AC
-            37AB8E1056180096565569BD5D7DAF002F86E27E512209BC1E13EFD862466551
-            1918EEA8B8D2530EBC0B4CB76DED578DC08660079D948919868D23CA5C15089C
-            283A414611ED43E00C070821F50C83BCC48F811DC054DBFE40FFFCD24D639DA1
-            14719E619097F8481322D700A2771C43D00BECD084C80D370861F30C03328ECA
-            CFF205621B503ECE40A890C8E7463B9D3DAA61F8AEEB707B4B91F235145CDB69
-            B20E23C44BA359E934EE60F83E9EF8AC1CC40B51E8292A406EF5953DA2EC5607
-            CAE6FD456EAF5348B919781C488A5000DA810FA410DB03D91FC18661042D761F
-            4E91E8EB913C052C891008BE40B04BA0ED1969EB1C1B8631EAA143DE39BA261F
-            43B216584C08B7361E417D4035828F355D7CE86F7B3D1B062B628B4F3D193858
-            092C3782CEDC10BE8FA4FF4886C3C021FA3870AF2D786D18C201C7414F061A8B
-            01275000E4037309FE54BE56FA0FF7AAA7FF289F5A74AA873BAFC18641711555
-            7AD38494B3A510590239099804240271C61FF41F10DE4DFFD9D02D12D122A46C
-            96425CAC291BFD02D648D5FF039D4CD8A6BE3B421E0000000049454E44AE4260
-            82
-          }
-          Stretch = True
-        end
-        object ButtonUp: TToggleBox
-          Left = 39
-          Height = 17
-          Top = 1
-          Width = 17
-          Caption = 'Q'
-          Color = clSkyBlue
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          OnChange = ButtonUpChange
-          OnExit = ButtonUpClick
-          ParentFont = False
-          TabOrder = 0
-        end
-        object ButtonLeft: TToggleBox
-          Left = 7
-          Height = 17
-          Top = 31
-          Width = 17
-          Caption = 'O'
-          Color = clSkyBlue
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          OnChange = ButtonLeftChange
-          OnExit = ButtonLeftExit
-          ParentFont = False
-          TabOrder = 1
-        end
-        object ButtonDown: TToggleBox
-          Left = 39
-          Height = 17
-          Top = 65
-          Width = 17
-          Caption = 'A'
-          Color = clSkyBlue
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          OnChange = ButtonDownChange
-          OnExit = ButtonDownClick
-          ParentFont = False
-          TabOrder = 2
-        end
-        object ButtonRight: TToggleBox
-          Left = 70
-          Height = 17
-          Top = 31
-          Width = 17
-          Caption = 'P'
-          Color = clSkyBlue
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          OnChange = ButtonRightChange
-          OnExit = ButtonRightExit
-          ParentFont = False
-          TabOrder = 3
-        end
-        object ButtonFire: TToggleBox
-          Left = 86
-          Height = 17
-          Top = 11
-          Width = 17
-          Caption = '_'
-          Color = clSkyBlue
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          OnChange = ButtonFireChange
-          OnExit = ButtonFireClick
-          ParentFont = False
-          TabOrder = 4
-        end
-      end
-    end
-    object CheckGroup1: TCheckGroup
-      Left = 5
-      Height = 68
-      Top = 248
-      Width = 115
-      AutoFill = True
-      Caption = 'Sound'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.TopBottomSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 1
-      ClientHeight = 43
-      ClientWidth = 111
-      Enabled = False
-      TabOrder = 1
-      object ckAYSound: TCheckBox
-        Left = 6
-        Height = 31
-        Top = 6
-        Width = 99
-        Caption = 'AY Sound'
-        OnChange = ckAYSoundChange
-        TabOrder = 0
-      end
-    end
-    object GroupLeftJoystick: TRadioGroup
-      Left = 5
-      Height = 118
-      Top = 5
-      Width = 108
-      AutoFill = True
-      Caption = 'LeftJoystick'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 1
-      ClientHeight = 93
-      ClientWidth = 104
-      ItemIndex = 0
-      Items.Strings = (
-        'None'
-        'Cursor'
-        'Joystick1'
-        'Joystick2'
-      )
-      OnClick = GroupLeftJoystickClick
-      TabOrder = 2
-    end
-    object GroupRightJoystick: TRadioGroup
-      Left = 135
-      Height = 118
-      Top = 5
-      Width = 108
-      AutoFill = True
-      Caption = 'RightJoystick'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 1
-      ClientHeight = 93
-      ClientWidth = 104
-      ItemIndex = 0
-      Items.Strings = (
-        'None'
-        'Cursor'
-        'Joystick1'
-        'Joystick2'
-      )
-      OnClick = GroupRightJoystickClick
-      TabOrder = 3
-    end
-    object GroupJoystickProtocol: TRadioGroup
-      Left = 5
-      Height = 118
-      Top = 120
-      Width = 108
-      AutoFill = True
-      Caption = 'JoyProtocol'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 1
-      ClientHeight = 93
-      ClientWidth = 104
-      ItemIndex = 0
-      Items.Strings = (
-        'None'
-        'Kempston'
-        'Sinclair'
-        'User'
-      )
-      OnClick = GroupJoystickProtocolClick
-      TabOrder = 4
-    end
-    object GroupMachine: TRadioGroup
-      Left = 260
-      Height = 131
-      Top = 7
-      Width = 196
-      AutoFill = True
-      Caption = 'Machine'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 1
-      ClientHeight = 106
-      ClientWidth = 192
-      ItemIndex = 0
-      Items.Strings = (
-        'Spectrum 48K'
-        'Spectrum 128K'
-        'Spectrum +2 gray'
-        'Spectrum +2A'
-        'Spectrum +3'
-      )
-      OnClick = GroupMachineClick
-      TabOrder = 5
-    end
-    object Button4: TButton
-      Left = 392
-      Height = 29
-      Top = 282
-      Width = 61
-      Caption = 'Save'
-      OnClick = Button4Click
-      TabOrder = 6
-    end
-    object Button5: TButton
-      Left = 320
-      Height = 29
-      Top = 283
-      Width = 61
-      Caption = 'Default'
-      OnClick = Button5Click
-      TabOrder = 7
-    end
-    object stROM0: TStaticText
-      Left = 259
-      Height = 23
-      Top = 144
-      Width = 194
-      Caption = 'ROM\48.rom'
-      Color = clWindow
-      OnClick = stROM0Click
-      ParentColor = False
-      TabOrder = 8
-      Transparent = False
-    end
-    object stROM1: TStaticText
-      Left = 259
-      Height = 23
-      Top = 173
-      Width = 194
-      Caption = 'ROM\48.rom'
-      Color = clWindow
-      OnClick = stROM1Click
-      ParentColor = False
-      TabOrder = 9
-      Transparent = False
-    end
-    object stROM2: TStaticText
-      Left = 259
-      Height = 23
-      Top = 202
-      Width = 194
-      Caption = 'ROM\48.rom'
-      Color = clWindow
-      OnClick = stROM2Click
-      ParentColor = False
-      TabOrder = 10
-      Transparent = False
-    end
-    object stROM3: TStaticText
-      Left = 259
-      Height = 23
-      Top = 231
-      Width = 194
-      Caption = 'ROM\48.rom'
-      Color = clWindow
-      OnClick = stROM3Click
-      ParentColor = False
-      TabOrder = 11
-      Transparent = False
-    end
-  end
   object Timer1: TTimer
     Interval = 100
     OnTimer = Timer1Timer
@@ -54132,46 +54445,35 @@ object SpecEmu: TSpecEmu
     Top = 69
   end
   object OpenTapFileDialog: TOpenDialog
-    OnClose = OpenTapFileDialogClose
     Title = 'Open a TAP file'
     DefaultExt = '.tap'
     Filter = 'Spectrum TAP files|*.tap'
-    OnSelectionChange = OpenTapFileDialogSelectionChange
     Left = 80
     Top = 197
   end
   object ApplicationProperties1: TApplicationProperties
     OnActivate = ApplicationProperties1Activate
-    Left = 728
-    Top = 64
+    Left = 16
+    Top = 480
   end
-  object screen_timer: TEpikTimer
-    StringPrecision = 6
-    WantMilliseconds = True
-    WantDays = True
-    TimebaseSource = SystemTimebase
-    CorrelationMode = OnTimebaseSelect
-    Left = 146
-    Top = 287
-  end
-  object AcsAudioOut1: TAcsAudioOut
-    Input = AcsMemoryIn1
+  object AudioOut: TAcsAudioOut
+    Input = ACSEar
     BufferSize = 4000
     PrefetchMode = pmAuto
     DriverName = 'Wavemapper'
     Device = 0
     Volume = 15
     Delay = 0
-    Left = 752
-    Top = 352
+    Left = 896
+    Top = 416
   end
-  object AcsMemoryIn1: TAcsMemoryIn
+  object ACSEar: TAcsMemoryIn
     InBitsPerSample = 8
     InChannels = 1
     InSampleRate = 16800
-    OnBufferDone = AcsMemoryIn1BufferDone
-    Left = 760
-    Top = 448
+    OnBufferDone = ACSEarBufferDone
+    Left = 768
+    Top = 328
   end
   object OpenSnaFileDialog: TOpenDialog
     Title = 'Open snapshot'
@@ -54210,7 +54512,14 @@ object SpecEmu: TSpecEmu
   object odROM: TOpenDialog
     DefaultExt = '.*.rom'
     Filter = 'ROM files|*.rom|BIN files|*.bin'
-    Left = 872
-    Top = 344
+    Left = 152
+    Top = 504
+  end
+  object Timer2: TTimer
+    Enabled = False
+    Interval = 300
+    OnTimer = Timer2Timer
+    Left = 175
+    Top = 347
   end
 end

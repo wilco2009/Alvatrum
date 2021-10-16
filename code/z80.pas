@@ -8,7 +8,7 @@ unit Z80;
 interface
 
 uses
-  Classes, SysUtils, Z80ops, Z80Globals, Z80bitops, Z80bitops_ixiy,roms, Screen;
+  Classes, SysUtils, Z80ops, Z80Globals, Z80bitops, Z80bitops_ixiy;
 
 procedure do_Z80;
 procedure init_z80(coldboot: boolean);
@@ -481,7 +481,6 @@ end;
 
 procedure do_Z80;
 var
-   t: byte;
    addr, opcode: word;
 // infinite loop
 begin

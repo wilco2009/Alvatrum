@@ -59,8 +59,8 @@ end;
 
 function decode_instruction(addr: word): string;
 var
-  opcode, byte1, byte2, byte3, byte4: byte;
-  hexa, par1, par2,res: string;
+  byte1, byte2, byte3, byte4: byte;
+  res: string;
 
   function comp(command, param1, param2: string; size: byte): string;
   const
@@ -101,10 +101,8 @@ var
   function mem_b_s(addr_desp: word): string;
   var
      S: String;
-     v: byte;
      s_v: shortint;
   begin
-       v := rdmem(addr_desp);
        s_v := rdmem_signed(addr_desp);
        S := HexStr(abs(s_v),2);
        if s_v < 0 then

@@ -88,17 +88,7 @@ begin
 end;
 
 function rl(v: byte): byte;
-var
-  cmem: byte;
 begin
-  //cmem := c_flag;
-  //c_flag := iffb((v and 128)<>0, FLAG_C, 0);
-  //v := v << 1;
-  //v := v or cmem;
-  //set_undocumented_flags_bits(v);
-  //
-  //n_flag := 0;
-  //h_flag := 0;
   v := rl_comun(v);
   set_flags_zero_sign(v);
   pv_flag := parity(v);
@@ -123,17 +113,7 @@ begin
 end;
 
 function rr(v: byte): byte;
-var
-  cmem: byte;
 begin
-  //cmem := c_flag;
-  //c_flag := iffb((v and 1)<>0, FLAG_C, 0);
-  //v := v >> 1;
-  //v := v or (cmem << 7);
-  //set_undocumented_flags_bits(v);
-  //
-  //n_flag := 0;
-  //h_flag := 0;
   v := rr_comun(v);
   set_flags_zero_sign(v);
   pv_flag := parity(v);

@@ -63,6 +63,9 @@ AY chip implementation in progress
 alfa version 0.016
 AY chip implementation completed
 
+beta version 0.100
+corrected several bugs
+
 TO DO:
 tape reading tzx
 memory contention

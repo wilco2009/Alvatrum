@@ -537,7 +537,7 @@ begin
      if ext = '.SNA' then res := load_sna_file(filename)
      else if ext = '.Z80' then res := load_z80_file(filename)
      else ShowMessage('Format not yet supported');
-     loadSnapshotfile := result;
+     loadSnapshotfile := res;
 end;
 
 
@@ -634,7 +634,7 @@ begin
      if ext = '.SNA' then res := save_sna_file(filename)
      else if ext = '.Z80' then res := save_z80_file(filename)
      else ShowMessage('Format not yet supported');
-     saveSnapshotfile := result;
+     saveSnapshotfile := res;
 end;
 end.
 

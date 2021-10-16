@@ -276,10 +276,10 @@ var
 
 
 begin
-  byte1 := mem[addr];
-  byte2 := mem[addr+1];
-  byte3 := mem[addr+2];
-  byte4 := mem[addr+3];
+  byte1 := rdmem(addr);
+  byte2 := rdmem(addr+1);
+  byte3 := rdmem(addr+2);
+  byte4 := rdmem(addr+3);
   case byte1 of
        $22      : res := comp('LD','('+mem_w(addr+1)+')','HL',3);
        $2A      : res := comp('LD','HL','('+mem_w(addr+1)+')',3);

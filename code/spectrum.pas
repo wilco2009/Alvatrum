@@ -5,7 +5,7 @@ unit spectrum;
 interface
 
 uses
-  Classes, SysUtils,CRT,Z80Globals,hardware,Global,acs_misc;
+  Classes, SysUtils,CRT,Z80Globals,hardware,Global;
 
 const
   ancho_borde = 30;
@@ -68,7 +68,7 @@ type
     data: array[0..7014] of byte;
     volume: byte;
     envelope_volume: boolean;
-    buffer: array[0..bufsize] of byte;
+    buffer: array[0..spec_buffer_size] of byte;
   end;
 
 var
@@ -94,7 +94,7 @@ var
   speaker_out: boolean = false;
   speaker_data: array[0..7014] of byte;
   AYCHA, AYCHB, AYCHC: TAYChannel;
-  speaker_buffer: array[0..bufsize] of byte;
+  speaker_buffer: array[0..spec_buffer_size] of byte;
   sound_bytes: longint = 0;
   prev_sound_bytes: longint = 0;
   //nb: byte = 0;
@@ -357,12 +357,10 @@ begin
 end;
 
 procedure init_spectrum;
-var
-  x: byte;
 begin
-     border_color := 7;
-     clear_keyboard;
-     screen_page := Mem_banks[1];
+  border_color := 7;
+  clear_keyboard;
+  screen_page := Mem_banks[1];
 end;
 
 procedure spectrum_out(port: word; v: byte);
@@ -522,7 +520,23 @@ begin
         v := v and Keyboard[7]; // SPACE SYM M N B
      last_in_FE := v;
   end else begin                   // other write ports
-    v := $ff;
+    if ((lport = $ff) and (options.machine < spectrum_plus2a)) or
+       (((port and %1111000000000011) = %0000000000000001)
+               and (options.machine >= spectrum_plus2a)) then
+    begin
+      // screen 224 t-states
+      // border 128 t-states
+      // upper+lower border 12500 t-states
+      if (t_states_cur_frame > 12500) {and (t_states_cur_frame < 70000-12500)} then
+      begin
+
+        case t_states_cur_frame mod 8 of
+             3,5,7: v := random(256); // screen attributes
+             2,4,6: v := random(256); // screen data
+             else v := $ff;         // border
+        end;
+      end;
+    end else v := $ff;
   end;
   // port $fffd AY Read the value of the selected register
   if port and %1100000000000010 = %1100000000000000 then
