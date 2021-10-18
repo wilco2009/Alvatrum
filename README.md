@@ -66,6 +66,10 @@ AY chip implementation completed
 beta version 0.100
 corrected several bugs
 
+beta version 0.1.01
+corrected bugs in z80 loading procedure
+modified default options
+
 TO DO:
 tape reading tzx
 memory contention

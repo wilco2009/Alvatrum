@@ -2917,10 +2917,9 @@ procedure TSpecEmu.DefaultOptions;
 begin
   // Default Options
   options.machine := Spectrum48;
-  options.joystick_Protocol := joyp_kempston;
-  options.joystick_Protocol := joyp_kempston;
-  options.JL_Type := joyt_cursor;
-  options.JR_Type := joyt_cursor;
+  options.joystick_Protocol := joyp_none;
+  options.JL_Type := joyt_none;
+  options.JR_Type := joyt_none;
   AssignUserButton(user_up,VK_Q);
   AssignUserButton(user_down,VK_A);
   AssignUserButton(user_left,VK_O);
@@ -2937,8 +2936,8 @@ begin
   options.ROMFilename[1,3]:='';
   options.ROMFilename[2,0]:='ROM\plus2ROM0.rom';
   options.ROMFilename[2,1]:='ROM\plus2ROM1.rom';
-  options.ROMFilename[2,2]:='ROM\plus2ROM0.rom';
-  options.ROMFilename[2,3]:='ROM\plus2ROM1.rom';
+  options.ROMFilename[2,2]:='';
+  options.ROMFilename[2,3]:='';
   options.ROMFilename[3,0]:='ROM\plus3ROM0_4-1.rom';
   options.ROMFilename[3,1]:='ROM\plus3ROM1_4-1.rom';
   options.ROMFilename[3,2]:='ROM\plus3ROM2_4-1.rom';
@@ -3002,7 +3001,7 @@ begin
          showmessage('Error reading options file');
     end;
   end else DefaultOptions;
-
+  UpdateJoystickPanels;
 end;
 
 procedure TSpecEmu.FormActivate(Sender: TObject);

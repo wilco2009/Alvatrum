@@ -310,7 +310,7 @@ function load_z80_file(filename: string): boolean;
 var
   FF: File;
   res: longint;
-  header_size: word;
+  header_size: word = 30;
   estado: byte = 0;
   v,rep: byte;
   no_more_blocks: boolean;
@@ -318,31 +318,45 @@ var
   ver: byte;
   modo48k,modo128k: boolean;
 
-  procedure unpack_block(page: byte; endmarker: boolean; len: word);
+  procedure unpack_block(page: integer; endmarker: boolean; len: word);
   var
     j,k: word;
     m: byte;
+
+    procedure poke(addr: word; value: byte);
+    begin
+       if page < 0 then
+          wrmem(addr+$4000,value)
+       else
+         memp[page,addr]:=value;
+    end;
+
   begin
        if page = $ff then exit;
        k := 0;
        for j := 0 to len-1 do
        begin
+            if j = $ED0 then
+               a := a;
            case estado of
                 0: if Buffer[j] = $ED then estado := 1
                    else if (buffer[j]=0) and endmarker then estado := 4
                    else begin
                      // wrmem(k,Buffer[j]);
-                     memp[page,k]:=Buffer[j];
+                     //memp[page,k]:=Buffer[j];
+                     poke(k,Buffer[j]);
                      inc(k);
                    end;
                 // $ED
                 1: if Buffer[j] = $ED then estado := 2
                    else begin
                      //wrmem(k,$ED);
-                     memp[page,k]:=$ED;
+                     //memp[page,k]:=$ED;
+                     poke(k,$ED);
                      inc(k);
                      //wrmem(k,Buffer[j]);
-                     memp[page,k]:=Buffer[j];
+                     //memp[page,k]:=Buffer[j];
+                     poke(k,Buffer[j]);
                      inc(k);
                      estado := 0;
                    end;
@@ -357,7 +371,8 @@ var
                    for m := 1 to rep do
                    begin
                        // wrmem(k,v);
-                       memp[page,k]:=v;
+                       // memp[page,k]:=v;
+                       poke(k,v);
                        inc(k);
                    end;
                    estado := 0;
@@ -367,10 +382,12 @@ var
                    estado := 5
                 else begin
                   //wrmem(k,0);
-                  memp[page,k]:=0;
+                  //memp[page,k]:=0;
+                  poke(k,0);
                   inc(k);
                   //wrmem(k,Buffer[j]);
-                  memp[page,k]:=Buffer[j];
+                  //memp[page,k]:=Buffer[j];
+                  poke(k,Buffer[j]);
                   inc(k);
                   estado := 0;
                 end;
@@ -379,35 +396,45 @@ var
                    estado := 6
                 else begin
                   // wrmem(k,0);
-                  memp[page,k]:=0;
+                  //memp[page,k]:=0;
+                  poke(k,0);
                   inc(k);
                   //wrmem(k,$ED);
-                  memp[page,k]:=$ED;
+                  //memp[page,k]:=$ED;
+                  poke(k,$ED);
                   inc(k);
                   //wrmem(k,Buffer[j]);
-                  memp[page,k]:=Buffer[j];
+                  //memp[page,k]:=Buffer[j];
+                  poke(k,Buffer[j]);
                   inc(k);
                   estado := 0;
                 end;
                 // $00$ED$ED
-                6: if buffer[j] = $00 then // $00$ED$ED$00 End of block
-                   break;
-                else begin
-                  // wrmem(k,0);
-                  memp[page,k]:=0;
-                  inc(k);
-                  // wrmem(k,$ED);
-                  memp[page,k]:= $ED;
-                  inc(k);
-                  // mem[k] := $ED;
-                  memp[page,k]:=$ED;
-                  inc(k);
-                  // wrmem(k,Buffer[j]);
-                  memp[page,k]:=Buffer[j];
-                  inc(k);
-                  estado := 0;
+                6: begin
+                  if buffer[j] = $00 then // $00$ED$ED$00 End of block
+                    break
+                  else begin
+                    // wrmem(k,0);
+                    //memp[page,k]:=0;
+                    poke(k,0);
+                    inc(k);
+                    rep := Buffer[j];
+                    estado := 3;
+                    //// wrmem(k,$ED);
+                    //// memp[page,k]:= $ED;
+                    //poke(k,$ED);
+                    //inc(k);
+                    //// mem[k] := $ED;
+                    ////memp[page,k]:=$ED;
+                    //poke(k,$ED);
+                    //inc(k);
+                    //// wrmem(k,Buffer[j]);
+                    //// memp[page,k]:=Buffer[j];
+                    //poke(k,Buffer[j]);
+                    //inc(k);
+                    //estado := 0;
+                  end;
                 end;
-
            end;
        end;
   end;
@@ -416,7 +443,7 @@ begin
      Assignfile(FF, filename);
      Reset(FF,1);
      fillchar(z80, sizeof(z80), 0);
-     Blockread(FF,z80,30,res);
+     Blockread(FF,z80,Header_Size,res);
      A := z80.A;
      F := Z80.F;
      bc := Z80.bc;
@@ -449,11 +476,18 @@ begin
      im := z80.info2 and %11;
      explode_flags;
 
-     modo48k := (z80.hardware_mode = 0) or  (z80.hardware_mode = 1) or
+
+     if (z80.old_pc_byte <> 0) then
+        ver := 1
+     else if (z80.Additional_len = 23) then ver := 2
+     else ver := 3;
+
+     modo48k := (ver = 1) or
+             (z80.hardware_mode = 0) or  (z80.hardware_mode = 1) or
              ((ver=3) and (z80.hardware_mode = 3));
-     modo128k := ((ver=2) and (z80.hardware_mode = 3)) or
+     modo128k := (ver <> 1) and (((ver=2) and (z80.hardware_mode = 3)) or
                  (z80.hardware_mode = 4) or  (z80.hardware_mode = 5) or
-                 (z80.hardware_mode = 6);
+                 (z80.hardware_mode = 6));
 
      if modo128k then
         spectrum_out($7ffd,z80.lastout_7ffd);
@@ -465,12 +499,12 @@ begin
        else
            spectrum_out($1ffd,%100);
      end;
-     if (z80.old_pc_byte <> 0) then             // v1
+     if ver=1 then             // v1
      begin
         Blockread(FF,buffer,$c000,res);
         if (z80.info1 and %00100000) <> 0 then // v1 compressed file
         begin
-          unpack_block(1,true,65535);
+          unpack_block(-1,true,res);
         end else begin                           // v1 uncompressed file
           // move(buffer, mem[16384], res-Header_Size);
           move(buffer, memP[1,0], res-Header_Size);
@@ -482,8 +516,6 @@ begin
          if res = sizeof(bhead) then
          begin
             Blockread(FF,buffer,bhead.len,res);
-            if (z80.Additional_len = 23) then ver := 2
-            else ver := 3;
             if modo48k then // 48K
             begin
               case bhead.page of
