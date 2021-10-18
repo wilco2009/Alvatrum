@@ -104,7 +104,7 @@ procedure EX_reg_reg(var reg1: word; var reg2: word);
 procedure EX_af_af1;
 procedure EX_mem_reg(addr: word; var reg: word);
 procedure EX_mem_hl;
-procedure EX_mem_ixiy(reg: word);
+procedure EX_mem_ixiy(var reg: word);
 procedure EXX;
 
 //LD
@@ -959,7 +959,7 @@ begin
      inc(t_states, 19);
 end;
 
-procedure EX_mem_ixiy(reg: word);
+procedure EX_mem_ixiy(var reg: word);
 begin
      EX_mem_reg(sp,reg);
      inc(t_states, 23);

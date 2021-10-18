@@ -792,8 +792,6 @@ begin
 end;
 
 procedure in_n;
-var
-   t1,t2,t3: word;
 begin
      a := z80in((word(a)<<8) or fetch_pc);
      inc(t_states,11);
@@ -961,7 +959,7 @@ begin
      inc(t_states, 19);
 end;
 
-procedure EX_mem_ixiy(reg: word);
+procedure EX_mem_ixiy(var reg: word);
 begin
      EX_mem_reg(sp,reg);
      inc(t_states, 23);
@@ -1173,25 +1171,16 @@ end;
 
 procedure cpl;
 begin
-//   a := not a;
-    a := a xor $ff;
-   h_flag := FLAG_H;
-   n_flag := FLAG_N;
-   set_undocumented_flags_bits(a);
-   compose_flags;
-   inc(t_states,4);
+  a := a xor $ff;
+  h_flag := FLAG_H;
+  n_flag := FLAG_N;
+  set_undocumented_flags_bits(a);
+  compose_flags;
+  inc(t_states,4);
 end;
 
 procedure rra;
-var
-   t: byte;
 begin
-  //t:=a and 1;
-  //a := (a>>1) or (f<<7);
-  //h_flag := 0;
-  //n_flag := 0;
-  //c_flag := t;
-
   a := rr_comun(a);
   compose_flags;
   inc(t_states, 4);
@@ -1199,10 +1188,6 @@ end;
 
 procedure rla;
 begin
-  //c_flag := a >> 7;
-  //a := (a << 1) or (f and $01);
-  //n_flag := 0;
-  //h_flag := 0;
   a := rl_comun(a);
   compose_flags;
   inc(t_states, 4);
@@ -1210,10 +1195,6 @@ end;
 
 procedure rrca;
 begin
-   //c_flag := iffb((a and $01) <> 0, FLAG_C, 0);
-   //a := (a >> 1) or (a << 7);
-   //n_flag := 0;
-   //h_flag := 0;
    a := rrc_comun(a);
    compose_flags;
    inc(t_states,4);

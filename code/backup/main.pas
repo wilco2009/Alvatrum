@@ -1366,12 +1366,10 @@ end;
 procedure TSpecEmu.ButtonEjectMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  pause_emulation;
 end;
 
 procedure TSpecEmu.ButtonEjectMouseLeave(Sender: TObject);
 begin
-  restart_emulation;
 end;
 
 procedure TSpecEmu.ButtonFireChange(Sender: TObject);
@@ -2093,6 +2091,10 @@ begin
   AYCHA.enabled := ckAYSound.Checked;
   AYCHB.enabled := false;
   AYCHC.enabled := false;
+  if ckAYSound.Checked then
+     AudioOut.Resume
+  else
+      AudioOut.Pause;
 end;
 
 procedure TSpecEmu.FormChangeBounds(Sender: TObject);
@@ -2447,9 +2449,9 @@ end;
 
 procedure TSpecEmu.restart_emulation;
 begin
-  if not debugging then
+  if not debugging and ckAYSound.checked then
   begin
-    AudioOut.Run();
+    AudioOut.resume();
     pause := false;
   end;
 end;
@@ -2471,7 +2473,7 @@ end;
 
 procedure TSpecEmu.pause_emulation;
 begin
-  AudioOut.stop();
+  AudioOut.pause();
   pause := true;
 end;
 
@@ -2859,9 +2861,12 @@ begin
       //  tini := GetTickCount64;
       //  cc := 0;
       //end;
-      Run_AY_Channel(AYCHA);
-      Run_AY_Channel(AYCHB);
-      Run_AY_Channel(AYCHC);
+      if ckAYSound.checked then
+      begin
+        Run_AY_Channel(AYCHA);
+        Run_AY_Channel(AYCHB);
+        Run_AY_Channel(AYCHC);
+      end;
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
       ss := ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
                                    AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
@@ -2919,10 +2924,9 @@ procedure TSpecEmu.DefaultOptions;
 begin
   // Default Options
   options.machine := Spectrum48;
-  options.joystick_Protocol := joyp_kempston;
-  options.joystick_Protocol := joyp_kempston;
-  options.JL_Type := joyt_cursor;
-  options.JR_Type := joyt_cursor;
+  options.joystick_Protocol := joyp_none;
+  options.JL_Type := joyt_none;
+  options.JR_Type := joyt_none;
   AssignUserButton(user_up,VK_Q);
   AssignUserButton(user_down,VK_A);
   AssignUserButton(user_left,VK_O);
@@ -2939,8 +2943,8 @@ begin
   options.ROMFilename[1,3]:='';
   options.ROMFilename[2,0]:='ROM\plus2ROM0.rom';
   options.ROMFilename[2,1]:='ROM\plus2ROM1.rom';
-  options.ROMFilename[2,2]:='ROM\plus2ROM0.rom';
-  options.ROMFilename[2,3]:='ROM\plus2ROM1.rom';
+  options.ROMFilename[2,2]:='';
+  options.ROMFilename[2,3]:='';
   options.ROMFilename[3,0]:='ROM\plus3ROM0_4-1.rom';
   options.ROMFilename[3,1]:='ROM\plus3ROM1_4-1.rom';
   options.ROMFilename[3,2]:='ROM\plus3ROM2_4-1.rom';
@@ -3004,7 +3008,7 @@ begin
          showmessage('Error reading options file');
     end;
   end else DefaultOptions;
-
+  UpdateJoystickPanels;
 end;
 
 procedure TSpecEmu.FormActivate(Sender: TObject);
@@ -3414,8 +3418,10 @@ end;
 
 procedure TSpecEmu.Timer2Timer(Sender: TObject);
 begin
-  Audioout.Resume();
-  pause := false;
+  if ckAYSound.checked then
+     Audioout.Resume();
+  if not debugging then
+     pause := false;
   Timer2.Enabled := false;
 end;
 

@@ -24,7 +24,7 @@ const
   //screen_testados_linea=224;
   //screen_testados_total=screen_testados_linea*screen_scanlines;
   screen_testados_total=70000;
-  scanline_testados = 208; //208;// zesarux=224//208; //screen_testados_total div 334;//312;
+  scanline_testados = 199; //208;// zesarux=224//208; //screen_testados_total div 334;//312;
   screen_tstates_half_scanline = scanline_testados;
 
   MAX_TAPE_BLOCKS = 99;
@@ -68,7 +68,7 @@ type
     data: array[0..7014] of byte;
     volume: byte;
     envelope_volume: boolean;
-    buffer: array[0..bufsize] of byte;
+    buffer: array[0..spec_buffer_size] of byte;
   end;
 
 var
@@ -94,7 +94,7 @@ var
   speaker_out: boolean = false;
   speaker_data: array[0..7014] of byte;
   AYCHA, AYCHB, AYCHC: TAYChannel;
-  speaker_buffer: array[0..bufsize] of byte;
+  speaker_buffer: array[0..spec_buffer_size] of byte;
   sound_bytes: longint = 0;
   prev_sound_bytes: longint = 0;
   //nb: byte = 0;
@@ -203,6 +203,22 @@ end;
 procedure RUN_AY_Channel(var AYCH: TAYChannel);
 var
   vv: byte;
+  function decsound: byte;
+  begin
+    if AYCH.env.period = 0 then
+       decsound := 0
+    else
+        decsound := 15-(16*AYCH.env.counter div AYCH.env.period);
+  end;
+
+  function incsound: byte;
+  begin
+    if AYCH.env.period = 0 then
+       incsound := 0
+    else
+        incsound := (16*AYCH.env.counter div AYCH.env.period)
+  end;
+
 begin
   with AYCH do
   begin
@@ -251,26 +267,26 @@ begin
         case env.typ of
            0,9:
              if env.starting then
-               env.value := 15-(16*env.counter div AYCH.env.period)
+               env.value := decsound
              else
                env.value := 0; //128;
            11:
              if env.starting then
-               env.value := 15-(16*env.counter div AYCH.env.period)
+               env.value := decsound
              else
                env.value := {128+}64;
            4,15:
               if env.starting then
-                 env.value := (16*env.counter div AYCH.env.period)
+                 env.value := incsound
               else
                  env.value := 0;//128;
            13:
               if env.starting then
-                 env.value := (16*env.counter div AYCH.env.period)
+                 env.value := incsound
               else
                  env.value := {128+}64;
-           8,10: env.value := 15-(16*env.counter div AYCH.env.period);
-           12,14: env.value := (16*env.counter div AYCH.env.period);
+           8,10: env.value := decsound;
+           12,14: env.value := incsound;
         end;
       end else begin
         case env.typ of
@@ -506,6 +522,8 @@ begin
      begin
         v := v and Keyboard[3]; // 1 2 3 4 5
         v := v and SinclairLeft;
+        if v and 1 = 0 then
+           a := a;
      end;
      if (hport and %00010000) = 0 then
      begin

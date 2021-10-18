@@ -70,6 +70,10 @@ beta version 0.1.01
 corrected bugs in z80 loading procedure
 modified default options
 
+beta version 0.1.02
+solved bug in z80 instruction ex (sp),ix/iy - Tirnanog now works
+solved bug in z80 instructions ld a,ixh and ld a,ixl - Rambo III and Renegade II now works
+
 TO DO:
 tape reading tzx
 memory contention

@@ -203,6 +203,22 @@ end;
 procedure RUN_AY_Channel(var AYCH: TAYChannel);
 var
   vv: byte;
+  function decsound: byte;
+  begin
+    if AYCH.env.period = 0 then
+       decsound := 0
+    else
+        decsound := 15-(16*AYCH.env.counter div AYCH.env.period);
+  end;
+
+  function incsound: byte;
+  begin
+    if AYCH.env.period = 0 then
+       incsound := 0
+    else
+        incsound := (16*AYCH.env.counter div AYCH.env.period)
+  end;
+
 begin
   with AYCH do
   begin
@@ -251,26 +267,26 @@ begin
         case env.typ of
            0,9:
              if env.starting then
-               env.value := 15-(16*env.counter div AYCH.env.period)
+               env.value := decsound
              else
                env.value := 0; //128;
            11:
              if env.starting then
-               env.value := 15-(16*env.counter div AYCH.env.period)
+               env.value := decsound
              else
                env.value := {128+}64;
            4,15:
               if env.starting then
-                 env.value := (16*env.counter div AYCH.env.period)
+                 env.value := incsound
               else
                  env.value := 0;//128;
            13:
               if env.starting then
-                 env.value := (16*env.counter div AYCH.env.period)
+                 env.value := incsound
               else
                  env.value := {128+}64;
-           8,10: env.value := 15-(16*env.counter div AYCH.env.period);
-           12,14: env.value := (16*env.counter div AYCH.env.period);
+           8,10: env.value := decsound;
+           12,14: env.value := incsound;
         end;
       end else begin
         case env.typ of
@@ -506,6 +522,8 @@ begin
      begin
         v := v and Keyboard[3]; // 1 2 3 4 5
         v := v and SinclairLeft;
+        if v and 1 = 0 then
+           a := a;
      end;
      if (hport and %00010000) = 0 then
      begin

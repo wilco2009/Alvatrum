@@ -137,7 +137,6 @@ type
     Panel1: TPanel;
     GroupLeftJoystick: TRadioGroup;
     GroupMachine: TRadioGroup;
-    Panel2: TPanel;
     Panel3: TPanel;
     pDebug1: TPanel;
     pDebug2: TPanel;
@@ -2091,6 +2090,10 @@ begin
   AYCHA.enabled := ckAYSound.Checked;
   AYCHB.enabled := false;
   AYCHC.enabled := false;
+  if ckAYSound.Checked then
+     AudioOut.Resume
+  else
+      AudioOut.Pause;
 end;
 
 procedure TSpecEmu.FormChangeBounds(Sender: TObject);
@@ -2445,7 +2448,7 @@ end;
 
 procedure TSpecEmu.restart_emulation;
 begin
-  if not debugging then
+  if not debugging and ckAYSound.checked then
   begin
     AudioOut.resume();
     pause := false;
@@ -2857,9 +2860,12 @@ begin
       //  tini := GetTickCount64;
       //  cc := 0;
       //end;
-      Run_AY_Channel(AYCHA);
-      Run_AY_Channel(AYCHB);
-      Run_AY_Channel(AYCHC);
+      if ckAYSound.checked then
+      begin
+        Run_AY_Channel(AYCHA);
+        Run_AY_Channel(AYCHB);
+        Run_AY_Channel(AYCHC);
+      end;
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
       ss := ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
                                    AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
@@ -3411,8 +3417,10 @@ end;
 
 procedure TSpecEmu.Timer2Timer(Sender: TObject);
 begin
-  Audioout.Resume();
-  pause := false;
+  if ckAYSound.checked then
+     Audioout.Resume();
+  if not debugging then
+     pause := false;
   Timer2.Enabled := false;
 end;
 
