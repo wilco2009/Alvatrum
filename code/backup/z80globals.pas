@@ -34,7 +34,7 @@ var
      NMI: boolean;
    end;
    // Mem: Array[0..65535] of byte;
-   MemP: Array[0..34,0..$3FFF] of byte; // absolute Mem;
+   MemP: Array[0..35,0..$3FFF] of byte; // absolute Mem;
    Mem_banks: array[0..3] of byte = (0,1,2,3);
    disable_pagging: boolean = false;
    registers: Array[0..15] of byte;
@@ -72,6 +72,7 @@ var
    halted: boolean;
    t_states, t_states_ini_frame, t_states_cur_frame: int64;
    real_time, sp_time: qword;
+   rom_bank: byte = 0;
 
 
    intpend: boolean = false;
@@ -124,12 +125,33 @@ var
    function mem_page(x: word): word;
    function mem_offset(x: word): word;
    procedure reset_memory_banks;
+   procedure select_rom;
+   function PageToStr(page: byte): string;
 
 
 implementation
 
+function PageToStr(page: byte): string;
+begin
+  if page < 32 then
+    PageToStr := 'RAM'+ IntToStr(page)
+  else
+    PageToStr := 'ROM'+ IntToStr(page-32);
+end;
+
+procedure select_rom;
+begin
+  case rom_bank of
+    0: Mem_banks[0] := ROMPAGE0;
+    1: Mem_banks[0] := ROMPAGE1;
+    2: Mem_banks[0] := ROMPAGE2;
+    3: Mem_banks[0] := ROMPAGE3;
+  end;
+end;
+
 procedure reset_memory_banks;
 begin
+  rom_bank := 0;
   case options.machine of
     Spectrum48: begin
       Mem_banks[0] := ROMPAGE0;
@@ -140,8 +162,8 @@ begin
     Spectrum128,Spectrum_plus2,Spectrum_plus2a,Spectrum_plus3: begin
       Mem_banks[0] := ROMPAGE0;
       Mem_banks[1] := SCREENPAGE;
-      Mem_banks[2] := SHADOWPAGE;
-      Mem_banks[3] := 3;
+      Mem_banks[2] := 2;
+      Mem_banks[3] := 0;
     end;
   end;
 end;
@@ -427,11 +449,11 @@ begin
     antes := reg;
     res := reg+op;
 
-    lookup := ( (  (reg) and $0800 ) >> 11 ) or
+    lookup := byte(( (  (reg) and $0800 ) >> 11 ) or
              ( (  (op) and $0800 ) >> 10 ) or
-             ( (   res and $0800 ) >>  9 );
+             ( (   res and $0800 ) >>  9 ));
 
-    t := (res >> 8) and $ff;
+    t := byte((res >> 8) and $ff);
 //    if res > $ffff then
 //       c_flag := FLAG_C
 //    else

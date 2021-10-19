@@ -1,9 +1,9 @@
 object SpecEmu: TSpecEmu
-  Left = 1007
+  Left = 224
   Height = 659
-  Top = 323
+  Top = 272
   Width = 1039
-  Caption = 'Alvatrum Beta 0.1.02'
+  Caption = 'Alvatrum Beta 0.1.03'
   ClientHeight = 659
   ClientWidth = 1039
   DesignTimePPI = 120
@@ -2421,6 +2421,24 @@ object SpecEmu: TSpecEmu
           TabOrder = 4
         end
       end
+      object ButtonCursorFire: TToggleBox
+        Left = 112
+        Height = 17
+        Hint = 'Cursor Fire (Default CTRL)'
+        Top = 56
+        Width = 17
+        Color = clSkyBlue
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        OnChange = ButtonUpChange
+        ParentFont = False
+        TabOrder = 1
+        Visible = False
+      end
     end
     object CheckGroup1: TCheckGroup
       Left = 5
@@ -2623,6 +2641,15 @@ object SpecEmu: TSpecEmu
       TabOrder = 11
       Transparent = False
     end
+    object StaticText14: TStaticText
+      Left = 129
+      Height = 21
+      Top = 291
+      Width = 121
+      AutoSize = True
+      Caption = 'Cursor Fire = CTRL'
+      TabOrder = 12
+    end
   end
   object DebugPanel: TPanel
     Left = 256
@@ -2640,282 +2667,6 @@ object SpecEmu: TSpecEmu
     ParentFont = False
     TabOrder = 5
     Visible = False
-    object pDebug2: TPanel
-      Left = 3
-      Height = 206
-      Top = 104
-      Width = 461
-      ClientHeight = 206
-      ClientWidth = 461
-      TabOrder = 25
-      Visible = False
-      object GroupBox4: TGroupBox
-        Left = 4
-        Height = 123
-        Top = 5
-        Width = 132
-        Caption = 'Memory Pages'
-        ClientHeight = 103
-        ClientWidth = 128
-        TabOrder = 0
-        object MemPages: TStringGrid
-          Left = 2
-          Height = 64
-          Top = 0
-          Width = 114
-          AutoEdit = False
-          ColCount = 2
-          Columns = <          
-            item
-              Title.Caption = 'Title'
-              Width = 40
-            end>
-          DefaultColWidth = 70
-          DefaultRowHeight = 15
-          FixedRows = 0
-          RowCount = 4
-          TabOrder = 0
-        end
-        object stScreenPage: TStaticText
-          Left = 3
-          Height = 16
-          Top = 64
-          Width = 84
-          AutoSize = True
-          Caption = 'stScreenPage'
-          TabOrder = 1
-        end
-        object stPaggingDisabled: TStaticText
-          Left = 3
-          Height = 16
-          Top = 80
-          Width = 119
-          AutoSize = True
-          Caption = 'stPaggingDisabled'
-          TabOrder = 2
-        end
-      end
-      object stdiskMotor: TStaticText
-        Left = 152
-        Height = 16
-        Top = 9
-        Width = 77
-        AutoSize = True
-        Caption = 'stdiskMotor'
-        TabOrder = 1
-      end
-      object stPrinterStrobe: TStaticText
-        Left = 152
-        Height = 16
-        Top = 24
-        Width = 105
-        AutoSize = True
-        Caption = 'stPrinterStrobe'
-        TabOrder = 2
-      end
-      object GroupBox5: TGroupBox
-        Left = 311
-        Height = 115
-        Top = 10
-        Width = 127
-        Caption = 'Port status'
-        ClientHeight = 95
-        ClientWidth = 123
-        TabOrder = 3
-        object stportout7ffd: TStaticText
-          Left = 40
-          Height = 16
-          Top = 24
-          Width = 28
-          AutoSize = True
-          Caption = '7FFD'
-          TabOrder = 0
-        end
-        object stportout1ffd: TStaticText
-          Left = 40
-          Height = 16
-          Top = 38
-          Width = 28
-          AutoSize = True
-          Caption = '1FFD'
-          TabOrder = 1
-        end
-        object stportoutfffd: TStaticText
-          Left = 40
-          Height = 16
-          Top = 52
-          Width = 28
-          AutoSize = True
-          Caption = 'FFFD'
-          TabOrder = 2
-        end
-        object stportoutbffd: TStaticText
-          Left = 40
-          Height = 16
-          Top = 66
-          Width = 28
-          AutoSize = True
-          Caption = 'BFFD'
-          TabOrder = 3
-        end
-        object stportinfffd: TStaticText
-          Left = 80
-          Height = 16
-          Top = 52
-          Width = 28
-          AutoSize = True
-          Caption = 'FFFD'
-          TabOrder = 4
-        end
-        object StaticText7: TStaticText
-          Left = 0
-          Height = 16
-          Top = 24
-          Width = 28
-          AutoSize = True
-          Caption = '7FFD'
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          TabOrder = 5
-        end
-        object StaticText8: TStaticText
-          Left = 0
-          Height = 16
-          Top = 38
-          Width = 28
-          AutoSize = True
-          Caption = '1FFD'
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          TabOrder = 6
-        end
-        object StaticText9: TStaticText
-          Left = 0
-          Height = 16
-          Top = 52
-          Width = 28
-          AutoSize = True
-          Caption = 'FFFD'
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          TabOrder = 7
-        end
-        object StaticText10: TStaticText
-          Left = 0
-          Height = 16
-          Top = 66
-          Width = 28
-          AutoSize = True
-          Caption = 'BFFD'
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          TabOrder = 8
-        end
-        object StaticText11: TStaticText
-          Left = 44
-          Height = 16
-          Top = -3
-          Width = 21
-          AutoSize = True
-          Caption = 'OUT'
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          TabOrder = 9
-        end
-        object StaticText12: TStaticText
-          Left = 87
-          Height = 16
-          Top = -3
-          Width = 14
-          AutoSize = True
-          Caption = 'IN'
-          DoubleBuffered = False
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          ParentDoubleBuffered = False
-          TabOrder = 10
-        end
-        object StaticText13: TStaticText
-          Left = 0
-          Height = 16
-          Top = 10
-          Width = 28
-          AutoSize = True
-          Caption = 'xxFE'
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -13
-          Font.Name = 'Consolas'
-          Font.Pitch = fpFixed
-          Font.Quality = fqDraft
-          Font.Style = [fsBold]
-          ParentFont = False
-          TabOrder = 11
-        end
-        object stportoutFE: TStaticText
-          Left = 40
-          Height = 16
-          Top = 10
-          Width = 28
-          AutoSize = True
-          Caption = 'xxFE'
-          TabOrder = 12
-        end
-        object stportinFE: TStaticText
-          Left = 80
-          Height = 16
-          Top = 10
-          Width = 28
-          AutoSize = True
-          Caption = 'xxFE'
-          TabOrder = 13
-        end
-      end
-      object stSamples: TStaticText
-        Left = 4
-        Height = 21
-        Top = 136
-        Width = 52
-        Caption = 'Buffer'
-        TabOrder = 4
-      end
-    end
     object pDebug1: TPanel
       Left = 1
       Height = 206
@@ -3291,6 +3042,282 @@ object SpecEmu: TSpecEmu
           OnChange = AsciiSelectionChange
           TabOrder = 4
         end
+      end
+    end
+    object pDebug2: TPanel
+      Left = 3
+      Height = 206
+      Top = 104
+      Width = 461
+      ClientHeight = 206
+      ClientWidth = 461
+      TabOrder = 25
+      Visible = False
+      object GroupBox4: TGroupBox
+        Left = 4
+        Height = 123
+        Top = 5
+        Width = 132
+        Caption = 'Memory Pages'
+        ClientHeight = 103
+        ClientWidth = 128
+        TabOrder = 0
+        object MemPages: TStringGrid
+          Left = 2
+          Height = 64
+          Top = 0
+          Width = 114
+          AutoEdit = False
+          ColCount = 2
+          Columns = <          
+            item
+              Title.Caption = 'Title'
+              Width = 40
+            end>
+          DefaultColWidth = 70
+          DefaultRowHeight = 15
+          FixedRows = 0
+          RowCount = 4
+          TabOrder = 0
+        end
+        object stScreenPage: TStaticText
+          Left = 3
+          Height = 16
+          Top = 64
+          Width = 84
+          AutoSize = True
+          Caption = 'stScreenPage'
+          TabOrder = 1
+        end
+        object stPaggingDisabled: TStaticText
+          Left = 3
+          Height = 16
+          Top = 80
+          Width = 119
+          AutoSize = True
+          Caption = 'stPaggingDisabled'
+          TabOrder = 2
+        end
+      end
+      object stdiskMotor: TStaticText
+        Left = 152
+        Height = 16
+        Top = 9
+        Width = 77
+        AutoSize = True
+        Caption = 'stdiskMotor'
+        TabOrder = 1
+      end
+      object stPrinterStrobe: TStaticText
+        Left = 152
+        Height = 16
+        Top = 24
+        Width = 105
+        AutoSize = True
+        Caption = 'stPrinterStrobe'
+        TabOrder = 2
+      end
+      object GroupBox5: TGroupBox
+        Left = 311
+        Height = 115
+        Top = 10
+        Width = 127
+        Caption = 'Port status'
+        ClientHeight = 95
+        ClientWidth = 123
+        TabOrder = 3
+        object stportout7ffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 24
+          Width = 28
+          AutoSize = True
+          Caption = '7FFD'
+          TabOrder = 0
+        end
+        object stportout1ffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 38
+          Width = 28
+          AutoSize = True
+          Caption = '1FFD'
+          TabOrder = 1
+        end
+        object stportoutfffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 52
+          Width = 28
+          AutoSize = True
+          Caption = 'FFFD'
+          TabOrder = 2
+        end
+        object stportoutbffd: TStaticText
+          Left = 40
+          Height = 16
+          Top = 66
+          Width = 28
+          AutoSize = True
+          Caption = 'BFFD'
+          TabOrder = 3
+        end
+        object stportinfffd: TStaticText
+          Left = 80
+          Height = 16
+          Top = 52
+          Width = 28
+          AutoSize = True
+          Caption = 'FFFD'
+          TabOrder = 4
+        end
+        object StaticText7: TStaticText
+          Left = 0
+          Height = 16
+          Top = 24
+          Width = 28
+          AutoSize = True
+          Caption = '7FFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 5
+        end
+        object StaticText8: TStaticText
+          Left = 0
+          Height = 16
+          Top = 38
+          Width = 28
+          AutoSize = True
+          Caption = '1FFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 6
+        end
+        object StaticText9: TStaticText
+          Left = 0
+          Height = 16
+          Top = 52
+          Width = 28
+          AutoSize = True
+          Caption = 'FFFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 7
+        end
+        object StaticText10: TStaticText
+          Left = 0
+          Height = 16
+          Top = 66
+          Width = 28
+          AutoSize = True
+          Caption = 'BFFD'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 8
+        end
+        object StaticText11: TStaticText
+          Left = 44
+          Height = 16
+          Top = -3
+          Width = 21
+          AutoSize = True
+          Caption = 'OUT'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 9
+        end
+        object StaticText12: TStaticText
+          Left = 87
+          Height = 16
+          Top = -3
+          Width = 14
+          AutoSize = True
+          Caption = 'IN'
+          DoubleBuffered = False
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          ParentDoubleBuffered = False
+          TabOrder = 10
+        end
+        object StaticText13: TStaticText
+          Left = 0
+          Height = 16
+          Top = 10
+          Width = 28
+          AutoSize = True
+          Caption = 'xxFE'
+          Font.CharSet = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Consolas'
+          Font.Pitch = fpFixed
+          Font.Quality = fqDraft
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 11
+        end
+        object stportoutFE: TStaticText
+          Left = 40
+          Height = 16
+          Top = 10
+          Width = 28
+          AutoSize = True
+          Caption = 'xxFE'
+          TabOrder = 12
+        end
+        object stportinFE: TStaticText
+          Left = 80
+          Height = 16
+          Top = 10
+          Width = 28
+          AutoSize = True
+          Caption = 'xxFE'
+          TabOrder = 13
+        end
+      end
+      object stSamples: TStaticText
+        Left = 4
+        Height = 21
+        Top = 136
+        Width = 52
+        Caption = 'Buffer'
+        TabOrder = 4
       end
     end
     object FlagsPanel: TPanel

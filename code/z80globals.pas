@@ -449,11 +449,11 @@ begin
     antes := reg;
     res := reg+op;
 
-    lookup := ( (  (reg) and $0800 ) >> 11 ) or
+    lookup := byte(( (  (reg) and $0800 ) >> 11 ) or
              ( (  (op) and $0800 ) >> 10 ) or
-             ( (   res and $0800 ) >>  9 );
+             ( (   res and $0800 ) >>  9 ));
 
-    t := (res >> 8) and $ff;
+    t := byte((res >> 8) and $ff);
 //    if res > $ffff then
 //       c_flag := FLAG_C
 //    else
@@ -471,7 +471,7 @@ begin
 ////    f := f or h_ or carry;
 
     set_undocumented_flags_bits(t);
-    set_flags_carry_16_suma(antes,res);
+    set_flags_carry_16_suma(word(antes),word(res));
 
     h_flag := halfcarry_add_table[lookup];
     n_flag := 0;

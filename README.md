@@ -74,6 +74,18 @@ beta version 0.1.02
 solved bug in z80 instruction ex (sp),ix/iy - Tirnanog now works
 solved bug in z80 instructions ld a,ixh and ld a,ixl - Rambo III and Renegade II now works
 
+beta version 0.1.02
+solved a bug when screen page 7 is active
+opcodes $82 and $83 fixed - La Abadia del Crimen now works
+
+beta version 0.1.03
+Fixed a bug in the loading path procedure
+following games works now:
+Robocop
+Rtype now loads but work with trash in the screen
+Addams Family
+
+
 TO DO:
 tape reading tzx
 memory contention

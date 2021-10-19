@@ -377,6 +377,15 @@ begin
   border_color := 7;
   clear_keyboard;
   screen_page := Mem_banks[1];
+  last_out_7ffd := 0;
+  last_out_1ffd := 0;
+  last_out_fffd := 0;
+  last_out_bffd := 0;
+  last_in_fffd  := 0;
+  last_in_fe    := 0;
+  last_out_fe   := 0;
+  disk_motor    := false;
+  printer_strobe:= false;
 end;
 
 procedure spectrum_out(port: word; v: byte);

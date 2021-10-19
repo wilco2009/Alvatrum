@@ -41,6 +41,7 @@ Type
     JL_Type,JR_Type: TJoystickType;
     user_keys: TUser_buttons;
     ROMFilename: array[0..10,0..3] of string[100];
+    cursorfire: word;
   end;
 
 var

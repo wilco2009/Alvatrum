@@ -104,7 +104,7 @@ procedure EX_reg_reg(var reg1: word; var reg2: word);
 procedure EX_af_af1;
 procedure EX_mem_reg(addr: word; var reg: word);
 procedure EX_mem_hl;
-procedure EX_mem_ixiy(reg: word);
+procedure EX_mem_ixiy(var reg: word);
 procedure EXX;
 
 //LD
@@ -614,7 +614,7 @@ var
 begin
   set_undocumented_flags_bits(v);
   antes := a;
-  result := a-v;
+  result := byte(integer(a)-v);
   set_flags_zero_sign(result);
   set_flags_carry_resta(antes,result);
   set_flags_overflow_resta(antes,result);
@@ -1477,7 +1477,7 @@ end;
 
 procedure add_reg16_reg16(var reg1: word; reg2: word);
 begin
-  reg1 := add_16bit(reg1, reg2);
+  reg1 := word(add_16bit(reg1, reg2));
   inc(t_states, 11);
 end;
 
@@ -1601,11 +1601,11 @@ var
   h: byte;
   result_32bit: dword;
 begin
-  result_32bit := reg-value-c_flag;
+  result_32bit := dword(reg-value-c_flag);
 
-  lookup := ((reg and $8800 )>>11)
+  lookup := (word((reg and $8800 )>>11))
          or ((value and $8800 )>>10)
-         or ((result_32bit and $8800)>>9);
+         or (word(result_32bit and $8800)>>9);
 
 
   result16 := result_32bit and 65535;

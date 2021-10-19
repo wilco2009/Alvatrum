@@ -24,7 +24,7 @@ const
   //screen_testados_linea=224;
   //screen_testados_total=screen_testados_linea*screen_scanlines;
   screen_testados_total=70000;
-  scanline_testados = 199; //208;// zesarux=224//208; //screen_testados_total div 334;//312;
+  scanline_testados = 208; //208;// zesarux=224//208; //screen_testados_total div 334;//312;
   screen_tstates_half_scanline = scanline_testados;
 
   MAX_TAPE_BLOCKS = 99;
@@ -377,6 +377,15 @@ begin
   border_color := 7;
   clear_keyboard;
   screen_page := Mem_banks[1];
+  last_out_7ffd := 0;
+  last_out_1ffd := 0;
+  last_out_fffd := 0;
+  last_out_bffd := 0;
+  last_in_fffd  := 0;
+  last_in_fe    := 0;
+  last_out_fe   := 0;
+  disk_motor    := 0;
+  printer_strobe:= 0;
 end;
 
 procedure spectrum_out(port: word; v: byte);

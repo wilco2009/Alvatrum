@@ -630,8 +630,8 @@ begin
          $87: addareg(a);                  // ADD A,A
          $88: adcareg(b);                  // ADC A,B
          $89: adcareg(c);                  // ADC A,C
-         $8a: adcareg(e);                  // ADC A,D
-         $8b: adcareg(r);                  // ADC A,E
+         $8a: adcareg(d);                  // ADC A,D
+         $8b: adcareg(e);                  // ADC A,E
          $8c: adcareg(h);                  // ADC A,H
          $8d: adcareg(l);                  // ADC A,L
          $8e: adca_mem8r(hl);              // ADC A,(HL)

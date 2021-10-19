@@ -51,6 +51,7 @@ type
     ButtonBlockdown: TBGRAResizeSpeedButton;
     ButtonBlockUp: TBGRAResizeSpeedButton;
     ButtonUp: TToggleBox;
+    ButtonUp1: TToggleBox;
     Button_a: TBGRAResizeSpeedButton;
     Button_CS_LOCK: TBGRAResizeSpeedButton;
     Button_F: TBGRAResizeSpeedButton;
@@ -137,7 +138,6 @@ type
     Panel1: TPanel;
     GroupLeftJoystick: TRadioGroup;
     GroupMachine: TRadioGroup;
-    Panel2: TPanel;
     Panel3: TPanel;
     pDebug1: TPanel;
     pDebug2: TPanel;
@@ -590,6 +590,7 @@ var
   OptionsWidth: integer = 0;
   buff: Array[0..$ffff] of byte;
   tmp_delay: longint = 5000;
+  status_saved: boolean;
 
 implementation
 
@@ -751,7 +752,7 @@ begin
       BlockRead(F, size, sizeof(size));
       BlockRead(F,BT,1);
       BlockRead(F, buff, size-1);
-      if BT = flag then
+      if (BT = flag) or ((BT <>0) and (flag <>0)) then
       begin
            for k := 0 to len-1 do
                wrmem(addr+k,buff[k]);
@@ -2667,6 +2668,7 @@ begin
   init_spectrum;
   init_z80(coldbootrequired);
   reset_memory_banks;
+  status_saved := false;
   pc := 0;
   if pause then begin
     draw_screen;
@@ -2800,11 +2802,9 @@ begin
   init_spectrum;
   reset_memory_banks;
   draw_screen;
-  //screen_timer.Start;
   repaint_screen := false;
   prev_sound_bytes := sound_bytes;
-  //tini := GetTickCount64;
-  //cc := 0;
+  status_saved := false;
   while (not saliendo) do begin
     if not pause and (breakpoint_active) and ((breakpoint = pc) and not empezando) then begin
        start_debug;
@@ -2816,29 +2816,42 @@ begin
           ((options.machine = spectrum_plus2)   and (Mem_banks[0]=ROMPAGE1)) or
           ((options.machine >= spectrum_plus2a) and (Mem_banks[0]=ROMPAGE3));
 
-       if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6))) and basicrom then
+       if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6)))
+          and not status_saved and basicrom then
+       begin
+          status_saved := true;
           save_cpu_status;
+       end;
        if (pc >= $04c2) and (pc <= $04d8) and TapeRecLed.Visible and basicrom then // SAVE ROUTINE
        begin
-            restore_cpu_status;
-            c_flag := Save_tape_block(IX,DE,A);
-            compose_flags;
-            ret;
-            clear_keyboard;
+          if status_saved then
+             restore_cpu_status;
+          status_saved := false;
+          c_flag := Save_tape_block(IX,DE,A);
+          compose_flags;
+          ret;
+          clear_keyboard;
+          Application.ProcessMessages;
        end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible and basicrom then // LOAD ROUTINE
        begin
-          restore_cpu_status;
+         Application.ProcessMessages;
+          if status_saved then
+             restore_cpu_status;
+          status_saved := false;
           c_flag := Load_Tape_block(IX, DE, A); // IX: Addr; DE: Len; A: Flag byte
           compose_flags;
           ix+=de;
           ret;
           clear_keyboard;
-       end else if not screen_tstates_reached or step then do_z80;
+          Application.ProcessMessages;
+       end else if not screen_tstates_reached or step then
+           do_z80;
        if pause then
        begin
           stInstruction.caption := decode_instruction(pc);
           refresh_registers;
           draw_screen;
+          Application.ProcessMessages;
        end;
        step := false;
     end;
@@ -2854,13 +2867,6 @@ begin
     t_states_prev_instruction := t_states;
     if t_states_cur_half_scanline >= t_states_sound_bit then
     begin
-      //inc(cc);
-      //if cc = 16500 then
-      //begin
-      //  tt := GetTickCount64-tini;
-      //  tini := GetTickCount64;
-      //  cc := 0;
-      //end;
       if ckAYSound.checked then
       begin
         Run_AY_Channel(AYCHA);
@@ -3536,7 +3542,7 @@ procedure TSpecEmu.draw_screen;
 
     function rdshadow(addr: word): byte;
     begin
-      rdshadow := memp[7,addr and $4000];
+      rdshadow := memp[7,addr and $3FFF];
     end;
 
 begin

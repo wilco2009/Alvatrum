@@ -1,9 +1,9 @@
 object SpecEmu: TSpecEmu
-  Left = 1007
+  Left = 107
   Height = 659
-  Top = 323
+  Top = 354
   Width = 1039
-  Caption = 'Alvatrum Beta 0.1.02'
+  Caption = 'Alvatrum Beta 0.1.03'
   ClientHeight = 659
   ClientWidth = 1039
   DesignTimePPI = 120
@@ -2763,7 +2763,7 @@ object SpecEmu: TSpecEmu
           end
           object src_ix: TRadioButton
             Left = 6
-            Height = 18
+            Height = 19
             Top = 18
             Width = 39
             Caption = 'IX'
@@ -2778,7 +2778,7 @@ object SpecEmu: TSpecEmu
           object src_iy: TRadioButton
             Left = 6
             Height = 19
-            Top = 36
+            Top = 37
             Width = 39
             Caption = 'IY'
             Font.CharSet = ANSI_CHARSET
@@ -2788,14 +2788,6 @@ object SpecEmu: TSpecEmu
             OnChange = src_iyChange
             ParentFont = False
             TabOrder = 1
-          end
-          object Panel2: TPanel
-            Left = 6
-            Height = 1
-            Top = 55
-            Width = 39
-            Caption = 'Panel2'
-            TabOrder = 3
           end
         end
         object AsciiSelection: TCheckBox
@@ -3790,6 +3782,24 @@ object SpecEmu: TSpecEmu
           TabOrder = 4
         end
       end
+      object ButtonCursorFire: TToggleBox
+        Left = 112
+        Height = 17
+        Hint = 'Cursor Fire (Default CTRL)'
+        Top = 56
+        Width = 17
+        Color = clSkyBlue
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        OnChange = ButtonUpChange
+        ParentFont = False
+        TabOrder = 1
+        Visible = False
+      end
     end
     object CheckGroup1: TCheckGroup
       Left = 5
@@ -3991,6 +4001,15 @@ object SpecEmu: TSpecEmu
       ParentColor = False
       TabOrder = 11
       Transparent = False
+    end
+    object StaticText14: TStaticText
+      Left = 129
+      Height = 21
+      Top = 291
+      Width = 121
+      AutoSize = True
+      Caption = 'Cursor Fire = CTRL'
+      TabOrder = 12
     end
   end
   object Pantalla: TBGRAGraphicControl
