@@ -384,8 +384,8 @@ begin
   last_in_fffd  := 0;
   last_in_fe    := 0;
   last_out_fe   := 0;
-  disk_motor    := 0;
-  printer_strobe:= 0;
+  disk_motor    := false;
+  printer_strobe:= false;
 end;
 
 procedure spectrum_out(port: word; v: byte);
@@ -507,14 +507,20 @@ begin
        config_AY;
      end;
   end;
+  if fdc_present and ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3)) then
+  begin
+    // port $3ffd Bytes written to this port are sent to the FDC
+    if port and %1111000000000010 = %0011000000000000 then
+    begin
+      Handle_fdc(v,FROM_OUT);
+    end;
+  end;
 end;
 
 function spectrum_in(port: word): byte;
 var
   hport, lport, v: byte;
 begin
-  if rdmem(sp)=$79 then
-     a := a;
   v := $ff;
   hport := port >> 8;
   lport := port and $ff;
@@ -570,6 +576,28 @@ begin
   begin
      v := AY1.R[AY1.selreg];
      last_in_fffd := v;
+  end;
+  // port $2ffd Reading from this port will return the main status register of the uPD765A
+  // DB0 FDD 0 Busy
+  // DB1 FDD 1 Busy
+  // DB2 FDD 2 Busy
+  // DB3 FDD 3 Busy
+  // DB4 FDC Busy
+  // DB5 Execution Mode
+  // DB6 Data Input/Output
+  // DB7 Request for master
+  if fdc_present and ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))then
+  begin
+    // port $2ffd
+    if port and %1111000000000010 = %0010000000000000 then
+    begin
+      v := fdc.main_reg;
+    end;
+    // port $3ffd reading from this port will read bytes from the FDC
+    if port and %1111000000000010 = %0011000000000000 then
+    begin
+      Handle_fdc(v,false);
+    end;
   end;
   spectrum_in := v;
 end;

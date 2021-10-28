@@ -85,6 +85,15 @@ Robocop
 Rtype now loads but work with trash in the screen
 Addams Family
 
+beta version 0.1.04
+Fixed a bug in the loading path procedure
+following games works now:
+Fernando Martin Basket
+Hero Returns
+R-Type
+
+alfa version 0.1.05
+Spectrum +3 disk emulation in progress.....
 
 TO DO:
 tape reading tzx

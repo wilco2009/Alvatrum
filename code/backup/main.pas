@@ -31,23 +31,28 @@ type
     Button6: TButton;
     Button7: TButton;
     ButtonConf: TBGRAResizeSpeedButton;
+    ButtonCursorFire: TToggleBox;
     ButtonDeleteBlock: TBGRAResizeSpeedButton;
     ButtonDown: TToggleBox;
-    ButtonFire: TToggleBox;
-    ButtonLeft: TToggleBox;
-    ButtonRight: TToggleBox;
-    ButtonSnapLoad: TBGRAResizeSpeedButton;
-    ButtonSnapSave: TBGRAResizeSpeedButton;
-    ButtonTapeFirst: TBGRAResizeSpeedButton;
-    ButonTapeEnd: TBGRAResizeSpeedButton;
-    ButtonRew: TBGRAResizeSpeedButton;
-    ButtonFWD: TBGRAResizeSpeedButton;
     ButtonEject: TBGRAResizeSpeedButton;
-    ButtonStop: TBGRAResizeSpeedButton;
+    ButtonFire: TToggleBox;
+    ButtonFloppy: TBGRAResizeSpeedButton;
+    ButtonFloppy2: TBGRAResizeSpeedButton;
+    ButtonFWD: TBGRAResizeSpeedButton;
+    ButtonLeft: TToggleBox;
     ButtonPlay: TBGRAResizeSpeedButton;
     ButtonPlayPressed: TBGRAResizeSpeedButton;
     ButtonRec: TBGRAResizeSpeedButton;
     ButtonRecPressed: TBGRAResizeSpeedButton;
+    ButtonRew: TBGRAResizeSpeedButton;
+    ButtonRight: TToggleBox;
+    ButtonSnapLoad: TBGRAResizeSpeedButton;
+    ButtonSnapLoad1: TBGRAResizeSpeedButton;
+    ButtonSnapLoad2: TBGRAResizeSpeedButton;
+    ButtonSnapSave: TBGRAResizeSpeedButton;
+    ButtonStop: TBGRAResizeSpeedButton;
+    ButtonTapeFirst: TBGRAResizeSpeedButton;
+    ButonTapeEnd: TBGRAResizeSpeedButton;
     ButtonBlockdown: TBGRAResizeSpeedButton;
     ButtonBlockUp: TBGRAResizeSpeedButton;
     ButtonUp: TToggleBox;
@@ -112,7 +117,14 @@ type
     GroupJoystickProtocol: TRadioGroup;
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
+    driveA: TImage;
+    Image2: TImage;
     Image3: TImage;
+    driveAfloppy: TImage;
+    driveBFloppy: TImage;
+    driveALed: TImage;
+    driveB: TImage;
+    driveBLed: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -134,18 +146,20 @@ type
     labelI: TLabel;
     memgrid: TStringGrid;
     odROM: TOpenDialog;
+    DiskFileDialog: TOpenDialog;
     OpenSnaFileDialog: TOpenDialog;
     Panel1: TPanel;
     GroupLeftJoystick: TRadioGroup;
     GroupMachine: TRadioGroup;
+    panelFloppy: TPanel;
     Panel3: TPanel;
+    panelComputone: TPanel;
     pDebug1: TPanel;
     pDebug2: TPanel;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
     //screen_timer: TEpikTimer;
     Image1: TImage;
-    Image2: TImage;
     BlockGrid: TStringGrid;
     OpenTapFileDialog: TOpenDialog;
     PanelKeyboard: TPanel;
@@ -162,6 +176,11 @@ type
     StaticText11: TStaticText;
     StaticText12: TStaticText;
     StaticText13: TStaticText;
+    StaticText14: TStaticText;
+    StaticText15: TStaticText;
+    StaticText16: TStaticText;
+    StaticText17: TStaticText;
+    StaticText18: TStaticText;
     StaticText2: TStaticText;
     StaticText3: TStaticText;
     StaticText4: TStaticText;
@@ -213,11 +232,12 @@ type
     stStack: TStaticText;
     stTstates: TStaticText;
     stTstatesFrame: TStaticText;
-    TapeRecLed: TShape;
     TapeFileName: TStaticText;
+    TapeImage: TImage;
     TapePanel: TPanel;
-    TapePlayLed: TShape;
     JoyTimer: TTimer;
+    TapePlayLed: TShape;
+    TapeRecLed: TShape;
     Timer2: TTimer;
     ZoomOutButton: TBitBtn;
     ZoomInButton: TBitBtn;
@@ -226,7 +246,6 @@ type
     PlayButton: TBitBtn;
     ResetButton: TBitBtn;
     StepButton: TBitBtn;
-    TapeImage: TImage;
     BottomButtonsPanel: TPanel;
     Timer1: TTimer;
     procedure ACSEarBufferDone(Sender: TComponent);
@@ -250,6 +269,7 @@ type
     procedure ButtonEjectMouseLeave(Sender: TObject);
     procedure ButtonFireChange(Sender: TObject);
     procedure ButtonFireClick(Sender: TObject);
+    procedure ButtonFloppyClick(Sender: TObject);
     procedure ButtonFWDClick(Sender: TObject);
     procedure ButtonLeftChange(Sender: TObject);
     procedure ButtonLeftClick(Sender: TObject);
@@ -261,6 +281,8 @@ type
     procedure ButtonRightChange(Sender: TObject);
     procedure ButtonRightClick(Sender: TObject);
     procedure ButtonRightExit(Sender: TObject);
+    procedure ButtonSnapLoad1Click(Sender: TObject);
+    procedure ButtonSnapLoad2Click(Sender: TObject);
     procedure ButtonSnapSaveClick(Sender: TObject);
     procedure ButtonSnapLoadClick(Sender: TObject);
     procedure ButtonTapeFirstClick(Sender: TObject);
@@ -503,6 +525,7 @@ type
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
   private
     saliendo, starting, pause, debugging, step, breakpoint_active: boolean;
+    AYActive: boolean;
     SS_Status: Byte;
     breakpoint, mem_addr: word;
     empezando : boolean;
@@ -567,6 +590,7 @@ type
     procedure ReadOptions(filename: string);
     procedure ReadROM;
     procedure ReadROMPage(Machine: Tmachine; ROMPage, Membank: byte);
+    procedure read_dsk_file(drive: byte);
   public
 
   end;
@@ -1387,6 +1411,38 @@ begin
   ButtonFire.Checked := false;
 end;
 
+procedure TSpecemu.read_dsk_file(drive: byte);
+var
+  FF: file;
+  tt,ss,hh: integer;
+begin
+  Assignfile(FF,diskFileDialog.FileName);
+  Reset(FF,1);
+  bsize_dsk[drive] := filesize(FF);
+  blockread(FF,buffer_dsk[drive],bsize_dsk[drive]);
+  closefile(ff);
+  getdiskinfo(drive);
+  for tt := 0 to disk_info[drive].tracks-1 do
+    for hh := 0 to disk_info[drive].sides-1 do
+    begin
+      getTrackblock(drive,hh,tt,track_block);
+      for ss := 0 to track_block.sectors-1 do
+      begin
+        getSectorBlock(drive,hh,tt,ss,sector_block);
+        getSectorData(drive,hh,tt,ss,sector_data);
+      end;
+    end;
+end;
+
+procedure TSpecEmu.ButtonFloppyClick(Sender: TObject);
+begin
+  if diskFileDialog.Execute then
+  begin
+     read_dsk_file(0);
+     DriveA_ready := true;
+  end;
+end;
+
 procedure TSpecEmu.ButtonFWDClick(Sender: TObject);
 begin
   Tape_Select(blockgrid.Row+1);
@@ -1455,6 +1511,18 @@ begin
   ButtonLeft.Checked := false;
   ButtonRight.Checked := false;
   ButtonFire.Checked := false;
+end;
+
+procedure TSpecEmu.ButtonSnapLoad1Click(Sender: TObject);
+begin
+  panelFloppy.Visible:=true;
+  panelComputone.Visible:=false;
+end;
+
+procedure TSpecEmu.ButtonSnapLoad2Click(Sender: TObject);
+begin
+  panelFloppy.Visible:=false;
+  panelComputone.Visible:=true;
 end;
 
 
@@ -2092,10 +2160,7 @@ begin
   AYCHA.enabled := ckAYSound.Checked;
   AYCHB.enabled := false;
   AYCHC.enabled := false;
-  if ckAYSound.Checked then
-     AudioOut.Resume
-  else
-      AudioOut.Pause;
+  AudioOut.Resume
 end;
 
 procedure TSpecEmu.FormChangeBounds(Sender: TObject);
@@ -2450,7 +2515,7 @@ end;
 
 procedure TSpecEmu.restart_emulation;
 begin
-  if not debugging and ckAYSound.checked then
+  if not debugging then
   begin
     AudioOut.resume();
     pause := false;
@@ -2666,6 +2731,7 @@ begin
   UpdateOptions;
   ReadROM;
   init_spectrum;
+  reset_fdc;
   init_z80(coldbootrequired);
   reset_memory_banks;
   status_saved := false;
@@ -2795,7 +2861,9 @@ var
    ii: word = 0;
    ss: word;
    basicrom: boolean;
-
+   flag: byte;
+   yadormido : boolean = false;
+   dummy: byte;
 begin
   AudioOut.Run();
   init_z80(true);
@@ -2836,16 +2904,24 @@ begin
        begin
          Application.ProcessMessages;
           if status_saved then
+          begin
              restore_cpu_status;
+             flag := A;
+          end else if pc = $562 then
+          begin
+               flag := A1;
+          end;
           status_saved := false;
-          c_flag := Load_Tape_block(IX, DE, A); // IX: Addr; DE: Len; A: Flag byte
+          spectrum_out($fe,A);                     // border color
+          c_flag := Load_Tape_block(IX, DE, Flag); // IX: Addr; DE: Len; A: Flag byte
           compose_flags;
           ix+=de;
           ret;
           clear_keyboard;
           Application.ProcessMessages;
        end else if not screen_tstates_reached or step then
-           do_z80;
+           do_z80
+       {else sleep(1)};
        if pause then
        begin
           stInstruction.caption := decode_instruction(pc);
@@ -2867,6 +2943,7 @@ begin
     t_states_prev_instruction := t_states;
     if t_states_cur_half_scanline >= t_states_sound_bit then
     begin
+      AYActive := ckAYSound.checked or AYMachine;
       if ckAYSound.checked then
       begin
         Run_AY_Channel(AYCHA);
@@ -2890,7 +2967,16 @@ begin
 //    time := screen_timer.Elapsed;
     screen_tstates_reached := (t_states_cur_frame >= screen_testados_total);
     repaint_screen := screen_tstates_reached and (sound_bytes <= 2048);//screen_timer.Elapsed >= 0.020;
-    if repaint_screen and screen_tstates_reached then begin
+    if screen_tstates_reached and not repaint_screen and not yadormido then
+    begin
+         sleep(1);
+         yadormido := true;
+    end;
+    if repaint_screen and screen_tstates_reached then
+    begin
+      //if frames mod 2 = 0 then
+      //   Handle_fdc(dummy, FROM_TIMER);
+      yadormido := false;
         prev_sound_bytes := sound_bytes;
         //screen_timer.clear;
         //screen_timer.start;
@@ -3424,8 +3510,7 @@ end;
 
 procedure TSpecEmu.Timer2Timer(Sender: TObject);
 begin
-  if ckAYSound.checked then
-     Audioout.Resume();
+  Audioout.Resume();
   if not debugging then
      pause := false;
   Timer2.Enabled := false;

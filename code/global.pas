@@ -47,6 +47,7 @@ Type
 var
   options: Toptions;
   coldbootrequired: boolean = false;
+  fdc_present: boolean = true;
 
 implementation
 

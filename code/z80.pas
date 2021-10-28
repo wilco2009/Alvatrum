@@ -488,6 +488,8 @@ begin
  //   ixoriy:=new_ixoriy;
  //   new_ixoriy:=0;
     // fetch opcode and execute
+    if (Mem_banks[0] = 34) and (pc >=$100) and (pc <= $19c) then
+       a := a;
     inc_register_r;
     pc_before := pc;
     opcode := fetch_pc;
