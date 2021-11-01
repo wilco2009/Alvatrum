@@ -277,11 +277,13 @@ end;
 
 procedure wrmem(x: word; y: byte);
 begin
-     if x >= 16384 then
-     begin
-        MemP[mem_page(x), mem_offset(x)] := y;
-        //Mem[x] := y;
-     end;
+  if (x = $e420) {or (x=$e2d1)} then
+    a := a;
+  if x >= 16384 then
+  begin
+    MemP[mem_page(x), mem_offset(x)] := y;
+    //Mem[x] := y;
+  end;
 end;
 
 
@@ -471,7 +473,7 @@ begin
 ////    f := f or h_ or carry;
 
     set_undocumented_flags_bits(t);
-    set_flags_carry_16_suma(antes,res);
+    set_flags_carry_16_suma(word(antes),word(res));
 
     h_flag := halfcarry_add_table[lookup];
     n_flag := 0;

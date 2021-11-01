@@ -95,6 +95,10 @@ R-Type
 alfa version 0.1.05
 Spectrum +3 disk emulation in progress.....
 
+alfa version 0.1.06
+Spectrum +3 disk emulation in progress.....
+some disks are working
+
 TO DO:
 tape reading tzx
 memory contention

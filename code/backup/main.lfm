@@ -1,11 +1,11 @@
 object SpecEmu: TSpecEmu
-  Left = 758
+  Left = 215
   Height = 659
-  Top = 332
-  Width = 1018
+  Top = 245
+  Width = 1177
   Caption = 'Alvatrum Beta 0.1.04'
   ClientHeight = 659
-  ClientWidth = 1018
+  ClientWidth = 1177
   DesignTimePPI = 120
   Icon.Data = {
     3E08010000000100010080800000010020002808010016000000280000008000
@@ -4597,6 +4597,51 @@ object SpecEmu: TSpecEmu
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 1
+    object BlockGrid: TStringGrid
+      Left = 184
+      Height = 304
+      Top = 0
+      Width = 200
+      Columns = <      
+        item
+          MinSize = 6
+          MaxSize = 125
+          Title.Caption = 'Block'
+          Width = 80
+        end      
+        item
+          MinSize = 8
+          MaxSize = 125
+          Title.Caption = 'Size'
+          Width = 40
+        end      
+        item
+          MinSize = 6
+          MaxSize = 125
+          Title.Caption = 'Typ'
+          Width = 40
+        end      
+        item
+          MinSize = 6
+          MaxSize = 125
+          Title.Caption = 'LEN'
+          Width = 25
+        end>
+      DefaultColWidth = 15
+      DefaultRowHeight = 18
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Consolas'
+      Font.Pitch = fpFixed
+      Font.Quality = fqDraft
+      MouseWheelOption = mwGrid
+      ParentFont = False
+      RowCount = 17
+      TabOrder = 0
+      OnAfterSelection = BlockGridAfterSelection
+      OnBeforeSelection = BlockGridBeforeSelection
+    end
     object panelComputone: TPanel
       Left = 0
       Height = 192
@@ -20410,10 +20455,10 @@ object SpecEmu: TSpecEmu
     object panelFloppy: TPanel
       Left = 0
       Height = 193
-      Top = 0
-      Width = 185
+      Top = 1
+      Width = 385
       ClientHeight = 193
-      ClientWidth = 185
+      ClientWidth = 385
       TabOrder = 2
       Visible = False
       object driveB: TImage
@@ -21540,7 +21585,7 @@ object SpecEmu: TSpecEmu
       object driveA: TImage
         Left = 0
         Height = 59
-        Top = -3
+        Top = 1
         Width = 182
         Picture.Data = {
           1754506F727461626C654E6574776F726B47726170686963CF43000089504E47
@@ -22657,6 +22702,7 @@ object SpecEmu: TSpecEmu
           690A1B4E2F36C2EADDE3A417B635C5F97C2C319799E17C3CF0EBED1DFF0183B8
           DA040134E8610000000049454E44AE426082
         }
+        Visible = False
       end
       object ButtonFloppy: TBGRAResizeSpeedButton
         Left = 136
@@ -22762,49 +22808,14 @@ object SpecEmu: TSpecEmu
           4FB35C6354B3606959B45A6354B55D6354B5656B5BB5626859B65B6250B66066
           56B663685AB6585F4EB6616B59B6646B5AB6535D4DB84E524353
         }
+        OnClick = ButtonFloppy2Click
         ShowHint = True
         ParentShowHint = False
-      end
-      object StaticText15: TStaticText
-        Left = 5
-        Height = 16
-        Top = 120
-        Width = 14
-        AutoSize = True
-        Caption = 'A:'
-        Color = clWhite
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        ParentFont = False
-        ParentColor = False
-        TabOrder = 0
-      end
-      object StaticText16: TStaticText
-        Left = 5
-        Height = 16
-        Top = 137
-        Width = 14
-        AutoSize = True
-        Caption = 'B:'
-        Color = clWhite
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -13
-        Font.Name = 'Consolas'
-        Font.Pitch = fpFixed
-        Font.Quality = fqDraft
-        ParentFont = False
-        ParentColor = False
-        TabOrder = 1
       end
       object driveALed: TImage
         Left = 16
         Height = 9
-        Top = 40
+        Top = 44
         Width = 14
         AutoSize = True
         Picture.Data = {
@@ -22839,6 +22850,7 @@ object SpecEmu: TSpecEmu
           9075710C09D0CE11F69ED41800AAAEC3068233CA8A9E85578E75C55F91349D00
           5CEF88E10000000049454E44AE426082
         }
+        Visible = False
       end
       object driveBLed: TImage
         Left = 16
@@ -22896,7 +22908,7 @@ object SpecEmu: TSpecEmu
         Font.Quality = fqDraft
         ParentFont = False
         ParentColor = False
-        TabOrder = 2
+        TabOrder = 0
         Transparent = False
       end
       object StaticText18: TStaticText
@@ -22915,54 +22927,360 @@ object SpecEmu: TSpecEmu
         Font.Quality = fqDraft
         ParentFont = False
         ParentColor = False
-        TabOrder = 3
+        TabOrder = 1
         Transparent = False
       end
-    end
-    object BlockGrid: TStringGrid
-      Left = 184
-      Height = 304
-      Top = 0
-      Width = 200
-      Columns = <      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = 'Block'
-          Width = 80
-        end      
-        item
-          MinSize = 8
-          MaxSize = 125
-          Title.Caption = 'Size'
-          Width = 40
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = 'Typ'
-          Width = 40
-        end      
-        item
-          MinSize = 6
-          MaxSize = 125
-          Title.Caption = 'LEN'
-          Width = 25
-        end>
-      DefaultColWidth = 15
-      DefaultRowHeight = 18
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -13
-      Font.Name = 'Consolas'
-      Font.Pitch = fpFixed
-      Font.Quality = fqDraft
-      MouseWheelOption = mwGrid
-      ParentFont = False
-      RowCount = 17
-      TabOrder = 0
-      OnAfterSelection = BlockGridAfterSelection
-      OnBeforeSelection = BlockGridBeforeSelection
+      object stFileDriveA: TStaticText
+        Left = 33
+        Height = 15
+        Top = 155
+        Width = 26
+        AutoSize = True
+        Caption = 'EMPTY'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 2
+      end
+      object stFileDriveB: TStaticText
+        Left = 33
+        Height = 15
+        Top = 176
+        Width = 26
+        AutoSize = True
+        Caption = 'EMPTY'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        OnClick = stFileDriveBClick
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 3
+      end
+      object ckDiskA_prot: TCheckBox
+        Left = 0
+        Height = 23
+        Hint = 'Write protection'
+        Top = 152
+        Width = 32
+        AutoSize = False
+        Caption = 'A:'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        OnChange = ckDiskA_protChange
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+      object ckDiskB_prot: TCheckBox
+        Left = 0
+        Height = 23
+        Hint = 'Write protection'
+        Top = 174
+        Width = 32
+        AutoSize = False
+        Caption = 'B:'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        OnChange = ckDiskB_protChange
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+      end
+      object StaticText15: TStaticText
+        Left = 0
+        Height = 14
+        Top = 140
+        Width = 16
+        AutoSize = True
+        Caption = 'WP'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        TabOrder = 6
+      end
+      object stFileDriveAInfo: TStaticText
+        Left = 200
+        Height = 16
+        Top = 0
+        Width = 91
+        AutoSize = True
+        Caption = 'DRIVE A: INFO'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 7
+      end
+      object stDriveAVersion: TStaticText
+        Left = 200
+        Height = 15
+        Top = 14
+        Width = 11
+        AutoSize = True
+        Caption = 'NA'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 8
+      end
+      object stFileDriveBInfo: TStaticText
+        Left = 200
+        Height = 16
+        Top = 56
+        Width = 91
+        AutoSize = True
+        Caption = 'DRIVE B: INFO'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Pitch = fpFixed
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 9
+      end
+      object stDriveBVersion: TStaticText
+        Left = 200
+        Height = 15
+        Top = 70
+        Width = 11
+        AutoSize = True
+        Caption = 'NA'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 10
+      end
+      object stDriveACreator: TStaticText
+        Left = 200
+        Height = 15
+        Top = 26
+        Width = 11
+        AutoSize = True
+        Caption = 'NA'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 11
+      end
+      object stDriveBCreator: TStaticText
+        Left = 200
+        Height = 15
+        Top = 82
+        Width = 11
+        AutoSize = True
+        Caption = 'NA'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 12
+      end
+      object stDriveATrackst: TStaticText
+        Left = 200
+        Height = 15
+        Top = 37
+        Width = 37
+        AutoSize = True
+        Caption = 'TRACKS:'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 13
+      end
+      object stDriveASidest: TStaticText
+        Left = 272
+        Height = 15
+        Top = 37
+        Width = 26
+        AutoSize = True
+        Caption = 'SIDES:'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 14
+      end
+      object stDriveATracks: TStaticText
+        Left = 240
+        Height = 15
+        Top = 37
+        Width = 9
+        AutoSize = True
+        Caption = '---'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 15
+      end
+      object stDriveASides: TStaticText
+        Left = 304
+        Height = 15
+        Top = 37
+        Width = 9
+        AutoSize = True
+        Caption = '---'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 16
+      end
+      object stDriveBTrackst: TStaticText
+        Left = 200
+        Height = 15
+        Top = 94
+        Width = 37
+        AutoSize = True
+        Caption = 'TRACKS:'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 17
+      end
+      object stDriveBTracks: TStaticText
+        Left = 240
+        Height = 15
+        Top = 94
+        Width = 9
+        AutoSize = True
+        Caption = '---'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 18
+      end
+      object stDriveBSidest: TStaticText
+        Left = 272
+        Height = 15
+        Top = 94
+        Width = 26
+        AutoSize = True
+        Caption = 'SIDES:'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 19
+      end
+      object stDriveBSides: TStaticText
+        Left = 304
+        Height = 15
+        Top = 94
+        Width = 9
+        AutoSize = True
+        Caption = '---'
+        Color = clWhite
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -10
+        Font.Name = 'Arial Narrow'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        ParentFont = False
+        ParentColor = False
+        TabOrder = 20
+      end
     end
     object ButtonDeleteBlock: TBGRAResizeSpeedButton
       Left = 74
@@ -23636,7 +23954,7 @@ object SpecEmu: TSpecEmu
       ShowHint = True
       ParentShowHint = False
     end
-    object ButtonSnapLoad1: TBGRAResizeSpeedButton
+    object Button_show_floppy: TBGRAResizeSpeedButton
       Left = 128
       Height = 32
       Hint = 'Disk drives'
@@ -23768,11 +24086,11 @@ object SpecEmu: TSpecEmu
         AEACB1AEABB1ADABA09C99ADA9A6A8A4A1999591A19A97F6F3F2
       }
       Transparent = False
-      OnClick = ButtonSnapLoad1Click
+      OnClick = Button_show_floppyClick
       ShowHint = True
       ParentShowHint = False
     end
-    object ButtonSnapLoad2: TBGRAResizeSpeedButton
+    object Button_show_computone: TBGRAResizeSpeedButton
       Left = 96
       Height = 32
       Hint = 'Computone'
@@ -23960,7 +24278,7 @@ object SpecEmu: TSpecEmu
         365A363562A09FBB0000
       }
       Transparent = False
-      OnClick = ButtonSnapLoad2Click
+      OnClick = Button_show_computoneClick
       ShowHint = True
       ParentShowHint = False
     end
@@ -57321,7 +57639,7 @@ object SpecEmu: TSpecEmu
   end
   object ApplicationProperties1: TApplicationProperties
     OnActivate = ApplicationProperties1Activate
-    Left = 968
+    Left = 824
     Top = 504
   end
   object AudioOut: TAcsAudioOut
@@ -57332,7 +57650,7 @@ object SpecEmu: TSpecEmu
     Device = 0
     Volume = 15
     Delay = 0
-    Left = 968
+    Left = 824
     Top = 336
   end
   object ACSEar: TAcsMemoryIn
@@ -57340,7 +57658,7 @@ object SpecEmu: TSpecEmu
     InChannels = 1
     InSampleRate = 16800
     OnBufferDone = ACSEarBufferDone
-    Left = 968
+    Left = 824
     Top = 416
   end
   object OpenSnaFileDialog: TOpenDialog

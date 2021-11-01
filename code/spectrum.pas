@@ -103,7 +103,6 @@ var
   soundpos_write: longint = 0;
   sound_active : boolean= false;
   sonido_acumulado : longint= 0;
-  disk_motor: boolean = false;
   printer_strobe: boolean = false;
   screen_page: byte = 5;
 
@@ -384,7 +383,6 @@ begin
   last_in_fffd  := 0;
   last_in_fe    := 0;
   last_out_fe   := 0;
-  disk_motor    := false;
   printer_strobe:= false;
 end;
 
@@ -447,43 +445,44 @@ begin
     if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
     and ((port and %1111000000000010) = %0001000000000000) then
     begin
-       last_out_1ffd := v;
-       pagging_mode := v and %1;
-       if pagging_mode = 0 then
-       begin
-         rom_bank := (rom_bank and %01) or ((v and %100)>>1);
-         disk_motor := (v and %1000) <> 0;
-         printer_strobe := (v and %10000) <> 0;
-         select_rom;
+      last_out_1ffd := v;
+      pagging_mode := v and %1;
+      disk_motor_on := (v and %1000) <> 0;
+      disk_motor[fdc.US1*2+fdc.US0] := disk_motor_on;
+      printer_strobe := (v and %10000) <> 0;
+      if pagging_mode = 0 then
+      begin
+        rom_bank := (rom_bank and %01) or ((v and %100)>>1);
+        select_rom;
       end else begin
-         special_mode := (v and %110) >> 1;
-         case special_mode of
-           %00: begin
-             Mem_banks[0] := 0;
-             Mem_banks[1] := 1;
-             Mem_banks[2] := 2;
-             Mem_banks[3] := 3;
-           end;
-           %01: begin
-             Mem_banks[0] := 4;
-             Mem_banks[1] := 5;
-             Mem_banks[2] := 6;
-             Mem_banks[3] := 7;
-           end;
-           %10: begin
-             Mem_banks[0] := 4;
-             Mem_banks[1] := 5;
-             Mem_banks[2] := 6;
-             Mem_banks[3] := 3;
-           end;
-           %11: begin
-             Mem_banks[0] := 4;
-             Mem_banks[1] := 7;
-             Mem_banks[2] := 6;
-             Mem_banks[3] := 3;
-           end;
-         end;
-       end;
+        special_mode := (v and %110) >> 1;
+        case special_mode of
+          %00: begin
+            Mem_banks[0] := 0;
+            Mem_banks[1] := 1;
+            Mem_banks[2] := 2;
+            Mem_banks[3] := 3;
+          end;
+          %01: begin
+            Mem_banks[0] := 4;
+            Mem_banks[1] := 5;
+            Mem_banks[2] := 6;
+            Mem_banks[3] := 7;
+          end;
+          %10: begin
+            Mem_banks[0] := 4;
+            Mem_banks[1] := 5;
+            Mem_banks[2] := 6;
+            Mem_banks[3] := 3;
+          end;
+          %11: begin
+            Mem_banks[0] := 4;
+            Mem_banks[1] := 7;
+            Mem_banks[2] := 6;
+            Mem_banks[3] := 3;
+          end;
+        end;
+      end;
     end;
 
     // port $fffd AY Select a register 0-14

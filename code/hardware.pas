@@ -76,6 +76,9 @@ procedure reset_fdc;
 procedure getTrackblock(drive: byte; head: byte; track: byte; var track_block: ttrack_block);
 procedure getSectorBlock(drive: byte; head: byte; track: byte; sector: byte; var sector_block: tsector_block);
 procedure getSectorData(drive: byte; head: byte; track: byte; sector: byte; var buffer);
+procedure putSectorData(drive: byte; head: byte; track: byte; sector: byte; var buffer);
+function getdskversionstring(drive: byte): string;
+function getdskcreator(drive: byte): string;
 
 const
   FROM_IN    = 0;
@@ -87,8 +90,8 @@ const
 
 
 var
-    //track_info_offset: array[0..1,0..255] of longint;
-    //sector_info_offset: array[0..1,0..255,0..255] of longint;
+    disk_motor: array[0..3] of boolean = (false,false,false,false);
+    disk_motor_on: boolean;
     sector_data: array[0..4095] of byte;
     sector_sizes: array[0..5] of integer = (128,256,512,1024,2048,4096);
     bsize_dsk: array[0..1] of longint;
@@ -100,10 +103,10 @@ var
     fdc_command: tfdc_command = cfdc_null;
     operation_pending: boolean = false;
     param_num: byte = 0;
-    DriveA_protected: boolean = false;
-    DriveB_protected: boolean = false;
-    DriveA_ready: boolean = false;
-    DriveB_ready: boolean = false;
+    led_motor_on: array[0..3] of boolean = (false,false,false,false);
+    drive_two_sides: array[0..3] of byte = (0,0,0,0);
+    drive_protected: array[0..3] of byte = (0,0,0,0);
+    drive_not_ready: array[0..3] of byte = (1,1,1,1);
     executed: boolean;
     data_count: word;
 
@@ -132,14 +135,15 @@ procedure test_ready;
 begin
   with fdc do
   begin
-    if ((US1*2+US0)=0) then
-    begin
-      if driveA_ready then NR := 0
-      else NR := 1;
-    end else begin
-      if driveB_ready then NR := 0
-      else NR := 1;
-    end;
+    //if ((US1*2+US0)=0) then
+    //begin
+    //  if driveA_ready then NR := 0
+    //  else NR := 1;
+    //end else begin
+    //  if driveB_ready then NR := 0
+    //  else NR := 1;
+    //end;
+    NR := drive_not_ready[US1*2+US0];
   end;
 end;
 
@@ -209,10 +213,19 @@ begin
 end;
 
 procedure fdc_composeST3;
+var
+    drive: byte;
 begin
    with fdc do
+   begin
+     drive := (US1 << 1) or (US0);
+     RY := (not NR) and 1;
+     WP := drive_protected[drive];
+     T0 := byte(C=0) and 1;
+     TS := drive_two_sides[drive];
      ST3 := (FT << 7) or (WP << 6) or (RY << 5) or (T0 << 4) or
-            (TS << 3) or (HD << 2) or (US0 << 1) or (US1);
+            (TS << 3) or (H << 2) or drive;
+   end;
 end;
 
 procedure fdc_explodeST3;
@@ -225,8 +238,8 @@ begin
     T0 := (ST3 >> 4) and 1;
     TS := (ST3 >> 3) and 1;
     HD := (ST3 >> 2) and 1;
-    US0 := (ST3 >> 1) and 1;
-    US1 := ST3 and 1;
+    US1 := (ST3 >> 1) and 1;
+    US0 := ST3 and 1;
   end;
 end;
 
@@ -252,6 +265,10 @@ begin
   fdc_command:= cfdc_null;
   operation_pending:= false;
   param_num:= 0;
+  disk_motor[0] := false;
+  disk_motor[1] := false;
+  disk_motor[2] := false;
+  disk_motor[3] := false;
   with fdc do
   begin
     C := 0;
@@ -405,18 +422,73 @@ var
     pos: longint;
     track_block: TTrack_block;
     ds: word;
+    fisical_sector: byte;
+begin
+  getTrackBlock(drive,head,track,track_block);
+  fisical_sector := 0;
+  repeat
+    inc(fisical_sector);
+    getSectorBlock(drive,head,track,fisical_sector,sector_block);
+  until (fisical_sector > track_block.sectors) or (sector_block.sector_ID = sector);
+  pos := getDataOffset(drive,head,track,fisical_sector);
+  ds := calcSectorDataSize(track_block.sector_size);
+  move(buffer_dsk[drive][pos], buffer,ds);
+end;
+
+procedure putSectorData(drive: byte; head: byte; track: byte; sector: byte; var buffer);
+var
+    pos: longint;
+    track_block: TTrack_block;
+    ds: word;
 begin
   getTrackBlock(drive,head,track,track_block);
   pos := getDataOffset(drive,head,track,sector);
   ds := calcSectorDataSize(track_block.sector_size);
-  move(buffer_dsk[drive][pos], buffer,ds);
+  move(buffer,buffer_dsk[drive][pos],ds);
+end;
+
+function getdskcreator(drive: byte): string;
+var
+    S: string[34];
+    jj: byte;
+begin
+  S := '';
+  jj := 34;
+  while {(buffer_dsk[drive][jj] <> 13) and} (jj < 34+14) do
+  begin
+    if buffer_dsk[drive][jj] >= 32 then
+      s := s + chr(buffer_dsk[drive][jj])
+    else
+      s := s + ' ';
+    inc(jj);
+  end;
+  getdskcreator := S;
+end;
+
+
+function getdskversionstring(drive: byte): string;
+var
+    S: string[34];
+    jj: byte;
+begin
+  S := '';
+  jj := 0;
+  while {(buffer_dsk[drive][jj] <> 13) and} (jj < 34) do
+  begin
+    if buffer_dsk[drive][jj] >= 32 then
+      s := s + chr(buffer_dsk[drive][jj])
+    else
+      s := s + ' ';
+    inc(jj);
+  end;
+  getdskversionstring := S;
 end;
 
 procedure getSectorInfo;
 begin
   with fdc do
   begin
-    getSectorBlock(US0+US1*2,HD,PCN,R,sector_block);
+    getSectorBlock(US0+US1*2,HD,C,R,sector_block);
 
     ST1 := sector_block.ST1;
     ST2 := sector_block.ST2;
@@ -431,18 +503,18 @@ procedure check_ready(drive: byte);
 begin
   with fdc do
   begin
-    if drive = 0 then
-    begin
-      if not driveA_ready then
-         main_reg := main_reg or %00000001
-      else
-        main_reg := main_reg and %11111110;
-    end else begin
-      if not driveB_ready then
-         main_reg := main_reg or %00000010
-      else
-        main_reg := main_reg and %00000001;
-    end;
+    //if drive = 0 then
+    //begin
+    //  if not driveA_ready then
+    //     main_reg := main_reg or %00000001
+    //  else
+    //    main_reg := main_reg and %11111110;
+    //end else begin
+    //  if not driveB_ready then
+    //     main_reg := main_reg or %00000010
+    //  else
+    //    main_reg := main_reg and %00000001;
+    //end;
   end;
 end;
 
@@ -618,8 +690,12 @@ begin
         end;
         cfdc_readtrack,
         cfdc_readdeldata,
-        cfdc_writedata,
-        cfdc_writedeldata: begin
+        cfdc_writedeldata: begin   // sin probar
+          fdc := fdc;
+        end;
+        cfdc_writedata:
+        begin
+          fdc_read_command_params([@param0,@C,@H,@R,@N,@EOT,@GPL,@DTL],sfdc_exec,to_fdc);
         end;
         cfdc_sectorid:
         begin
@@ -634,7 +710,7 @@ begin
             set_results_phase;
             extract_param0(%111);
         end;
-        cfdc_format:
+        cfdc_format: // sin probar
         begin
             fdc_read_command_params([@param0,@N,@SC,@GPL,@D],sfdc_results);
             extract_param0(%111);
@@ -659,7 +735,7 @@ begin
         end;
         cfdc_seek:
         begin
-            fdc_read_command_params([@param0,@NCN],sfdc_command);
+            fdc_read_command_params([@param0,@C],sfdc_command);
             extract_param0(%011);
             SE := 0;
             IC := %00;
@@ -678,8 +754,34 @@ begin
     sfdc_exec:
     with fdc do
     begin
-      //fdc.main_reg := %01000000;
       case fdc_command of
+        cfdc_readtrack:   // falta probar
+        begin
+           if not executed then
+          begin
+            executed := true;
+            getSectorBlock(us0+us1*2,H,C,R,sector_block);
+            getSectorData(us0+us1*2,H,C,R,sector_data);
+            data_count := 0;
+          end;
+          v := sector_data[data_count];
+          inc(data_count);
+          if data_count >= calcSectorDataSize(N) then
+          begin
+            if R < EOT then
+            begin
+              inc(R);
+              getSectorBlock(us0+us1*2,H,C,R,sector_block);
+              getSectorData(us0+us1*2,H,C,R,sector_data);
+              data_count := 0;
+            end else begin
+              getSectorInfo;
+              set_results_phase;
+              executed := false;
+            end;
+          end;
+        end;
+
         cfdc_readdata:
         begin
            if not executed then
@@ -687,7 +789,6 @@ begin
             executed := true;
             getSectorBlock(us0+us1*2,H,C,R,sector_block);
             getSectorData(us0+us1*2,H,C,R,sector_data);
-            //inc(R);
             data_count := 0;
           end;
           v := sector_data[data_count];
@@ -709,31 +810,40 @@ begin
             executed := false;
           end;
         end;
-        //cfdc_senseinterrupt:
-        //begin
-        //     ST0 := ST0 or %00100000 or (fdc.param0 and %111);
-        //     set_results_phase;
-        //end;
+
+        cfdc_writedata:
+        begin
+           if not executed then
+          begin
+            executed := true;
+            getSectorBlock(us0+us1*2,H,C,R,sector_block);
+            getSectorData(us0+us1*2,H,C,R,sector_data);
+            data_count := 0;
+          end;
+          sector_data[data_count] := v;
+          inc(data_count);
+          if data_count >= calcSectorDataSize(N) then
+          begin
+            getSectorInfo;
+            putSectorData(us0+us1*2,H,C,R,sector_data);
+            if MT = 0 then
+            begin
+              if R < track_block.sectors then
+                inc(R)
+              else begin
+                R := 1;
+                inc(C);
+                H := (not H) and 1;
+              end;
+            end;
+            set_results_phase;
+            executed := false;
+          end;
+        end;
         cfdc_invalid: begin
           ST0 := $80;
           set_results_phase;
         end;
-        //cfdc_recalibrate:
-        //begin
-        //    PCN := 0;
-        //    SE := 1;
-        //    IC := %00;
-        //    fdc_composeST0;
-        //    set_command_phase;
-        //end;
-        //cfdc_seek:
-        //begin
-        //    PCN := NCN;
-        //    SE := 1;
-        //    IC := %00;
-        //    check_ready((US1 << 1) or US0);
-        //    set_command_phase;
-        //end;
       end;
     end;
     sfdc_results:

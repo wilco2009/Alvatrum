@@ -47,8 +47,8 @@ type
     ButtonRew: TBGRAResizeSpeedButton;
     ButtonRight: TToggleBox;
     ButtonSnapLoad: TBGRAResizeSpeedButton;
-    ButtonSnapLoad1: TBGRAResizeSpeedButton;
-    ButtonSnapLoad2: TBGRAResizeSpeedButton;
+    Button_show_floppy: TBGRAResizeSpeedButton;
+    Button_show_computone: TBGRAResizeSpeedButton;
     ButtonSnapSave: TBGRAResizeSpeedButton;
     ButtonStop: TBGRAResizeSpeedButton;
     ButtonTapeFirst: TBGRAResizeSpeedButton;
@@ -102,8 +102,10 @@ type
     Button_B: TBGRAResizeSpeedButton;
     Button_N: TBGRAResizeSpeedButton;
     Button_M: TBGRAResizeSpeedButton;
+    ckDiskA_prot: TCheckBox;
     ckAYSound: TCheckBox;
     CheckGroup1: TCheckGroup;
+    ckDiskB_prot: TCheckBox;
     DebugPanel: TPanel;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
@@ -178,7 +180,6 @@ type
     StaticText13: TStaticText;
     StaticText14: TStaticText;
     StaticText15: TStaticText;
-    StaticText16: TStaticText;
     StaticText17: TStaticText;
     StaticText18: TStaticText;
     StaticText2: TStaticText;
@@ -190,6 +191,22 @@ type
     StaticText8: TStaticText;
     StaticText9: TStaticText;
     stdiskMotor: TStaticText;
+    stDriveACreator: TStaticText;
+    stDriveASides: TStaticText;
+    stDriveBSides: TStaticText;
+    stDriveBSidest: TStaticText;
+    stDriveBTracks: TStaticText;
+    stDriveATrackst: TStaticText;
+    stDriveASidest: TStaticText;
+    stDriveATracks: TStaticText;
+    stDriveBTrackst: TStaticText;
+    stDriveBCreator: TStaticText;
+    stDriveBVersion: TStaticText;
+    stFileDriveA: TStaticText;
+    stFileDriveAInfo: TStaticText;
+    stDriveAVersion: TStaticText;
+    stFileDriveBInfo: TStaticText;
+    stFileDriveB: TStaticText;
     stportoutFE: TStaticText;
     stportinFE: TStaticText;
     stportoutfffd: TStaticText;
@@ -269,6 +286,7 @@ type
     procedure ButtonEjectMouseLeave(Sender: TObject);
     procedure ButtonFireChange(Sender: TObject);
     procedure ButtonFireClick(Sender: TObject);
+    procedure ButtonFloppy2Click(Sender: TObject);
     procedure ButtonFloppyClick(Sender: TObject);
     procedure ButtonFWDClick(Sender: TObject);
     procedure ButtonLeftChange(Sender: TObject);
@@ -281,8 +299,8 @@ type
     procedure ButtonRightChange(Sender: TObject);
     procedure ButtonRightClick(Sender: TObject);
     procedure ButtonRightExit(Sender: TObject);
-    procedure ButtonSnapLoad1Click(Sender: TObject);
-    procedure ButtonSnapLoad2Click(Sender: TObject);
+    procedure Button_show_floppyClick(Sender: TObject);
+    procedure Button_show_computoneClick(Sender: TObject);
     procedure ButtonSnapSaveClick(Sender: TObject);
     procedure ButtonSnapLoadClick(Sender: TObject);
     procedure ButtonTapeFirstClick(Sender: TObject);
@@ -460,6 +478,8 @@ type
     procedure Button_ZMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure ckAYSoundChange(Sender: TObject);
+    procedure ckDiskA_protChange(Sender: TObject);
+    procedure ckDiskB_protChange(Sender: TObject);
     procedure FormChangeBounds(Sender: TObject);
     procedure GroupJoystickProtocolClick(Sender: TObject);
     procedure GroupLeftJoystickClick(Sender: TObject);
@@ -489,6 +509,7 @@ type
     procedure rbspec128Change(Sender: TObject);
     procedure rbspec48Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
+    procedure stFileDriveBClick(Sender: TObject);
     procedure stROM0Click(Sender: TObject);
     procedure StatusJoystick2ChangeBounds(Sender: TObject);
     procedure StepButtonClick(Sender: TObject);
@@ -524,6 +545,7 @@ type
     procedure ZoomOutButtonClick(Sender: TObject);
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
   private
+    timer_floppyA, timer_floppyB: byte;
     saliendo, starting, pause, debugging, step, breakpoint_active: boolean;
     AYActive: boolean;
     SS_Status: Byte;
@@ -536,6 +558,8 @@ type
     SavedLeft: integer;
     LeftJoystickSelection: word;
     RightJoystickSelection: word;
+    diskA_filename: string;
+    diskB_filename: string;
     procedure draw_screen;
     procedure RunEmulation;
     procedure refresh_system;
@@ -615,6 +639,8 @@ var
   buff: Array[0..$ffff] of byte;
   tmp_delay: longint = 5000;
   status_saved: boolean;
+  diskA_inserted: boolean = false;
+  diskB_inserted: boolean = false;
 
 implementation
 
@@ -1411,6 +1437,45 @@ begin
   ButtonFire.Checked := false;
 end;
 
+procedure TSpecEmu.ButtonFloppy2Click(Sender: TObject);
+begin
+  diskFileDialog.Filename := diskB_filename;
+  if diskFileDialog.Execute then
+  begin
+     if fileexists(diskFileDialog.filename) then
+     begin
+       read_dsk_file(1);
+       diskB_filename := diskFileDialog.filename;
+       Drive_not_ready[1] := 0;
+       driveBfloppy.visible := true;
+       driveB.visible := false;
+       stFileDriveB.caption := extractfilename(diskFileDialog.filename);
+       stDriveBVersion.caption := getdskversionstring(1);
+       stDriveBCreator.caption := getdskcreator(1);
+       stDriveBTracks.Caption := InttoStr(disk_info[1].Tracks);
+       stDriveBSides.Caption := InttoStr(disk_info[1].Sides);
+     end else begin      // Aquí iria nuevo disco
+       Drive_not_ready[1] := 1;
+       driveBfloppy.visible := false;
+       driveB.visible := true;
+       stFileDriveB.caption := 'EMPTY';
+       stDriveBVersion.caption := getdskversionstring(1);
+       stDriveBCreator.caption := getdskcreator(1);
+       stDriveBTracks.Caption := InttoStr(disk_info[1].Tracks);
+       stDriveBSides.Caption := InttoStr(disk_info[1].Sides);
+     end;
+  end else begin
+     Drive_not_ready[1] := 1;
+     driveBfloppy.visible := false;
+     driveB.visible := true;
+     stFileDriveB.caption := 'EMPTY';
+     stDriveBVersion.caption := '---';
+     stDriveBCreator.caption := '---';
+     stDriveBTracks.Caption := '---';
+     stDriveBSides.Caption := '---';
+   end;
+end;
+
 procedure TSpecemu.read_dsk_file(drive: byte);
 var
   FF: file;
@@ -1426,7 +1491,7 @@ begin
     for hh := 0 to disk_info[drive].sides-1 do
     begin
       getTrackblock(drive,hh,tt,track_block);
-      for ss := 0 to track_block.sectors-1 do
+      for ss := 1 to track_block.sectors do
       begin
         getSectorBlock(drive,hh,tt,ss,sector_block);
         getSectorData(drive,hh,tt,ss,sector_data);
@@ -1436,10 +1501,40 @@ end;
 
 procedure TSpecEmu.ButtonFloppyClick(Sender: TObject);
 begin
+  diskFileDialog.Filename := diskA_filename;
   if diskFileDialog.Execute then
   begin
-     read_dsk_file(0);
-     DriveA_ready := true;
+    if fileexists(diskFileDialog.filename) then
+    begin
+      diskA_filename := diskFileDialog.filename;
+      read_dsk_file(0);
+      Drive_not_ready[0] := 0;
+      driveAfloppy.visible := true;
+      driveA.visible := false;
+      stFileDriveA.caption := extractfilename(diskFileDialog.filename);
+      stDriveAVersion.caption := getdskversionstring(0);
+      stDriveACreator.caption := getdskcreator(0);
+      stDriveATracks.Caption := InttoStr(disk_info[0].Tracks);
+      stDriveASides.Caption := InttoStr(disk_info[0].Sides);
+   end else begin // Aquí iria nuevo disco
+      Drive_not_ready[0] := 1;
+      driveAfloppy.visible := false;
+      driveA.visible := true;
+      stFileDriveA.caption := 'EMPTY';
+      stDriveAVersion.caption := getdskversionstring(0);
+      stDriveACreator.caption := getdskcreator(0);
+      stDriveATracks.Caption := InttoStr(disk_info[0].Tracks);
+      stDriveASides.Caption := InttoStr(disk_info[0].Sides);
+    end;
+  end else begin
+    Drive_not_ready[0] := 1;
+    driveAfloppy.visible := false;
+    driveA.visible := true;
+    stFileDriveA.caption := 'EMPTY';
+    stDriveAVersion.caption := '---';
+    stDriveACreator.caption := '---';
+    stDriveATracks.Caption := '---';
+    stDriveASides.Caption := '---';
   end;
 end;
 
@@ -1513,15 +1608,17 @@ begin
   ButtonFire.Checked := false;
 end;
 
-procedure TSpecEmu.ButtonSnapLoad1Click(Sender: TObject);
+procedure TSpecEmu.Button_show_floppyClick(Sender: TObject);
 begin
   panelFloppy.Visible:=true;
+  blockGrid.Visible := false;
   panelComputone.Visible:=false;
 end;
 
-procedure TSpecEmu.ButtonSnapLoad2Click(Sender: TObject);
+procedure TSpecEmu.Button_show_computoneClick(Sender: TObject);
 begin
   panelFloppy.Visible:=false;
+  blockGrid.Visible := true;
   panelComputone.Visible:=true;
 end;
 
@@ -2163,6 +2260,16 @@ begin
   AudioOut.Resume
 end;
 
+procedure TSpecEmu.ckDiskA_protChange(Sender: TObject);
+begin
+  drive_protected[0] := byte(ckDiskA_prot.checked) and 1;
+end;
+
+procedure TSpecEmu.ckDiskB_protChange(Sender: TObject);
+begin
+  drive_protected[1] := byte(ckDiskB_prot.checked) and 1;
+end;
+
 procedure TSpecEmu.FormChangeBounds(Sender: TObject);
 begin
   timed_pause_emulation;
@@ -2743,6 +2850,11 @@ begin
   BFocus.setfocus;
 end;
 
+procedure TSpecEmu.stFileDriveBClick(Sender: TObject);
+begin
+
+end;
+
 procedure TSpecEmu.stROM0Click(Sender: TObject);
 begin
   pause_emulation;
@@ -2836,7 +2948,7 @@ begin
       stPaggingDisabled.caption := 'PAG ENABLED';
     if options.machine < spectrum_plus2a then
       stDiskMotor.caption := 'DISK MOTOR: N/A'
-    else if disk_motor then
+    else if disk_motor_on then
       stDiskMotor.caption := 'DISK MOTOR: ON'
     else
       stDiskMotor.caption := 'DISK MOTOR: OFF';
@@ -2972,23 +3084,40 @@ begin
          sleep(1);
          yadormido := true;
     end;
+    if disk_motor[0] then
+       led_motor_on[0] := true;
+    if disk_motor[1] then
+       led_motor_on[1] := true;
     if repaint_screen and screen_tstates_reached then
     begin
-      //if frames mod 2 = 0 then
-      //   Handle_fdc(dummy, FROM_TIMER);
+      if timer_floppyA > 0 then
+         dec(timer_floppyA);
+      if timer_floppyB > 0 then
+         dec(timer_floppyB);
+      if (frames mod 10 = 0) and (timer_floppyA = 0) then
+      begin
+        timer_floppyA := 50;
+        driveALed.Visible := led_motor_on[0];
+        disk_motor[0] := false;
+        led_motor_on[0] := false;
+      end;
+      if (frames mod 10 = 0) and (timer_floppyB = 0) then
+      begin
+        timer_floppyB := 50;
+        driveBLed.Visible := led_motor_on[1];
+        disk_motor[1] := false;
+        led_motor_on[1] := false;
+      end;
       yadormido := false;
-        prev_sound_bytes := sound_bytes;
-        //screen_timer.clear;
-        //screen_timer.start;
-        t_states_ini_frame := t_states-(t_states_cur_frame-screen_testados_total);
-        intpend := true;
-        draw_screen;
-        repaint_screen := false;
-        inc(frames);
-        if (frames mod 50) = 0 then begin
-          stsamples.caption := intToStr(sound_bytes);
-          //ststatessound.caption := intToStr(t_states_sound_bit);
-        end;
+      prev_sound_bytes := sound_bytes;
+      t_states_ini_frame := t_states-(t_states_cur_frame-screen_testados_total);
+      intpend := true;
+      draw_screen;
+      repaint_screen := false;
+      inc(frames);
+      if (frames mod 50) = 0 then begin
+        stsamples.caption := intToStr(sound_bytes);
+      end;
     end;
   end;
 end;
@@ -3105,6 +3234,8 @@ end;
 
 procedure TSpecEmu.FormActivate(Sender: TObject);
 begin
+  drive_protected[0] := byte(ckdiskA_prot.Checked) and 1;
+  drive_protected[1] := byte(ckdiskB_prot.Checked) and 1;
   DebugPanel.Enabled := false;
   TapePanel.Visible := false;
   DebugPanel.Visible := false;
