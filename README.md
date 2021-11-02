@@ -99,6 +99,10 @@ alfa version 0.1.06
 Spectrum +3 disk emulation in progress.....
 some disks are working
 
+alfa version 0.1.06
+Spectrum +3 disk emulation in progress.....
+more disks are working
+
 TO DO:
 tape reading tzx
 memory contention

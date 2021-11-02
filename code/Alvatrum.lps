@@ -32,10 +32,9 @@
         <Filename Value="z80.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Z80"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <TopLine Value="472"/>
-        <CursorPos X="59" Y="491"/>
+        <CursorPos Y="492"/>
         <UsageCount Value="211"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -150,12 +149,13 @@
       <Unit15>
         <Filename Value="hardware.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="844"/>
-        <CursorPos X="57" Y="870"/>
+        <TopLine Value="899"/>
+        <CursorPos Y="906"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="702" ID="1"/>
+          <Item0 Y="716" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit15>
@@ -182,7 +182,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="212"/>
         <CursorPos X="34" Y="240"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
@@ -191,136 +191,136 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="447"/>
         <CursorPos X="20" Y="468"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit19>
       <Unit20>
         <Filename Value="..\Alvatrum - copia (2)\main.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1413"/>
         <CursorPos Y="1437"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit20>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="347" Column="5" TopLine="331"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1509" Column="35" TopLine="1489"/>
       </Position1>
       <Position2>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="392" Column="45" TopLine="376"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1510" Column="35" TopLine="1490"/>
       </Position2>
       <Position3>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="347" Column="14" TopLine="331"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1511" Column="35" TopLine="1491"/>
       </Position3>
       <Position4>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="80" Column="29" TopLine="64"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1510" Column="35" TopLine="1490"/>
       </Position4>
       <Position5>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="449" Column="29" TopLine="423"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1461" Column="36" TopLine="1431"/>
       </Position5>
       <Position6>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="81" TopLine="64"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1446" Column="35" TopLine="1430"/>
       </Position6>
       <Position7>
         <Filename Value="main.pas"/>
-        <Caret Line="1444" TopLine="1427"/>
+        <Caret Line="1447" Column="35" TopLine="1431"/>
       </Position7>
       <Position8>
-        <Filename Value="hardware.pas"/>
-        <Caret Line="80" Column="29" TopLine="64"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="1448" Column="35" TopLine="1432"/>
       </Position8>
       <Position9>
         <Filename Value="main.pas"/>
-        <Caret Line="1509" Column="35" TopLine="1489"/>
+        <Caret Line="1449" Column="35" TopLine="1433"/>
       </Position9>
       <Position10>
         <Filename Value="main.pas"/>
-        <Caret Line="1510" Column="35" TopLine="1490"/>
+        <Caret Line="1448" Column="35" TopLine="1432"/>
       </Position10>
       <Position11>
         <Filename Value="main.pas"/>
-        <Caret Line="1511" Column="35" TopLine="1491"/>
+        <Caret Line="1525" Column="38" TopLine="1496"/>
       </Position11>
       <Position12>
         <Filename Value="main.pas"/>
-        <Caret Line="1510" Column="35" TopLine="1490"/>
+        <Caret Line="1507" TopLine="1489"/>
       </Position12>
       <Position13>
         <Filename Value="main.pas"/>
-        <Caret Line="1509" Column="35" TopLine="1489"/>
+        <Caret Line="1508" TopLine="1490"/>
       </Position13>
       <Position14>
         <Filename Value="main.pas"/>
-        <Caret Line="1510" Column="35" TopLine="1490"/>
+        <Caret Line="1509" TopLine="1491"/>
       </Position14>
       <Position15>
         <Filename Value="main.pas"/>
-        <Caret Line="1509" Column="35" TopLine="1489"/>
+        <Caret Line="1508" Column="32" TopLine="1498"/>
       </Position15>
       <Position16>
         <Filename Value="main.pas"/>
-        <Caret Line="1510" Column="35" TopLine="1490"/>
+        <Caret Line="1512" Column="32" TopLine="1502"/>
       </Position16>
       <Position17>
-        <Filename Value="main.pas"/>
-        <Caret Line="1511" Column="35" TopLine="1491"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="906" TopLine="894"/>
       </Position17>
       <Position18>
-        <Filename Value="main.pas"/>
-        <Caret Line="1510" Column="35" TopLine="1490"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="907" TopLine="894"/>
       </Position18>
       <Position19>
-        <Filename Value="main.pas"/>
-        <Caret Line="1461" Column="36" TopLine="1431"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="909" TopLine="894"/>
       </Position19>
       <Position20>
-        <Filename Value="main.pas"/>
-        <Caret Line="1446" Column="35" TopLine="1430"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="910" TopLine="894"/>
       </Position20>
       <Position21>
-        <Filename Value="main.pas"/>
-        <Caret Line="1447" Column="35" TopLine="1431"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="911" TopLine="894"/>
       </Position21>
       <Position22>
-        <Filename Value="main.pas"/>
-        <Caret Line="1448" Column="35" TopLine="1432"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="912" TopLine="894"/>
       </Position22>
       <Position23>
-        <Filename Value="main.pas"/>
-        <Caret Line="1449" Column="35" TopLine="1433"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="505" TopLine="489"/>
       </Position23>
       <Position24>
-        <Filename Value="main.pas"/>
-        <Caret Line="1448" Column="35" TopLine="1432"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="507" Column="20" TopLine="489"/>
       </Position24>
       <Position25>
-        <Filename Value="main.pas"/>
-        <Caret Line="1525" Column="38" TopLine="1496"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="508" TopLine="489"/>
       </Position25>
       <Position26>
-        <Filename Value="main.pas"/>
-        <Caret Line="1507" TopLine="1489"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="509" TopLine="489"/>
       </Position26>
       <Position27>
-        <Filename Value="main.pas"/>
-        <Caret Line="1508" TopLine="1490"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="510" TopLine="489"/>
       </Position27>
       <Position28>
-        <Filename Value="main.pas"/>
-        <Caret Line="1509" TopLine="1491"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="511" TopLine="489"/>
       </Position28>
       <Position29>
-        <Filename Value="main.pas"/>
-        <Caret Line="1508" Column="32" TopLine="1498"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="513" TopLine="489"/>
       </Position29>
       <Position30>
-        <Filename Value="main.pas"/>
-        <Caret Line="1512" Column="32" TopLine="1502"/>
+        <Filename Value="hardware.pas"/>
+        <Caret Line="514" TopLine="489"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -335,35 +335,35 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="hardware.pas"/>
-        <Line Value="722"/>
+        <Line Value="736"/>
       </Item1>
       <Item2>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="hardware.pas"/>
-        <Line Value="669"/>
+        <Line Value="683"/>
       </Item2>
       <Item3>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="hardware.pas"/>
-        <Line Value="715"/>
+        <Line Value="729"/>
       </Item3>
       <Item4>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="hardware.pas"/>
-        <Line Value="696"/>
+        <Line Value="710"/>
       </Item4>
       <Item5>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="hardware.pas"/>
-        <Line Value="661"/>
+        <Line Value="675"/>
       </Item5>
     </BreakPoints>
     <Watches Count="17">

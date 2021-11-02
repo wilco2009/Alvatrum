@@ -61,6 +61,10 @@ type
     data_len: word;
   end;
 
+  tdrive_pos = record
+    side, track, sector: byte;
+  end;
+
 procedure setKempston(n: byte);
 procedure ResetKempston(n: byte);
 procedure setSinclairLeft(n: byte);
@@ -90,6 +94,7 @@ const
 
 
 var
+    drive_pos: array[0..3] of tdrive_pos;
     disk_motor: array[0..3] of boolean = (false,false,false,false);
     disk_motor_on: boolean;
     sector_data: array[0..4095] of byte;
@@ -260,6 +265,8 @@ begin
 end;
 
 procedure reset_fdc;
+var
+    jj: byte;
 begin
   fdc_state:= sfdc_command;
   fdc_command:= cfdc_null;
@@ -324,6 +331,13 @@ begin
     TS := 0;
     fdc_compose_status;
   end;
+  for jj := 0 to 3 do
+      with drive_pos[jj] do
+      begin
+        sector := 1;
+        side := 0;
+        track := 0;
+      end;
 end;
 
 function calcSectorDataSize(size_code: byte): word;
@@ -742,6 +756,12 @@ begin
             check_ready((US1 << 1) or US0);
             fdc_composeST0;
             operation_pending := true;
+            if fdc_state = sfdc_command then
+              with drive_pos[(US1 << 1) or US0] do
+              begin
+                side := H;
+                track := C;
+              end;
         end;
         cfdc_specify:
         begin
@@ -778,6 +798,12 @@ begin
               getSectorInfo;
               set_results_phase;
               executed := false;
+              with drive_pos[(US1 << 1) or US0] do
+              begin
+                side := H;
+                track := C;
+                sector := R;
+              end;
             end;
           end;
         end;
@@ -808,6 +834,12 @@ begin
             end;
             set_results_phase;
             executed := false;
+            with drive_pos[(US1 << 1) or US0] do
+            begin
+              side := H;
+              track := C;
+              sector := R;
+            end;
           end;
         end;
 
@@ -838,6 +870,12 @@ begin
             end;
             set_results_phase;
             executed := false;
+            with drive_pos[(US1 << 1) or US0] do
+            begin
+              side := H;
+              track := C;
+              sector := R;
+            end;
           end;
         end;
         cfdc_invalid: begin
@@ -866,7 +904,14 @@ begin
         cfdc_sectorid:
         begin
             if param_num = 0 then
-               getsectorinfo;
+            with drive_pos[(US1 << 1) or US0] do
+            begin
+              H := side;
+              C := track;
+              R := sector;
+              getsectorinfo;
+              R := sector_block.sector_ID;
+            end;
             fdc_write_command_results([@ST0,@ST1,@ST2,@C,@H,@R,@N]);
         end;
         cfdc_sensedrive:
