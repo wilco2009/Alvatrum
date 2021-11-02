@@ -8,6 +8,8 @@ uses
   Classes, SysUtils,z80Globals;
 
 function decode_instruction(addr: word): string;
+function get_instruction_len(s: string): byte;
+function get_instruction(s: string): string;
 
 implementation
 
@@ -57,6 +59,29 @@ begin
   else reg16ixiy := r[n];
 end;
 
+function get_instruction_len(s: string): byte;
+var
+  rr, ss: byte;
+begin
+  rr := 1;
+  while (rr <= length(s)) and (s[rr] = ' ') do
+    inc(rr);
+  ss := rr;
+  while (rr <= length(s)) and (s[rr] <> ':') do
+    inc(rr);
+  get_instruction_len := (rr-ss) div 2;
+end;
+
+function get_instruction(s: string): string;
+var
+  len,rr: byte;
+begin
+  //len := get_instruction_len(s);
+  rr := 13;
+  while (rr <= length(s)) and (s[rr] = ' ') do
+    inc(rr);
+  get_instruction := copy(s,12,rr-12+1);
+end;
 function decode_instruction(addr: word): string;
 var
   byte1, byte2, byte3, byte4: byte;

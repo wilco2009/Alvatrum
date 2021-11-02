@@ -741,8 +741,15 @@ begin
             fdc_read_command_params([@param0],sfdc_command);
             extract_param0(%011);
             SE := 0;
-            NCN := 0;
+            C := 0;
+            H := 0;
             IC := %00;
+            with drive_pos[(US1 << 1) or US0] do
+            begin
+              side := H;
+              track := C;
+              sector := R;
+            end;
             check_ready((US1 << 1) or US0);
             fdc_composeST0;
             operation_pending := true;
@@ -865,7 +872,7 @@ begin
               else begin
                 R := 1;
                 inc(C);
-                H := (not H) and 1;
+                //H := (not H) and 1;
               end;
             end;
             set_results_phase;

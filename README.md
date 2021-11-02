@@ -99,7 +99,11 @@ alfa version 0.1.06
 Spectrum +3 disk emulation in progress.....
 some disks are working
 
-alfa version 0.1.06
+alfa version 0.1.07
+Spectrum +3 disk emulation in progress.....
+more disks are working
+
+beta version 0.1.08
 Spectrum +3 disk emulation in progress.....
 more disks are working
 

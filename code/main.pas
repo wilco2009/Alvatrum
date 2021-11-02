@@ -31,6 +31,7 @@ type
     Button6: TButton;
     Button7: TButton;
     ButtonConf: TBGRAResizeSpeedButton;
+    ButtonMedia: TBGRAResizeSpeedButton;
     ButtonCursorFire: TToggleBox;
     ButtonDeleteBlock: TBGRAResizeSpeedButton;
     ButtonDown: TToggleBox;
@@ -91,7 +92,6 @@ type
     Button_cinco: TBGRAResizeSpeedButton;
     Button_uno: TBGRAResizeSpeedButton;
     ButtonDebug: TSpeedButton;
-    ButtonTap: TSpeedButton;
     ButtonTap1: TSpeedButton;
     Button_dos: TBGRAResizeSpeedButton;
     Button_E: TBGRAResizeSpeedButton;
@@ -180,6 +180,7 @@ type
     StaticText13: TStaticText;
     StaticText14: TStaticText;
     StaticText15: TStaticText;
+    stPaused: TStaticText;
     StaticText17: TStaticText;
     StaticText18: TStaticText;
     StaticText2: TStaticText;
@@ -202,6 +203,7 @@ type
     stDriveBTrackst: TStaticText;
     stDriveBCreator: TStaticText;
     stDriveBVersion: TStaticText;
+    StepOverButton: TBitBtn;
     stFileDriveA: TStaticText;
     stFileDriveAInfo: TStaticText;
     stDriveAVersion: TStaticText;
@@ -277,6 +279,7 @@ type
     procedure Button7Click(Sender: TObject);
     procedure ButtonBlockdownClick(Sender: TObject);
     procedure ButtonBlockUpClick(Sender: TObject);
+    procedure ButtonConf1Click(Sender: TObject);
     procedure ButtonConfClick(Sender: TObject);
     procedure ButtonDownChange(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
@@ -292,6 +295,7 @@ type
     procedure ButtonLeftChange(Sender: TObject);
     procedure ButtonLeftClick(Sender: TObject);
     procedure ButtonLeftExit(Sender: TObject);
+    procedure ButtonMediaClick(Sender: TObject);
     procedure ButtonPlayClick(Sender: TObject);
     procedure ButtonPlayPressedClick(Sender: TObject);
     procedure ButtonRecClick(Sender: TObject);
@@ -491,7 +495,6 @@ type
     procedure BlockGridAfterSelection(Sender: TObject; aCol, aRow: Integer);
     procedure BlockGridBeforeSelection(Sender: TObject; aCol, aRow: Integer);
     procedure ButtonTap1Click(Sender: TObject);
-    procedure ButtonTapClick(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
     procedure PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
@@ -509,6 +512,7 @@ type
     procedure rbspec128Change(Sender: TObject);
     procedure rbspec48Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
+    procedure StepOverButtonClick(Sender: TObject);
     procedure stFileDriveBClick(Sender: TObject);
     procedure stROM0Click(Sender: TObject);
     procedure StatusJoystick2ChangeBounds(Sender: TObject);
@@ -641,6 +645,8 @@ var
   status_saved: boolean;
   diskA_inserted: boolean = false;
   diskB_inserted: boolean = false;
+  step_over_true, step_over_false: word;
+  step_over_break: boolean = false;
 
 implementation
 
@@ -1362,6 +1368,12 @@ begin
   end;
 end;
 
+procedure TSpecEmu.ButtonConf1Click(Sender: TObject);
+begin
+
+end;
+
+
 procedure TSpecEmu.ButtonConfClick(Sender: TObject);
 begin
   if OptionsPanel.Visible then begin
@@ -1559,6 +1571,17 @@ begin
   ButtonLeft.Checked := false;
   ButtonRight.Checked := false;
   ButtonFire.Checked := false;
+end;
+
+procedure TSpecEmu.ButtonMediaClick(Sender: TObject);
+begin
+  if TapePanel.Visible then begin
+    HideAll;
+  end else begin
+    HideAll;
+    Show_Tape;
+  end;
+  adjust_window_size;
 end;
 
 procedure TSpecEmu.ButtonPlayClick(Sender: TObject);
@@ -2501,17 +2524,6 @@ begin
   adjust_window_size;
 end;
 
-procedure TSpecEmu.ButtonTapClick(Sender: TObject);
-begin
-  if TapePanel.Visible then begin
-    HideAll;
-  end else begin
-    HideAll;
-    Show_Tape;
-  end;
-  adjust_window_size;
-end;
-
 
 procedure TSpecEmu.FormWindowStateChange(Sender: TObject);
 var
@@ -2626,6 +2638,7 @@ begin
   begin
     AudioOut.resume();
     pause := false;
+    stPaused.visible := false;
   end;
 end;
 
@@ -2648,6 +2661,7 @@ procedure TSpecEmu.pause_emulation;
 begin
   AudioOut.pause();
   pause := true;
+  stPaused.visible := true;
 end;
 
 procedure TSpecEmu.timed_pause_emulation;
@@ -2672,6 +2686,8 @@ begin
   StepButton.Enabled := true;
   stepbutton.SetFocus;
   debugging := true;
+  step_over_break := false;
+  clear_keyboard;
 end;
 
 procedure TSpecEmu.BitBtn3Click(Sender: TObject);
@@ -2850,6 +2866,26 @@ begin
   BFocus.setfocus;
 end;
 
+procedure TSpecEmu.StepOverButtonClick(Sender: TObject);
+var
+  S: string;
+  len: byte;
+  inst: string;
+begin
+  if pause then
+  begin
+    step_over_break := true;
+    S := decode_instruction(pc);
+    len := get_instruction_len(s);
+    inst := get_instruction(s);
+    step_over_true := pc + len;
+    empezando := true;
+    stop_debug;
+    clear_keyboard;
+  end;
+  BFocus.setfocus;
+end;
+
 procedure TSpecEmu.stFileDriveBClick(Sender: TObject);
 begin
 
@@ -2986,10 +3022,13 @@ begin
   prev_sound_bytes := sound_bytes;
   status_saved := false;
   while (not saliendo) do begin
-    if not pause and (breakpoint_active) and ((breakpoint = pc) and not empezando) then begin
+    if not pause and
+       ((breakpoint_active) and ((breakpoint = pc) and not empezando)) or
+       (step_over_break and (step_over_true = pc) and not empezando)
+       then begin
        start_debug;
     end;
-    if not pause or step then begin
+    if not pause or step or step_over_break then begin
        empezando := false;
        basicrom := (options.machine = spectrum48) or
           ((options.machine = spectrum128)      and (Mem_banks[0]=ROMPAGE1)) or
