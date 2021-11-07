@@ -125,6 +125,7 @@ procedure ld_SP_reg16(var reg: word);
 procedure e_ld_reg8_reg8(var r1: byte; r2: byte);
 procedure e_ld_i_a;
 procedure e_ld_r_a;
+procedure e_ld_a_r;
 procedure e_ld_a_reg8(r2: byte);
 procedure e_ld_mem16_reg16(reg: word);
 procedure e_ld_reg16_mem16(var reg: word);
@@ -1056,6 +1057,10 @@ begin
   r_bit7 := r >> 7;
 end;
 
+procedure e_ld_a_r;
+begin
+  e_ld_reg8_reg8(a,(r and $7f) or (r_bit7 << 7));
+end;
 
 procedure e_ld_a_reg8(r2: byte);
 begin

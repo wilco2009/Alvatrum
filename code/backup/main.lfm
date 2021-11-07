@@ -1,9 +1,9 @@
 object SpecEmu: TSpecEmu
-  Left = 87
+  Left = 218
   Height = 659
-  Top = 269
+  Top = 253
   Width = 1177
-  Caption = 'Alvatrum Beta 0.1.04'
+  Caption = 'Alvatrum Beta 0.1.08'
   ClientHeight = 659
   ClientWidth = 1177
   DesignTimePPI = 120

@@ -105,6 +105,8 @@ var
   sonido_acumulado : longint= 0;
   printer_strobe: boolean = false;
   screen_page: byte = 5;
+  pagging_mode: byte = 0;
+  special_mode: byte = 0;
 
   last_out_7ffd : byte = 0;
   last_out_1ffd : byte = 0;
@@ -384,11 +386,13 @@ begin
   last_in_fe    := 0;
   last_out_fe   := 0;
   printer_strobe:= false;
+  membanks_mode0[0] := 0;
+  membanks_mode0[1] := 1;
+  membanks_mode0[2] := 2;
+  membanks_mode0[3] := 3;
 end;
 
 procedure spectrum_out(port: word; v: byte);
-var
-  pagging_mode, special_mode: byte;
 begin
   if (port and 1) = 0 then begin // ULA port 0xfe
     last_out_fe := v;
@@ -424,22 +428,34 @@ begin
        disable_pagging := (v and %100000) = 1;
 
        Mem_banks[3] := v and %111;
+       membanks_mode0[0] := Mem_banks[0];
+       membanks_mode0[1] := Mem_banks[1];
+       membanks_mode0[2] := Mem_banks[2];
+       membanks_mode0[3] := Mem_banks[3];
     end;
     // port 7ffd spectrum +2a/+3
     if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
-    and ((port and %1100000000000010) = %0100000000000000) then
+    and ((port and %1100000000000010) = %0100000000000000)  then
     begin
        last_out_7ffd := v;
        if (v and %1000) = 0 then
           screen_page := SCREENPAGE
        else
           screen_page := SHADOWPAGE;
-       Mem_banks[1] := 5;
        rom_bank := (rom_bank and %10) or ((v and %10000)>>4);
        disable_pagging := (v and %100000) = 1;
 
-       Mem_banks[3] := v and %111;
-       select_rom;
+       //if (pagging_mode = 0) then
+       //begin
+         ///////// asignar los bancos de RAM para modo 0 independiente del modo
+         //Mem_banks[3] := v and %111;
+         membanks_mode0[3] := v and %111;
+         membanks_mode0[1] := 5;
+         if (pagging_mode = 0) then
+         begin
+           Mem_banks[3] := membanks_mode0[3];
+           select_rom;
+         end;
     end;
     // port 1ffd spectrum +2a/+3
     if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
@@ -452,6 +468,10 @@ begin
       printer_strobe := (v and %10000) <> 0;
       if pagging_mode = 0 then
       begin
+        Mem_banks[0] := membanks_mode0[0];
+        Mem_banks[1] := membanks_mode0[1];
+        Mem_banks[2] := membanks_mode0[2];
+        Mem_banks[3] := membanks_mode0[3];
         rom_bank := (rom_bank and %01) or ((v and %100)>>1);
         select_rom;
       end else begin
@@ -483,6 +503,8 @@ begin
           end;
         end;
       end;
+
+      ///  asignar la ram dependiendo del modo en el que estemos.
     end;
 
     // port $fffd AY Select a register 0-14

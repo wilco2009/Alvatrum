@@ -107,6 +107,11 @@ beta version 0.1.08
 Spectrum +3 disk emulation in progress.....
 more disks are working
 
+beta version 0.1.09
+Spectrum +3 disk emulation near to be completed
+many disks are working
+bug in all RAM modes fixed
+
 TO DO:
 tape reading tzx
 memory contention

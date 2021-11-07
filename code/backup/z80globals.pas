@@ -22,6 +22,8 @@ const
      FLAG_S =$80;
 
 var
+   membanks_mode0: array[0..3] of byte;
+   //membanks_mode1: array[0..3] of byte;
    cpu_backup: record
      registers: Array[0..15] of byte;
      iff1, iff2: boolean;
@@ -166,6 +168,10 @@ begin
       Mem_banks[3] := 0;
     end;
   end;
+  membanks_mode0[0] := Mem_banks[0];
+  membanks_mode0[1] := Mem_banks[1];
+  membanks_mode0[2] := Mem_banks[2];
+  membanks_mode0[3] := Mem_banks[3];
 end;
 
 
@@ -206,7 +212,7 @@ end;
 procedure inc_register_r;
 begin
      inc(r);
-     r := (r and $7f) or r_bit7;
+     r := (r and $7f) or (r_bit7 << 7);
 end;
 
 function parity(a: byte): byte;
@@ -277,9 +283,9 @@ end;
 
 procedure wrmem(x: word; y: byte);
 begin
-  if (x = $e420) {or (x=$e2d1)} then
+  if (x < $4000) {or (x=$e2d1)} then
     a := a;
-  if x >= 16384 then
+  if (Mem_banks[0] < 32) or (x >= 16384) then
   begin
     MemP[mem_page(x), mem_offset(x)] := y;
     //Mem[x] := y;

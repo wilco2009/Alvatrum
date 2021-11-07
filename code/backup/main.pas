@@ -1505,8 +1505,8 @@ begin
       getTrackblock(drive,hh,tt,track_block);
       for ss := 1 to track_block.sectors do
       begin
-        getSectorBlock(drive,hh,tt,ss,sector_block);
-        getSectorData(drive,hh,tt,ss,sector_data);
+        getFisicalSectorBlock(drive,hh,tt,ss,sector_block);
+        getSectorData(drive,hh,tt,sector_block.sector_ID,sector_data);
       end;
     end;
 end;
@@ -2853,6 +2853,8 @@ procedure TSpecEmu.ResetButtonClick(Sender: TObject);
 begin
   UpdateOptions;
   ReadROM;
+  step_over_break := false;
+  //breakpoint_active := false;
   init_spectrum;
   reset_fdc;
   init_z80(coldbootrequired);
@@ -3800,6 +3802,11 @@ procedure TSpecEmu.draw_screen;
       rdshadow := memp[7,addr and $3FFF];
     end;
 
+    function rdscreen(addr: word): byte;
+    begin
+      rdscreen := memp[5,addr and $3FFF];
+    end;
+
 begin
     inc(frame);
     bgra := TBGRABitmap.Create(sizex1x, sizey1x, BGRABlack);
@@ -3821,8 +3828,10 @@ begin
       pmem := lines[y];
       for x := 0 to 255 do
       begin
-        if (options.machine = spectrum48) or (screen_page = SCREENPAGE) then
+        if (options.machine = spectrum48) then
            v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0)
+        else if (screen_page = SCREENPAGE) then
+           v := getColor(rdscreen(pattr+attr_offset), (rdscreen(pmem) and bit) <> 0)
         else // SHADOW SCREEN SELECTED
            v := getColor(rdshadow(pattr+attr_offset), (rdshadow(pmem) and bit) <> 0);
         p^.red:= getRedComponent(v);

@@ -488,7 +488,7 @@ begin
  //   ixoriy:=new_ixoriy;
  //   new_ixoriy:=0;
     // fetch opcode and execute
-    if (Mem_banks[0] = 33) and (pc >=$d6e) and (pc <= $d9b) then
+    if (Mem_banks[0,0] = 34) and (pc >=$100) and (pc <= $19e) then
        a := a;
     inc_register_r;
     pc_before := pc;

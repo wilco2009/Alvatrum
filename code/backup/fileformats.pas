@@ -272,7 +272,7 @@ begin
        end;
        select_rom;
        for x := 1 to 3 do
-           move(sna.RAM[x*$4000],memP[Mem_banks[x],0],$4000);
+           move(sna.RAM[x*$4000],memP[Mem_banks[0,x],0],$4000);
        retn;
      end else begin  // 128K mode
         case options.machine of
@@ -608,7 +608,7 @@ begin
     if options.machine = spectrum48 then
     begin
       for x := 1 to 3 do
-          move(memP[Mem_banks[x],0],sna.RAM[x*$4000],$4000);
+          move(memP[Mem_banks[0,x],0],sna.RAM[x*$4000],$4000);
       Try
         Assignfile(F, filename);
         Rewrite(F,1);
