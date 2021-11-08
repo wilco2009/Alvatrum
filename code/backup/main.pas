@@ -66,6 +66,7 @@ type
     Button_J: TBGRAResizeSpeedButton;
     Button_K: TBGRAResizeSpeedButton;
     Button_L: TBGRAResizeSpeedButton;
+    Button_flush_drives: TBGRAResizeSpeedButton;
     Button_SS_LOCK: TBGRAResizeSpeedButton;
     Button_Z: TBGRAResizeSpeedButton;
     Button_s: TBGRAResizeSpeedButton;
@@ -303,6 +304,7 @@ type
     procedure ButtonRightChange(Sender: TObject);
     procedure ButtonRightClick(Sender: TObject);
     procedure ButtonRightExit(Sender: TObject);
+    procedure Button_flush_drivesClick(Sender: TObject);
     procedure Button_show_floppyClick(Sender: TObject);
     procedure Button_show_computoneClick(Sender: TObject);
     procedure ButtonSnapSaveClick(Sender: TObject);
@@ -619,6 +621,9 @@ type
     procedure ReadROM;
     procedure ReadROMPage(Machine: Tmachine; ROMPage, Membank: byte);
     procedure read_dsk_file(drive: byte);
+    procedure write_dsk_file(drive: byte);
+    procedure flush_drive(drive: byte);
+
   public
 
   end;
@@ -1451,7 +1456,9 @@ end;
 
 procedure TSpecEmu.ButtonFloppy2Click(Sender: TObject);
 begin
+  flush_drive(1);
   diskFileDialog.Filename := diskB_filename;
+  disk_modified[1] := false;
   if diskFileDialog.Execute then
   begin
      if fileexists(diskFileDialog.filename) then
@@ -1511,9 +1518,23 @@ begin
     end;
 end;
 
+procedure TSpecemu.write_dsk_file(drive: byte);
+var
+  FF: file;
+  tt,ss,hh: integer;
+begin
+  Assignfile(FF,diskFileDialog.FileName);
+  Reset(FF,1);
+  bsize_dsk[drive] := filesize(FF);
+  blockwrite(FF,buffer_dsk[drive],bsize_dsk[drive]);
+  closefile(ff);
+end;
+
 procedure TSpecEmu.ButtonFloppyClick(Sender: TObject);
 begin
+  flush_drive(0);
   diskFileDialog.Filename := diskA_filename;
+  disk_modified[0] := false;
   if diskFileDialog.Execute then
   begin
     if fileexists(diskFileDialog.filename) then
@@ -1629,6 +1650,32 @@ begin
   ButtonLeft.Checked := false;
   ButtonRight.Checked := false;
   ButtonFire.Checked := false;
+end;
+
+procedure TSpecEmu.flush_drive(drive: byte);
+var
+  reply: boolean;
+  S: String;
+begin
+   if disk_modified[drive] then
+   begin
+     S := 'drive '+ chr(ord('A')+drive) + ' modified';
+     reply := Application.MessageBox('Update DSK file?', PChar(S),
+                              MB_ICONQUESTION + MB_YESNO) = IDYES;
+     if reply then
+     begin
+       write_dsk_file(drive);
+       disk_modified[1] := false;
+     end;
+   end;
+end;
+
+procedure TSpecEmu.Button_flush_drivesClick(Sender: TObject);
+var
+  kk: byte;
+begin
+  for kk := 0 to 1 do
+    flush_drive(kk);
 end;
 
 procedure TSpecEmu.Button_show_floppyClick(Sender: TObject);

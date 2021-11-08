@@ -80,7 +80,7 @@ procedure reset_fdc;
 procedure getTrackblock(drive: byte; head: byte; track: byte; var track_block: ttrack_block);
 procedure getFisicalSectorBlock(drive: byte; head: byte; track: byte; fisical_sector: byte; var sector_block: tsector_block);
 procedure getSectorData(drive: byte; head: byte; track: byte; logical_sector: byte; var buffer);
-procedure putSectorData(drive: byte; head: byte; track: byte; sector: byte; var buffer);
+procedure putSectorData(drive: byte; head: byte; track: byte; logical_sector: byte; var buffer);
 function getdskversionstring(drive: byte): string;
 function getdskcreator(drive: byte): string;
 
@@ -114,6 +114,7 @@ var
     drive_not_ready: array[0..3] of byte = (1,1,1,1);
     executed: boolean;
     data_count: word;
+    disk_modified: array[0..3] of boolean = (false,false,false,false);
 
     fdc: record
       C,H,R,N,EOT,GPL: byte;
@@ -474,14 +475,16 @@ begin
   move(buffer_dsk[drive][pos], buffer,ds);
 end;
 
-procedure putSectorData(drive: byte; head: byte; track: byte; sector: byte; var buffer);
+procedure putSectorData(drive: byte; head: byte; track: byte; logical_sector: byte; var buffer);
 var
     pos: longint;
     track_block: TTrack_block;
     ds: word;
+    fisical_sector: byte;
 begin
   getTrackBlock(drive,head,track,track_block);
-  pos := getDataOffset(drive,head,track,sector);
+  fisical_sector := LogicalToFisicalSector(drive,head,track,logical_sector);
+  pos := getDataOffset(drive,head,track,fisical_sector);
   ds := calcSectorDataSize(track_block.sector_size);
   move(buffer,buffer_dsk[drive][pos],ds);
 end;
@@ -992,11 +995,12 @@ begin
         cfdc_writedata,
         cfdc_writedeldata:
         begin
-           if not executed then
+          drive := us0+us1*2;
+          if not executed then
           begin
             executed := true;
-            getLogicalSectorBlock(us0+us1*2,H,C,R,sector_block);
-            getSectorData(us0+us1*2,H,C,R,sector_data);
+            getLogicalSectorBlock(drive,H,C,R,sector_block);
+            getSectorData(drive,H,C,R,sector_data);
             data_count := 0;
           end;
           sector_data[data_count] := v;
@@ -1004,7 +1008,7 @@ begin
           if data_count >= calcSectorDataSize(N) then
           begin
             getSectorInfo;
-            putSectorData(us0+us1*2,H,C,R,sector_data);
+            putSectorData(drive,H,C,R,sector_data);
             if MT = 0 then
             begin
               fs := LogicalToFisicalSector(drive,H,C,R);
@@ -1041,16 +1045,21 @@ begin
     if source = FROM_IN then
     with fdc do
     begin
+      drive := US1*2+US0;
       case fdc_command of
         cfdc_readdeldata:
         begin
           fdc_write_command_results([@ST0,@ST1,@ST2,@C,@H,@R,@N]);
         end;
+        cfdc_format,
+        cfdc_writedata,
+        cfdc_writedeldata:
+        begin
+          fdc_write_command_results([@ST0,@ST1,@ST2,@C,@H,@R,@N]);
+          disk_modified[drive] := true;
+        end;
         cfdc_readdata,
         cfdc_readtrack,
-        cfdc_writedata,
-        cfdc_writedeldata,
-        cfdc_format,
         cfdc_scanequal,
         cfdc_scanloworequal,
         cfdc_scanhighorequal:
