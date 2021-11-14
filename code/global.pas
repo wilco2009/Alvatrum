@@ -30,7 +30,7 @@ const
 
 
 Type
-  Tmachine = (Spectrum48, Spectrum128, Spectrum_plus2, Spectrum_plus2a, Spectrum_plus3);
+  Tmachine = (Spectrum48, tk90x, tk95, inves, Spectrum128, Spectrum_plus2, Spectrum_plus2a, Spectrum_plus3);
   TjoystickProtocol = (joyp_none,joyp_kempston, joyp_sinclair,joyp_user);
   TjoystickType = (joyt_none,joyt_cursor, joyt_j1,joyt_j2);
   TUser_buttons = array[0..4,0..1] of byte;
@@ -49,7 +49,38 @@ var
   coldbootrequired: boolean = false;
   fdc_present: boolean = true;
 
+function is_plus3type_machine: boolean;
+function is_fdc_machine: boolean;
+function is_48k_machine: boolean;
+function is_plus2type_machine: boolean;
+function AYMachine: boolean;
+
 implementation
+
+function AYMachine: boolean;
+begin
+     AYMachine := options.machine <= spectrum128;
+end;
+
+function is_plus3type_machine: boolean;
+begin
+  is_plus3type_machine := ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3));
+end;
+
+function is_fdc_machine: boolean;
+begin
+  is_fdc_machine := (options.machine = spectrum_plus3);
+end;
+
+function is_48k_machine: boolean;
+begin
+  is_48k_machine := options.machine in [spectrum48,tk90x,tk95,inves];
+end;
+
+function is_plus2type_machine: boolean;
+begin
+  is_plus2type_machine := (options.machine = spectrum128) or (options.machine = spectrum_plus2);
+end;
 
 end.
 

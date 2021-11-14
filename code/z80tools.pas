@@ -268,7 +268,7 @@ var
           $34      : res := comp('INC','('+reg+mem_b_s(addr+2)+')','',3)+ ixiy_addr(wreg,addr+2);
           $35      : res := comp('DEC','('+reg+mem_b_s(addr+2)+')','',3)+ ixiy_addr(wreg,addr+2);
           $9,$19,
-          $29,$39  : res := comp('ADD',reg,reg16ixiy(addr,4,reg),2);
+          $29,$39  : res := comp('ADD',reg,reg16ixiy(addr+1,4,reg),2);
           $23      : res := comp('INC',reg,'',2);
           $2b      : res := comp('DEC',reg,'',2);
           $cb      : res := bit_ix_iy_instructions(reg);

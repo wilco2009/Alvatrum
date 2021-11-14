@@ -8,6 +8,9 @@ interface
 uses
   Classes, SysUtils, LCLType,global,z80globals;
 
+const
+  FDC_BOOTING_TIME = 10000000;
+
 type
   tAYChip = record
     R: array[0..15] of byte;
@@ -73,7 +76,6 @@ procedure setSinclairRight(n: byte);
 procedure ResetSinclairRight(n: byte);
 procedure AssignUserButton(dir: byte; key: word);
 function getdircaption(x: byte): string;
-function AYMachine: boolean;
 procedure Handle_fdc(var v: byte; source: byte);
 procedure getdiskinfo(drive: byte);
 procedure reset_fdc;
@@ -97,8 +99,8 @@ var
     drive_pos: array[0..3] of tdrive_pos;
     disk_motor: array[0..3] of boolean = (false,false,false,false);
     disk_motor_on: boolean;
-    sector_data: array[0..4095] of byte;
-    sector_sizes: array[0..5] of integer = (128,256,512,1024,2048,4096);
+    sector_data: array[0..8191] of byte;
+    sector_sizes: array[0..6] of integer = (128,256,512,1024,2048,4096,6144);
     bsize_dsk: array[0..1] of longint;
     buffer_dsk: array[0..1] of TbufferDsk;
     disk_info: array[0..1] of Tdiskinfo;
@@ -111,6 +113,7 @@ var
     led_motor_on: array[0..3] of boolean = (false,false,false,false);
     drive_two_sides: array[0..3] of byte = (0,0,0,0);
     drive_protected: array[0..3] of byte = (0,0,0,0);
+    drive_connected: array[0..3] of byte = (1,1,0,0);
     drive_not_ready: array[0..3] of byte = (1,1,1,1);
     executed: boolean;
     data_count: word;
@@ -141,6 +144,9 @@ var
     seek_time: qword = 0;
     seek_max_time: qword = 0;
 
+    fdc_reset_time: Qword = 0;
+
+
 implementation
 
 procedure test_ready;
@@ -155,7 +161,10 @@ begin
     //  if driveB_ready then NR := 0
     //  else NR := 1;
     //end;
-    NR := drive_not_ready[US1*2+US0];
+    //if (t_states-fdc_reset_time) > FDC_BOOTING_TIME then
+       NR := drive_not_ready[US1*2+US0]
+    //else
+      //NR := 0;
   end;
 end;
 
@@ -231,7 +240,7 @@ begin
    with fdc do
    begin
      drive := (US1 << 1) or (US0);
-     RY := (not NR) and 1;
+     RY := drive_connected[drive];//(not NR) and 1;
      WP := drive_protected[drive];
      T0 := byte(C=0) and 1;
      TS := drive_two_sides[drive];
@@ -275,6 +284,7 @@ procedure reset_fdc;
 var
     jj: byte;
 begin
+  fdc_reset_time := t_states;
   fdc_state:= sfdc_command;
   fdc_command:= cfdc_null;
   operation_pending:= false;
@@ -356,7 +366,7 @@ begin
        3: calcSectorDataSize := 1024;
        4: calcSectorDataSize := 2048;
        5: calcSectorDataSize := 4096;
-       6: calcSectorDataSize := 8912;
+       6: calcSectorDataSize := 6144;
      end;
 end;
 
@@ -369,9 +379,9 @@ begin
     disk_info[drive].version := 0;
     disk_info[drive].Tracks := buffer_dsk[drive][$30];
     disk_info[drive].sides := buffer_dsk[drive][$31];
-    for jj := 0 to disk_info[drive].Tracks*disk_info[drive].sides do
+    for jj := 0 to disk_info[drive].Tracks*disk_info[drive].sides-1 do
     begin
-       disk_info[drive].track_size[jj] := buffer_dsk[drive][$32+$33*$FF];
+       disk_info[drive].track_size[jj] := buffer_dsk[drive][$32]+buffer_dsk[drive][$33]*256;
     end;
   end else if buffer_dsk[drive][0] = ord('E') then // Extended format
   begin
@@ -713,7 +723,14 @@ procedure Handle_fdc(var v: byte; source: byte);
   begin
     with fdc do
     begin
-      v := sector_data[data_count];
+      if (sector_block.ST1 and %00100000) <> 0 then       // CRC Error
+      begin
+        if (data_count >= 256) {and (data_count < 256+32)} then
+           v := random(256)
+        else
+          v := sector_data[data_count];
+      end else
+          v := sector_data[data_count];
       inc(data_count);
       if readend then
       begin
@@ -804,19 +821,23 @@ begin
         begin
           fdc_command := cfdc_senseinterrupt;
           seek_end := t_states;
-           seek_time := seek_end-seek_start;
-           inc(seek_count);
-          if {(seek_count mod 7) < 3}operation_pending {seek_time > seek_max_time 1800000} then
-          begin
-            PCN := C;
-            SE := 1;
-            IC := %00;
-            operation_pending := false;
-          end else begin
-            operation_pending := true;
-            SE := 0;
-            IC := %10;
-          end;
+          seek_time := seek_end-seek_start;
+          inc(seek_count);
+          //case pc_before of
+          //  $1d67: begin IC := %10; SE := 0; end;
+          //  else
+              if (seek_count mod 3) > 0{operation_pending} {seek_time > seek_max_time 1800000} then
+              begin
+                PCN := C;
+                SE := 1;
+                IC := %00;
+                operation_pending := false;
+              end else begin
+                operation_pending := true;
+                SE := 0;
+                IC := %10;
+              end;
+          //end;
           fdc_composeST0;
           set_results_phase;
         end;
@@ -1082,19 +1103,18 @@ begin
         end;
         cfdc_sensedrive:
             fdc_write_command_results([@ST3]);
-        cfdc_senseinterrupt:
-            fdc_write_command_results([@ST0,@PCN]);
+        cfdc_senseinterrupt: begin
+            if operation_pending then
+               fdc_write_command_results([@ST0{,@C}])
+            else
+              fdc_write_command_results([@ST0,@C])
+        end;
         cfdc_invalid:
             fdc_write_command_results([@ST0]);
       end;
     end;
   end;
   fdc_compose_status;
-end;
-
-function AYMachine: boolean;
-begin
-     AYMachine := options.machine <= spectrum128;
 end;
 
 function getdircaption(x: byte): string;
@@ -1237,37 +1257,6 @@ begin
   fillchar(user_buttons, sizeof(user_buttons),0);
   fillchar(AY1, sizeof(AY1), 0);
 
-  //fdc.C := 0;       // cylinder
-  //fdc.H := 0;       // head
-  //fdc.R := 0;       // Record
-  //fdc.N := 0;       // Number of data bytes in a sector
-  //fdc.EOT := 0;     // End of track
-  //fdc.GPL := 0;     // Gap length
-  //fdc.DTL := 0;     // Data length
-  //fdc.D := 0;       // Data
-  //fdc.STP:= 0;      // During a Scan operation, if STP = 1, the data in contiguous sectors is compared byte by byte
-  //                  // with data sent from the processor (or DMA); and if STP = 2, then alternate sectors are read
-  //                  // and compared.
-  //fdc.SC := 0;      // sector
-  //fdc.SRT := $08;     // Step rate time
-  //fdc.HUT := $07;   // Head unload time
-  //fdc.HLT := $07;   // Head load time
-  //fdc.ND := 0;      // Non DMA Mode
-  //fdc.NCN := 0;     // new cylinder number
-  //fdc.PCN := 5;     // present cylinder number
-  //fdc.SK := 0;      // Skip
-  //fdc.MT := 0;      // Multitrack
-  //fdc.MF := 0;      // FM or MFM mode
-  //
-  //fdc.SRT_HUT := (fdc.SRT << 4) or fdc.HUT; // SRT+HUT
-  //fdc.HLT_ND := (fdc.HLT << 1) or fdc.ND;   // HLT+ND
-  //fdc.param0 := fdc.MT or fdc.MF or fdc.SK;
-  //fdc_composeST0;
-  //fdc_composeST1;
-  //fdc_composeST2;
-  //fdc_composeST3;
-  //
-  //fdc.main_reg := %10000000;
   reset_fdc;
 end.
 

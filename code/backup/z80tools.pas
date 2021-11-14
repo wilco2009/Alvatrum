@@ -80,7 +80,7 @@ begin
   rr := 13;
   while (rr <= length(s)) and (s[rr] = ' ') do
     inc(rr);
-  get_instruction := copy(s,12,rr-12+1);
+  get_instruction := copy(s,14,rr-12+1);
 end;
 function decode_instruction(addr: word): string;
 var

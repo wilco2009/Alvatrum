@@ -112,6 +112,12 @@ Spectrum +3 disk emulation near to be completed
 many disks are working
 bug in all RAM modes fixed
 
+beta version 0.1.10
+Spectrum +3 disk emulation is ready 
+some bugs fixed
+standard load without trapping implemented.
+border effects are now supported.
+
 TO DO:
 tape reading tzx
 memory contention

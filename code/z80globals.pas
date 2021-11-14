@@ -154,19 +154,17 @@ end;
 procedure reset_memory_banks;
 begin
   rom_bank := 0;
-  case options.machine of
-    Spectrum48: begin
-      Mem_banks[0] := ROMPAGE0;
-      Mem_banks[1] := 1;
-      Mem_banks[2] := 2;
-      Mem_banks[3] := 3;
-    end;
-    Spectrum128,Spectrum_plus2,Spectrum_plus2a,Spectrum_plus3: begin
-      Mem_banks[0] := ROMPAGE0;
-      Mem_banks[1] := SCREENPAGE;
-      Mem_banks[2] := 2;
-      Mem_banks[3] := 0;
-    end;
+  if is_48k_machine then
+  begin
+    Mem_banks[0] := ROMPAGE0;
+    Mem_banks[1] := 1;
+    Mem_banks[2] := 2;
+    Mem_banks[3] := 3;
+  end else begin
+    Mem_banks[0] := ROMPAGE0;
+    Mem_banks[1] := SCREENPAGE;
+    Mem_banks[2] := 2;
+    Mem_banks[3] := 0;
   end;
   membanks_mode0[0] := Mem_banks[0];
   membanks_mode0[1] := Mem_banks[1];
@@ -283,7 +281,7 @@ end;
 
 procedure wrmem(x: word; y: byte);
 begin
-  if (x = $fe03) {or (x=$e2d1)} then
+  if (x = $5c61) {or (x=$e2d1)} then
     a := a;
   if (Mem_banks[0] < 32) or (x >= 16384) then
   begin

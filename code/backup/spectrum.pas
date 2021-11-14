@@ -5,7 +5,7 @@ unit spectrum;
 interface
 
 uses
-  Classes, SysUtils,CRT,Z80Globals,hardware,Global;
+  Classes, SysUtils,CRT,Z80Globals,hardware,Global,cassette;
 
 const
   ancho_borde = 30;
@@ -26,6 +26,8 @@ const
   screen_testados_total=70000;
   scanline_testados = 208; //208;// zesarux=224//208; //screen_testados_total div 334;//312;
   screen_tstates_half_scanline = scanline_testados;
+  total_screen_lines = alto_borde*2+192;
+  t_states_scanline = screen_testados_total div total_screen_lines;
 
   MAX_TAPE_BLOCKS = 99;
   MAXFREQ = 16500;
@@ -72,6 +74,7 @@ type
   end;
 
 var
+  screen_line: word;
   Tape_info: TTapeInfo;
 //  Tape_info_bak: TTapeInfo;
   border_color : byte = 7;
@@ -390,6 +393,10 @@ begin
   membanks_mode0[1] := 1;
   membanks_mode0[2] := 2;
   membanks_mode0[3] := 3;
+  AY1.R[$E] := $bf;
+  pagging_mode := 0;
+  disable_pagging := false;
+  fillchar(bcolor, sizeof(bcolor),0);
 end;
 
 procedure spectrum_out(port: word; v: byte);
@@ -408,7 +415,7 @@ begin
   if not disable_pagging then
   begin
     // port 7ffd spectrum 128 and +2 gray
-    if ((options.machine = Spectrum128) or (options.machine = Spectrum_plus2))
+    if is_plus2type_machine
     and ((port and %1000000000000010) = 0) then
     begin
       last_out_7ffd := v;
@@ -434,7 +441,7 @@ begin
        membanks_mode0[3] := Mem_banks[3];
     end;
     // port 7ffd spectrum +2a/+3
-    if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
+    if is_plus3type_machine
     and ((port and %1100000000000010) = %0100000000000000)  then
     begin
        last_out_7ffd := v;
@@ -443,7 +450,7 @@ begin
        else
           screen_page := SHADOWPAGE;
        rom_bank := (rom_bank and %10) or ((v and %10000)>>4);
-       disable_pagging := (v and %100000) = 1;
+       disable_pagging := (v and %100000) <> 0;
 
        //if (pagging_mode = 0) then
        //begin
@@ -458,7 +465,7 @@ begin
          end;
     end;
     // port 1ffd spectrum +2a/+3
-    if ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))
+    if is_plus3type_machine
     and ((port and %1111000000000010) = %0001000000000000) then
     begin
       last_out_1ffd := v;
@@ -522,13 +529,14 @@ begin
          AY1.R[AY1.selreg]:=v and %1111;
        8,9,10,6:
          AY1.R[AY1.selreg]:=v and %11111;
+       14: AY1.R[AY1.selreg]:=v and $bf;
        else
             AY1.R[AY1.selreg]:=v;
       end;
        config_AY;
      end;
   end;
-  if fdc_present and ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3)) then
+  if is_fdc_machine then
   begin
     // port $3ffd Bytes written to this port are sent to the FDC
     if port and %1111000000000010 = %0011000000000000 then
@@ -558,13 +566,13 @@ begin
      begin
         v := v and Keyboard[3]; // 1 2 3 4 5
         v := v and SinclairLeft;
-        if v and 1 = 0 then
-           a := a;
      end;
      if (hport and %00010000) = 0 then
      begin
         v := v and Keyboard[4]; // 0 9 8 7 6
         v := v and SinclairRight;
+        if v and 1 = 0 then
+           a := a;
      end;
      if (hport and %00100000) = 0 then
         v := v and Keyboard[5]; // P O I U Y
@@ -572,11 +580,12 @@ begin
         v := v and Keyboard[6]; // ENTER L K J H
      if (hport and %10000000) = 0 then
         v := v and Keyboard[7]; // SPACE SYM M N B
+     v := v or ear_value;
      last_in_FE := v;
   end else begin                   // other write ports
-    if ((lport = $ff) and (options.machine < spectrum_plus2a)) or
+    if (lport = $ff) and not is_plus3type_machine or
        (((port and %1111000000000011) = %0000000000000001)
-               and (options.machine >= spectrum_plus2a)) then
+               and is_plus3type_machine) then
     begin
       // screen 224 t-states
       // border 128 t-states
@@ -607,12 +616,13 @@ begin
   // DB5 Execution Mode
   // DB6 Data Input/Output
   // DB7 Request for master
-  if fdc_present and ((options.machine = Spectrum_plus2a) or (options.machine = Spectrum_plus3))then
+  if is_fdc_machine and is_plus3type_machine then
   begin
     // port $2ffd
     if port and %1111000000000010 = %0010000000000000 then
     begin
       v := fdc.main_reg;
+      //if (v and %00010000) <> 0 then operation_pending := false;
     end;
     // port $3ffd reading from this port will read bytes from the FDC
     if port and %1111000000000010 = %0011000000000000 then
@@ -623,5 +633,7 @@ begin
   spectrum_in := v;
 end;
 
+begin
+  init_spectrum;
 end.
 

@@ -7,12 +7,12 @@ unit main;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes,
-  z80Globals, Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file,
-  acs_misc, acs_mixer, BCListBox, CRT, BGRAGraphicControl,
-  BGRASpriteAnimation, BGRAResizeSpeedButton,
-  spectrum,SdpoJoystick, global, hardware, fileformats, Types;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
+  StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes, z80Globals,
+  Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file, acs_misc, acs_mixer,
+  BCListBox, CRT, BGRAGraphicControl, BGRASpriteAnimation,
+  BGRAResizeSpeedButton, BGRAImageList, BCPanel, BGRAVirtualScreen, spectrum,
+  SdpoJoystick, global, hardware, fileformats, Types,cassette;
 type
 
   { TSpecEmu }
@@ -23,6 +23,10 @@ type
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
+    ButtonPrevMachine: TBGRAResizeSpeedButton;
+    ButtonNextMachine2: TBGRAResizeSpeedButton;
+    cktape_trap: TCheckBox;
+    dispComp: TBGRAGraphicControl;
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
@@ -31,14 +35,14 @@ type
     Button6: TButton;
     Button7: TButton;
     ButtonConf: TBGRAResizeSpeedButton;
+    ButtonFloppy: TBGRAResizeSpeedButton;
+    ButtonFloppy2: TBGRAResizeSpeedButton;
     ButtonMedia: TBGRAResizeSpeedButton;
     ButtonCursorFire: TToggleBox;
     ButtonDeleteBlock: TBGRAResizeSpeedButton;
     ButtonDown: TToggleBox;
     ButtonEject: TBGRAResizeSpeedButton;
     ButtonFire: TToggleBox;
-    ButtonFloppy: TBGRAResizeSpeedButton;
-    ButtonFloppy2: TBGRAResizeSpeedButton;
     ButtonFWD: TBGRAResizeSpeedButton;
     ButtonLeft: TToggleBox;
     ButtonPlay: TBGRAResizeSpeedButton;
@@ -107,7 +111,16 @@ type
     ckAYSound: TCheckBox;
     CheckGroup1: TCheckGroup;
     ckDiskB_prot: TCheckBox;
+    ckDiskB_active: TCheckBox;
     DebugPanel: TPanel;
+    driveA: TImage;
+    driveAfloppy: TImage;
+    driveALed: TImage;
+    DriveAPanel: TPanel;
+    driveB: TImage;
+    driveBFloppy: TImage;
+    driveBLed: TImage;
+    DriveBPanel: TPanel;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
     EdMem: TEdit;
@@ -120,14 +133,9 @@ type
     GroupJoystickProtocol: TRadioGroup;
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
-    driveA: TImage;
     Image2: TImage;
     Image3: TImage;
-    driveAfloppy: TImage;
-    driveBFloppy: TImage;
-    driveALed: TImage;
-    driveB: TImage;
-    driveBLed: TImage;
+    Image4: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -153,7 +161,6 @@ type
     OpenSnaFileDialog: TOpenDialog;
     Panel1: TPanel;
     GroupLeftJoystick: TRadioGroup;
-    GroupMachine: TRadioGroup;
     panelFloppy: TPanel;
     Panel3: TPanel;
     panelComputone: TPanel;
@@ -181,9 +188,23 @@ type
     StaticText13: TStaticText;
     StaticText14: TStaticText;
     StaticText15: TStaticText;
-    stPaused: TStaticText;
     StaticText17: TStaticText;
     StaticText18: TStaticText;
+    stDriveACreator: TStaticText;
+    stDriveASides: TStaticText;
+    stDriveASidest: TStaticText;
+    stDriveATracks: TStaticText;
+    stDriveATrackst: TStaticText;
+    stDriveAVersion: TStaticText;
+    stDriveBCreator: TStaticText;
+    stDriveBSides: TStaticText;
+    stDriveBSidest: TStaticText;
+    stDriveBTracks: TStaticText;
+    stDriveBTrackst: TStaticText;
+    stDriveBVersion: TStaticText;
+    stFileDriveAInfo: TStaticText;
+    stFileDriveBInfo: TStaticText;
+    stPaused: TStaticText;
     StaticText2: TStaticText;
     StaticText3: TStaticText;
     StaticText4: TStaticText;
@@ -193,22 +214,8 @@ type
     StaticText8: TStaticText;
     StaticText9: TStaticText;
     stdiskMotor: TStaticText;
-    stDriveACreator: TStaticText;
-    stDriveASides: TStaticText;
-    stDriveBSides: TStaticText;
-    stDriveBSidest: TStaticText;
-    stDriveBTracks: TStaticText;
-    stDriveATrackst: TStaticText;
-    stDriveASidest: TStaticText;
-    stDriveATracks: TStaticText;
-    stDriveBTrackst: TStaticText;
-    stDriveBCreator: TStaticText;
-    stDriveBVersion: TStaticText;
     StepOverButton: TBitBtn;
     stFileDriveA: TStaticText;
-    stFileDriveAInfo: TStaticText;
-    stDriveAVersion: TStaticText;
-    stFileDriveBInfo: TStaticText;
     stFileDriveB: TStaticText;
     stportoutFE: TStaticText;
     stportinFE: TStaticText;
@@ -274,6 +281,9 @@ type
     procedure BFocusClick(Sender: TObject);
     procedure BFocusdKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ButtonPrevMachineClick(Sender: TObject);
+    procedure ButtonNextMachine2Click(Sender: TObject);
+    procedure dispCompPaint(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
@@ -485,11 +495,12 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure ckAYSoundChange(Sender: TObject);
     procedure ckDiskA_protChange(Sender: TObject);
+    procedure ckDiskB_activeChange(Sender: TObject);
     procedure ckDiskB_protChange(Sender: TObject);
     procedure FormChangeBounds(Sender: TObject);
     procedure GroupJoystickProtocolClick(Sender: TObject);
     procedure GroupLeftJoystickClick(Sender: TObject);
-    procedure GroupMachineClick(Sender: TObject);
+    //procedure GroupMachineClick(Sender: TObject);
     procedure GroupRightJoystickClick(Sender: TObject);
     procedure grUserJoyClick(Sender: TObject);
     procedure KeyMouseEnter(Sender: TObject);
@@ -566,6 +577,7 @@ type
     RightJoystickSelection: word;
     diskA_filename: string;
     diskB_filename: string;
+    grComputer: array [Tmachine] of TBGRABitmap;
     procedure draw_screen;
     procedure RunEmulation;
     procedure refresh_system;
@@ -623,7 +635,9 @@ type
     procedure read_dsk_file(drive: byte);
     procedure write_dsk_file(drive: byte);
     procedure flush_drive(drive: byte);
-
+    procedure Change_to_floppy;
+    procedure Change_to_tape;
+    procedure UpdateROMs;
   public
 
   end;
@@ -637,7 +651,7 @@ const
 
 
 var
-   sizex, sizey, scale,bak_scale: word;
+  sizex, sizey, scale,bak_scale: word;
   SpecEmu: TSpecEmu;
   jj: word = 0;
   frame_counter: word = 0;
@@ -652,6 +666,7 @@ var
   diskB_inserted: boolean = false;
   step_over_true, step_over_false: word;
   step_over_break: boolean = false;
+  block: word;
 
 implementation
 
@@ -1314,6 +1329,38 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
     key := 0;
 end;
 
+procedure TSpecEmu.updateROMs;
+begin
+  stROM0.Caption:= ExtractFileName(options.ROMFilename[ord(options.machine),0]);
+  stROM1.Caption:= ExtractFileName(options.ROMFilename[ord(options.machine),1]);
+  stROM2.Caption:= ExtractFileName(options.ROMFilename[ord(options.machine),2]);
+  stROM3.Caption:= ExtractFileName(options.ROMFilename[ord(options.machine),3]);
+  coldbootrequired := true;
+end;
+
+procedure TSpecEmu.ButtonPrevMachineClick(Sender: TObject);
+begin
+  if options.machine > Spectrum48 then
+     dec(options.machine);
+  dispComp.Repaint;
+  updateROMs;
+  ResetButtonClick(Sender);
+end;
+
+procedure TSpecEmu.ButtonNextMachine2Click(Sender: TObject);
+begin
+  if options.machine < Spectrum_plus3 then
+     inc(options.machine);
+  dispComp.Repaint;
+  updateROMs;
+  ResetButtonClick(Sender);
+end;
+
+procedure TSpecEmu.dispCompPaint(Sender: TObject);
+begin
+  grcomputer[options.machine].Draw(dispComp.Canvas,0,0,True);
+end;
+
 procedure TSpecEmu.Button4Click(Sender: TObject);
 var
    FF: File;
@@ -1499,8 +1546,10 @@ procedure TSpecemu.read_dsk_file(drive: byte);
 var
   FF: file;
   tt,ss,hh: integer;
+  S: string;
 begin
-  Assignfile(FF,diskFileDialog.FileName);
+  S := diskFileDialog.FileName;
+  Assignfile(FF,S);
   Reset(FF,1);
   bsize_dsk[drive] := filesize(FF);
   blockread(FF,buffer_dsk[drive],bsize_dsk[drive]);
@@ -1509,11 +1558,18 @@ begin
   for tt := 0 to disk_info[drive].tracks-1 do
     for hh := 0 to disk_info[drive].sides-1 do
     begin
-      getTrackblock(drive,hh,tt,track_block);
-      for ss := 1 to track_block.sectors do
+      if disk_info[drive].track_size[tt] > 0 then
       begin
-        getFisicalSectorBlock(drive,hh,tt,ss,sector_block);
-        getSectorData(drive,hh,tt,sector_block.sector_ID,sector_data);
+        getTrackblock(drive,hh,tt,track_block);
+        for ss := 1 to track_block.sectors do
+        begin
+          getFisicalSectorBlock(drive,hh,tt,ss,sector_block);
+          if buffer_dsk[0][0] <> ord('E') then
+             a := a;
+          getSectorData(drive,hh,tt,sector_block.sector_ID,sector_data);
+          if buffer_dsk[0][0] <> ord('E') then
+             a := a;
+        end;
       end;
     end;
 end;
@@ -1611,6 +1667,8 @@ begin
     ButtonPlayPressed.Visible := true;
     ButtonPlay.Visible := false;
     Set_tape_leds;
+    if not cktape_trap.Checked then
+      playtap(OpenTapFileDialog.FileName,Tape_info[blockgrid.Row].Filepos,blockgrid.row);
   end;
 end;
 
@@ -1678,18 +1736,27 @@ begin
     flush_drive(kk);
 end;
 
-procedure TSpecEmu.Button_show_floppyClick(Sender: TObject);
+procedure TSpecEmu.Change_to_floppy;
 begin
   panelFloppy.Visible:=true;
   blockGrid.Visible := false;
   panelComputone.Visible:=false;
 end;
-
-procedure TSpecEmu.Button_show_computoneClick(Sender: TObject);
+procedure TSpecEmu.Change_to_tape;
 begin
   panelFloppy.Visible:=false;
   blockGrid.Visible := true;
   panelComputone.Visible:=true;
+end;
+
+procedure TSpecEmu.Button_show_floppyClick(Sender: TObject);
+begin
+  change_to_floppy;
+end;
+
+procedure TSpecEmu.Button_show_computoneClick(Sender: TObject);
+begin
+  change_to_tape;
 end;
 
 
@@ -1753,6 +1820,7 @@ begin
   ButtonPlayPressedClick(Sender);
   ButtonRecPressedClick(Sender);
   Set_tape_leds;
+  stoptap;
 end;
 
 procedure TSpecEmu.ButtonUpChange(Sender: TObject);
@@ -2317,8 +2385,9 @@ begin
   Options.JL_Type:= TJoystickType(GroupLeftJoystick.ItemIndex);
   Options.JR_Type:= TJoystickType(GroupRightJoystick.ItemIndex);
   Options.joystick_Protocol:= TjoystickProtocol(GroupJoystickProtocol.ItemIndex);
-  Options.machine := Tmachine(Groupmachine.ItemIndex);
+  //Options.machine := Tmachine(Groupmachine.ItemIndex);
   Options.user_keys := user_buttons;
+  fdc_present := is_fdc_machine;
 end;
 
 procedure TSpecEmu.ckAYSoundChange(Sender: TObject);
@@ -2333,6 +2402,27 @@ end;
 procedure TSpecEmu.ckDiskA_protChange(Sender: TObject);
 begin
   drive_protected[0] := byte(ckDiskA_prot.checked) and 1;
+end;
+
+procedure TSpecEmu.ckDiskB_activeChange(Sender: TObject);
+begin
+     if ckDiskB_active.checked then
+     begin
+       //driveBFloppy.Visible := true;
+       //driveB.Visible := true;
+       //ButtonFloppy2.Visible := true;
+       //StaticText18.Visible:= true;
+       drive_connected[1] := 1;
+       driveBPanel.Visible := true;
+     end else begin
+       drive_connected[1] := 0;
+       driveBPanel.Visible := false;
+       //driveBFloppy.Visible := false;
+       //driveB.Visible := false;
+       //ButtonFloppy2.Visible := false;
+       //driveBLed.Visible := false;
+       //StaticText18.Visible:= false;
+     end;
 end;
 
 procedure TSpecEmu.ckDiskB_protChange(Sender: TObject);
@@ -2479,15 +2569,15 @@ begin
   UpdateJoystickPanels;
 end;
 
-procedure TSpecEmu.GroupMachineClick(Sender: TObject);
-begin
-  stROM0.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,0]);
-  stROM1.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,1]);
-  stROM2.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,2]);
-  stROM3.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,3]);
-  coldbootrequired := true;
-end;
-
+//procedure TSpecEmu.GroupMachineClick(Sender: TObject);
+//begin
+//  stROM0.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,0]);
+//  stROM1.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,1]);
+//  stROM2.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,2]);
+//  stROM3.Caption:= ExtractFileName(options.ROMFilename[groupmachine.ItemIndex,3]);
+//  coldbootrequired := true;
+//end;
+//
 procedure TSpecEmu.GroupRightJoystickClick(Sender: TObject);
 begin
   OpenJoysticks;
@@ -2899,6 +2989,7 @@ end;
 procedure TSpecEmu.ResetButtonClick(Sender: TObject);
 begin
   UpdateOptions;
+  UpdateFromOptions;
   ReadROM;
   step_over_break := false;
   //breakpoint_active := false;
@@ -2943,11 +3034,11 @@ end;
 procedure TSpecEmu.stROM0Click(Sender: TObject);
 begin
   pause_emulation;
-  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,0];
+  odROM.FileName := Options.ROMFileName[ord(options.machine),0];
   if odROM.Execute then
   begin
     stROM0.Caption := ExtractFileName(odROM.FileName);
-    options.ROMFilename[groupmachine.itemindex,0] := odROM.FileName;
+    options.ROMFilename[ord(options.machine),0] := odROM.FileName;
   end;
   restart_emulation;
 end;
@@ -3021,7 +3112,7 @@ begin
   MemPages.Cells[1,2] := PageToStr(Mem_banks[1]);
   MemPages.Cells[1,3] := PageToStr(Mem_banks[0]);
   stScreenPage.Caption := 'SCREEN=RAM'+IntToStr(screen_page);
-  if options.machine = spectrum48 then
+  if is_48k_machine then
   begin
     stPaggingDisabled.caption := 'NO PAGGING';
     stDiskMotor.caption := 'DISK MOTOR: N/A';
@@ -3031,13 +3122,13 @@ begin
       stPaggingDisabled.caption := 'PAG DISABLED'
     else
       stPaggingDisabled.caption := 'PAG ENABLED';
-    if options.machine < spectrum_plus2a then
+    if is_plus3type_machine then
       stDiskMotor.caption := 'DISK MOTOR: N/A'
     else if disk_motor_on then
       stDiskMotor.caption := 'DISK MOTOR: ON'
     else
       stDiskMotor.caption := 'DISK MOTOR: OFF';
-    if options.machine < spectrum_plus2a then
+    if is_plus3type_machine then
       stprinterStrobe.caption := 'PRINT STRB: N/A'
     else if printer_strobe then
       stprinterStrobe.caption := 'PRINT STRB: ON'
@@ -3072,69 +3163,85 @@ begin
   status_saved := false;
   while (not saliendo) do begin
     if not pause and
-       ((breakpoint_active) and ((breakpoint = pc) and not empezando)) or
-       (step_over_break and (step_over_true = pc) and not empezando)
-       then begin
-       start_debug;
+      ((breakpoint_active) and ((breakpoint = pc) and not empezando)) or
+      (step_over_break and (step_over_true = pc) and not empezando)
+      then
+    begin
+      start_debug;
     end;
-    if not pause or step or step_over_break then begin
-       empezando := false;
-       basicrom := (options.machine = spectrum48) or
-          ((options.machine = spectrum128)      and (Mem_banks[0]=ROMPAGE1)) or
-          ((options.machine = spectrum_plus2)   and (Mem_banks[0]=ROMPAGE1)) or
-          ((options.machine >= spectrum_plus2a) and (Mem_banks[0]=ROMPAGE3));
+    if not pause or step or step_over_break then
+    begin
+      empezando := false;
+      basicrom := is_48k_machine or
+        (is_plus2type_machine and (Mem_banks[0]=ROMPAGE1)) or
+         (is_plus3type_machine and (Mem_banks[0]=ROMPAGE3));
 
-       if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6)))
-          and not status_saved and basicrom then
-       begin
-          status_saved := true;
-          save_cpu_status;
-       end;
-       if (pc >= $04c2) and (pc <= $04d8) and TapeRecLed.Visible and basicrom then // SAVE ROUTINE
-       begin
-          if status_saved then
-             restore_cpu_status;
-          status_saved := false;
-          c_flag := Save_tape_block(IX,DE,A);
-          compose_flags;
-          ret;
-          clear_keyboard;
-          Application.ProcessMessages;
-       end else if (pc >= $556) and (pc < $05e3) and TapePlayLed.Visible and basicrom then // LOAD ROUTINE
-       begin
-         Application.ProcessMessages;
-          if status_saved then
-          begin
-             restore_cpu_status;
-             flag := A;
-          end else if pc = $562 then
-          begin
-               flag := A1;
-          end;
-          status_saved := false;
-          spectrum_out($fe,A);                     // border color
-          c_flag := Load_Tape_block(IX, DE, Flag); // IX: Addr; DE: Len; A: Flag byte
-          compose_flags;
-          ix+=de;
-          ret;
-          clear_keyboard;
-          Application.ProcessMessages;
-       end else if not screen_tstates_reached or step then
-           do_z80
-       {else sleep(1)};
-       if pause then
-       begin
-          stInstruction.caption := decode_instruction(pc);
-          refresh_registers;
-          draw_screen;
-          Application.ProcessMessages;
-       end;
-       step := false;
+      if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6)))
+        and not status_saved and basicrom and cktape_trap.checked then
+      begin
+        status_saved := true;
+        save_cpu_status;
+      end;
+      if (pc >= $04c2) and (pc <= $04d8)
+        and cktape_trap.checked
+        and TapeRecLed.Visible and basicrom then // SAVE ROUTINE
+      begin
+        if status_saved then
+           restore_cpu_status;
+        status_saved := false;
+        c_flag := Save_tape_block(IX,DE,A);
+        compose_flags;
+        ret;
+        clear_keyboard;
+        Application.ProcessMessages;
+      end else if (pc >= $556) and (pc < $05e3) and
+        TapePlayLed.Visible and basicrom
+        and cktape_trap.checked then // LOAD ROUTINE
+      begin
+        Application.ProcessMessages;
+        if status_saved then
+        begin
+          restore_cpu_status;
+          flag := A;
+        end else if pc = $562 then
+        begin
+          flag := A1;
+        end;
+        status_saved := false;
+        spectrum_out($fe,A);                     // border color
+        c_flag := Load_Tape_block(IX, DE, Flag); // IX: Addr; DE: Len; A: Flag byte
+        compose_flags;
+        ix+=de;
+        ret;
+        clear_keyboard;
+        Application.ProcessMessages;
+      end else if not screen_tstates_reached or step then
+         do_z80
+      {else sleep(1)};
+      if pause then
+      begin
+        stInstruction.caption := decode_instruction(pc);
+        refresh_registers;
+        draw_screen;
+        Application.ProcessMessages;
+      end;
+      step := false;
     end;
     inc(ii);
     if (ii >= 2048) then begin
       Application.ProcessMessages;
       ii := 0;
+    end;
+    if stop_signal then
+    begin
+       ButtonStopClick(self);
+       stop_signal := false;
+    end;
+    if playing_tap then
+    begin
+       handle_load_sound(block);
+       if block <> blockgrid.Row then
+          blockgrid.row := block;
     end;
     t_states_cur_half_scanline := t_states - t_states_ini_half_scanline;
     t_states_cur_instruction := t_states - t_states_prev_instruction;
@@ -3150,9 +3257,12 @@ begin
         Run_AY_Channel(AYCHB);
         Run_AY_Channel(AYCHC);
       end;
+
+
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
       ss := ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
-                                   AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
+              (load_sound * 8*volume_speaker)+
+              AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
       if ss > 127 then
          ss := 127;
       speaker_data[soundpos_write] := 128 + ss;
@@ -3164,6 +3274,8 @@ begin
       inc(sound_bytes);
     end;
     t_states_cur_frame := t_states - t_states_ini_frame;
+    screen_line := t_states_cur_frame div t_states_scanline;
+    bcolor[screen_line] := border_color;
 //    time := screen_timer.Elapsed;
     screen_tstates_reached := (t_states_cur_frame >= screen_testados_total);
     repaint_screen := screen_tstates_reached and (sound_bytes <= 2048);//screen_timer.Elapsed >= 0.020;
@@ -3189,7 +3301,7 @@ begin
         disk_motor[0] := false;
         led_motor_on[0] := false;
       end;
-      if (frames mod 10 = 0) and (timer_floppyB = 0) then
+      if (frames mod 10 = 0) and (timer_floppyB = 0) and (drive_connected[1]=1) then
       begin
         timer_floppyB := 50;
         driveBLed.Visible := led_motor_on[1];
@@ -3212,7 +3324,7 @@ end;
 
 procedure TSpecEmu.UpdateFromOptions;
 begin
-  GroupMachine.ItemIndex := ord(options.machine);
+  //GroupMachine.ItemIndex := ord(options.machine);
   GroupLeftJoystick.ItemIndex := ord(options.JL_Type);
   GroupRightJoystick.ItemIndex := ord(options.JR_Type);
   GroupJoystickProtocol.ItemIndex := ord(options.joystick_Protocol);
@@ -3223,10 +3335,23 @@ begin
   ButtonLeft.caption := getdircaption(user_left);
   ButtonRight.caption := getdircaption(user_right);
   ButtonFire.caption := getdircaption(user_fire);
-  stROM0.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,0]);
-  stROM1.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,1]);
-  stROM2.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,2]);
-  stROM3.caption := ExtractFileName(options.ROMFileName[GroupMachine.ItemIndex,3]);
+  stROM0.caption := ExtractFileName(options.ROMFileName[ord(options.machine),0]);
+  stROM1.caption := ExtractFileName(options.ROMFileName[ord(options.machine),1]);
+  stROM2.caption := ExtractFileName(options.ROMFileName[ord(options.machine),2]);
+  stROM3.caption := ExtractFileName(options.ROMFileName[ord(options.machine),3]);
+  if is_fdc_machine then
+  begin
+    drive_connected[0] := 1;
+    Button_show_floppy.Enabled:=true;
+    if ckDiskB_active.checked then
+       drive_connected[1] := 1;
+    change_to_floppy;
+  end else begin
+    drive_connected[0] := 0;
+    drive_connected[1] := 0;
+    Button_show_floppy.Enabled:=false;
+    change_to_tape;
+  end;
 end;
 
 procedure TSpecEmu.DefaultOptions;
@@ -3242,26 +3367,38 @@ begin
   AssignUserButton(user_right,VK_P);
   AssignUserButton(user_fire,VK_SPACE);
   options.user_keys := user_buttons;
-  options.ROMFilename[0,0]:='ROM\48.rom';
-  options.ROMFilename[0,1]:='';
-  options.ROMFilename[0,2]:='';
-  options.ROMFilename[0,3]:='';
-  options.ROMFilename[1,0]:='ROM\128ROM0.rom';
-  options.ROMFilename[1,1]:='ROM\128ROM1.rom';
-  options.ROMFilename[1,2]:='';
-  options.ROMFilename[1,3]:='';
-  options.ROMFilename[2,0]:='ROM\plus2ROM0.rom';
-  options.ROMFilename[2,1]:='ROM\plus2ROM1.rom';
-  options.ROMFilename[2,2]:='';
-  options.ROMFilename[2,3]:='';
-  options.ROMFilename[3,0]:='ROM\plus3ROM0_4-1.rom';
-  options.ROMFilename[3,1]:='ROM\plus3ROM1_4-1.rom';
-  options.ROMFilename[3,2]:='ROM\plus3ROM2_4-1.rom';
-  options.ROMFilename[3,3]:='ROM\plus3ROM3_4-1.rom';
-  options.ROMFilename[4,0]:='ROM\plus3ROM0_4-1.rom';
-  options.ROMFilename[4,1]:='ROM\plus3ROM1_4-1.rom';
-  options.ROMFilename[4,2]:='ROM\plus3ROM2_4-1.rom';
-  options.ROMFilename[4,3]:='ROM\plus3ROM3_4-1.rom';
+  options.ROMFilename[ord(spectrum48),0]:='ROM\48.rom';
+  options.ROMFilename[ord(spectrum48),1]:='';
+  options.ROMFilename[ord(spectrum48),2]:='';
+  options.ROMFilename[ord(spectrum48),3]:='';
+  options.ROMFilename[ord(TK90x),0]:='ROM\tk90x.rom';
+  options.ROMFilename[ord(TK90x),1]:='';
+  options.ROMFilename[ord(TK90x),2]:='';
+  options.ROMFilename[ord(TK90x),3]:='';
+  options.ROMFilename[ord(TK95),0]:='ROM\tk95.rom';
+  options.ROMFilename[ord(TK95),1]:='';
+  options.ROMFilename[ord(TK95),2]:='';
+  options.ROMFilename[ord(TK95),3]:='';
+  options.ROMFilename[ord(inves),0]:='ROM\inves.rom';
+  options.ROMFilename[ord(inves),1]:='';
+  options.ROMFilename[ord(inves),2]:='';
+  options.ROMFilename[ord(inves),3]:='';
+  options.ROMFilename[ord(spectrum128),0]:='ROM\128ROM0.rom';
+  options.ROMFilename[ord(spectrum128),1]:='ROM\128ROM1.rom';
+  options.ROMFilename[ord(spectrum128),2]:='';
+  options.ROMFilename[ord(spectrum128),3]:='';
+  options.ROMFilename[ord(spectrum_plus2),0]:='ROM\plus2ROM0.rom';
+  options.ROMFilename[ord(spectrum_plus2),1]:='ROM\plus2ROM1.rom';
+  options.ROMFilename[ord(spectrum_plus2),2]:='';
+  options.ROMFilename[ord(spectrum_plus2),3]:='';
+  options.ROMFilename[ord(spectrum_plus2a),0]:='ROM\plus3ROM0_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus2a),1]:='ROM\plus3ROM1_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus2a),2]:='ROM\plus3ROM2_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus2a),3]:='ROM\plus3ROM3_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus3),0]:='ROM\plus3ROM0_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus3),1]:='ROM\plus3ROM1_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus3),2]:='ROM\plus3ROM2_4-1.rom';
+  options.ROMFilename[ord(spectrum_plus3),3]:='ROM\plus3ROM3_4-1.rom';
 
   UpdateFromOptions;
 
@@ -3362,13 +3499,23 @@ begin
   ButtonLeft.OnKeyUp:=@UserJoyKeyUp;
   ButtonRight.OnKeyUp:=@UserJoyKeyUp;
   ButtonFire.OnKeyUp:=@UserJoyKeyUp;
+
+  //img := TImage.Create(self);
+  grComputer[Spectrum48] := TBGRABitmap.Create('spectrum_c.png');
+  grComputer[tk90x] := TBGRABitmap.Create('tk90x.png');
+  grComputer[tk95] := TBGRABitmap.Create('tk95_c.png');
+  grComputer[inves] := TBGRABitmap.Create('inves_c.png');
+  grComputer[Spectrum128] := TBGRABitmap.Create('spectrum128_c.png');
+  grComputer[Spectrum_plus2] := TBGRABitmap.Create('spectrum_plus2_c.png');
+  grComputer[Spectrum_plus2a] := TBGRABitmap.Create('spectrum_plus2a_c.png');
+  grComputer[Spectrum_plus3] := TBGRABitmap.Create('spectrum_plus3_c.png');
 end;
 
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   saliendo := true;
   AudioOut.Stop();
-
+  Button_flush_drivesClick(self);
 end;
 
 procedure TSpecEmu.FormCreate(Sender: TObject);
@@ -3451,31 +3598,31 @@ end;
 
 procedure TSpecEmu.stROM1Click(Sender: TObject);
 begin
-  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,1];
+  odROM.FileName := Options.ROMFileName[ord(options.machine),1];
   if odROM.Execute then
   begin
     stROM1.Caption := ExtractFileName(odROM.FileName);
-    options.ROMFilename[groupmachine.itemindex,1] := odROM.FileName;
+    options.ROMFilename[ord(options.machine),1] := odROM.FileName;
   end;
 end;
 
 procedure TSpecEmu.stROM2Click(Sender: TObject);
 begin
-  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,2];
+  odROM.FileName := Options.ROMFileName[ord(options.machine),2];
   if odROM.Execute then
   begin
     stROM2.Caption := ExtractFileName(odROM.FileName);
-    options.ROMFilename[groupmachine.itemindex,2] := odROM.FileName;
+    options.ROMFilename[ord(options.machine),2] := odROM.FileName;
   end;
 end;
 
 procedure TSpecEmu.stROM3Click(Sender: TObject);
 begin
-  odROM.FileName := Options.ROMFileName[groupmachine.itemindex,3];
+  odROM.FileName := Options.ROMFileName[ord(options.machine),3];
   if odROM.Execute then
   begin
     stROM3.Caption := ExtractFileName(odROM.FileName);
-    options.ROMFilename[groupmachine.itemindex,3] := odROM.FileName;
+    options.ROMFilename[ord(options.machine),3] := odROM.FileName;
   end;
 end;
 
@@ -3782,7 +3929,7 @@ procedure TSpecEmu.draw_screen;
             );
 
   var
-    x, y: Integer;
+    x, y, curline: Integer;
     bgra: TBGRABitmap;
     // bitmap: TBitmap;
     p: PBGRAPixel;
@@ -3836,7 +3983,7 @@ procedure TSpecEmu.draw_screen;
     begin
       for x := 0 to pixels-1 do
       begin
-           v := border_color;
+           v := bcolor[curline];{border_color;}
            p^.red:= getRedComponent(v);
            p^.blue:= getBlueComponent(v);
            p^.green:= getGreenComponent(v);
@@ -3863,10 +4010,12 @@ begin
     bit := 128;
     pattr := 16384+6144;
     attr_offset := 0;
+    curline := 0;
     for y := 0 to alto_borde-1 do
     begin
       p := bgra.Scanline[y];
       linea_borde(ancho_borde*2+256);
+      inc(curline);
     end;
     for y := 0 to 191 do
     begin
@@ -3875,7 +4024,7 @@ begin
       pmem := lines[y];
       for x := 0 to 255 do
       begin
-        if (options.machine = spectrum48) then
+        if is_48k_machine then
            v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0)
         else if (screen_page = SCREENPAGE) then
            v := getColor(rdscreen(pattr+attr_offset), (rdscreen(pmem) and bit) <> 0)
@@ -3896,11 +4045,13 @@ begin
       if y mod 8 = 7 then
          inc(pattr,32);
       attr_offset := 0;
+      inc(curline);
     end;
     for y := 0 to alto_borde-1 do
     begin
       p := bgra.Scanline[y+192+alto_borde];
       linea_borde(ancho_borde*2+256);
+      inc(curline);
     end;
     if bfocus.Focused then
        bgra.canvas.DrawFocusRect(rect(0,0,sizex1x-1,sizey1x-1));
@@ -3909,5 +4060,6 @@ begin
     pantalla.canvas.StretchDraw(rect(15,15,sizex1x*scale+15-1,sizey1x*scale+15-1),bgra.Bitmap);
     bgra.Free;
 end;
+
 end.
 

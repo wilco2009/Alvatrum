@@ -217,6 +217,73 @@ Type
     page: byte;
   end;
 
+  ttzx_header = record
+    TZX_signature: Array[0..6] of char;
+    end_marker: byte;
+    major_rev: byte;
+    minor_rev: byte;
+  end;
+  ttzx_block_ID10 = record        // standard speed data block
+    pause: word;
+    len: array[0..2] of byte;
+    data: array[0..$ffff] of byte;
+  end;
+  ttzx_block_ID11 = record        // turbo speed data block
+    pilot_pulse_len: word;
+    sync_first_len: word;
+    sync_second_len: word;
+    ZERObit_len: word;
+    ONEbit_len: word;
+    pilot_tone_len: word;
+    used_bits_in_last_byte: byte;
+    pause: word;
+    len: array[0..2] of byte;
+    data: array[0..$ffff] of byte;
+  end;
+  ttzx_block_ID12 = record          // pure tone block
+    pulse_len: word;
+    number: array[0..255] of word;
+  end;
+
+  ttzx_block_ID13 = record          // pulse sequence
+    number: byte;
+    pulses_len: array[0..255] of word;
+  end;
+  ttzx_block_ID14 = record          // pure data block
+    ZERObit_len: word;
+    ONEbit_len: word;
+    used_bits_in_last_byte: byte;
+    pause: word;
+    len: array[0..2] of byte;
+    data: array[0..$ffff] of byte;
+  end;
+  ttzx_block_ID15 = record          // direct recording
+    t_states_per_sample: word;
+    pause: word;
+    used_bits_in_last_byte: byte;
+    len: array[0..2] of byte;
+    data: array[0..$ffff] of byte;
+  end;
+  ttzx_block_ID18 = record          // csw recording
+    block_len: dword;
+    pause: word;
+    sampling_rate: array[0..2] of byte;
+    compression_type: byte;
+    number_of_pulses: dword;
+    csw_data: array[0..$ffff] of byte;
+  end;
+  ttzx_block_ID19 = record          // generalized data
+    block_len: dword;
+    pause: word;
+    symbols_in_pilot: dword;
+    max_pulses_in_pilot: byte;
+    symbols_in_table: byte;
+    symbols_in_data_stream: dword;
+    max_pulses_in_data_symbol: byte;
+    symbols_in_table: byte;
+    //pilot_and_symbols_table:
+  end;
+
 var
   z80: Tz80Formatv2;
   snav2: TSnaFormatv2;
@@ -272,7 +339,7 @@ begin
        end;
        select_rom;
        for x := 1 to 3 do
-           move(sna.RAM[x*$4000],memP[Mem_banks[0,x],0],$4000);
+           move(sna.RAM[x*$4000],memP[Mem_banks[x],0],$4000);
        retn;
      end else begin  // 128K mode
         case options.machine of
@@ -608,7 +675,7 @@ begin
     if options.machine = spectrum48 then
     begin
       for x := 1 to 3 do
-          move(memP[Mem_banks[0,x],0],sna.RAM[x*$4000],$4000);
+          move(memP[Mem_banks[x],0],sna.RAM[x*$4000],$4000);
       Try
         Assignfile(F, filename);
         Rewrite(F,1);
