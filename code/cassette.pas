@@ -117,7 +117,7 @@ var
   option: word = $ffff;
   select_option: Tselect_option;
   select_options: array[0..255] of Tselect_option;
-  show_selection_menu: boolean = true;
+  show_selection_menu: boolean = false;
   show_time: byte;
 
 implementation
@@ -152,6 +152,7 @@ var
   nn: byte;
   jmp_addr: int16;
 begin
+  show_selection_menu := false;
   AssignFile (F, tap_filename);
   try
     Reset(F,1);

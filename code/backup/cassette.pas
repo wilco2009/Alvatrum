@@ -118,6 +118,7 @@ var
   select_option: Tselect_option;
   select_options: array[0..255] of Tselect_option;
   show_selection_menu: boolean = true;
+  show_time: byte;
 
 implementation
 
@@ -368,6 +369,17 @@ begin
             stoptap;
             inc(tap_block_num);
           end;
+        end;
+        $31: // Message block
+        begin
+          blockread(f,show_time,1,bytes_readed);
+          inc(tap_block_addr,bytes_readed);
+          BlockRead(F, data[0], sizeof(byte),bytes_readed);
+          inc(tap_block_addr,bytes_readed);
+          BlockRead(F, data[1], data[0],bytes_readed);
+          inc(tap_block_addr,bytes_readed);
+          if bytes_readed < data[0] then
+            stoptap;
         end;
          $32: // Archive info
         begin
@@ -648,6 +660,7 @@ begin
       $27,
       $2A,
       $30,
+      $31,
       $32,
       $33,
       $35,
