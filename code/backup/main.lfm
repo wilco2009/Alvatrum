@@ -1,7 +1,7 @@
 object SpecEmu: TSpecEmu
-  Left = 108
+  Left = 173
   Height = 659
-  Top = 33
+  Top = 257
   Width = 1177
   Caption = 'Alvatrum Beta 0.1.10'
   ClientHeight = 659
@@ -7857,12 +7857,13 @@ object SpecEmu: TSpecEmu
       Height = 304
       Top = 0
       Width = 200
+      ColCount = 6
       Columns = <      
         item
           MinSize = 6
           MaxSize = 125
           Title.Caption = 'Block'
-          Width = 80
+          Width = 130
         end      
         item
           MinSize = 8
@@ -7874,13 +7875,17 @@ object SpecEmu: TSpecEmu
           MinSize = 6
           MaxSize = 125
           Title.Caption = 'Typ'
-          Width = 40
+          Width = 50
         end      
         item
           MinSize = 6
           MaxSize = 125
           Title.Caption = 'LEN'
-          Width = 25
+          Width = 35
+        end      
+        item
+          Title.Caption = 'ID'
+          Width = 50
         end>
       DefaultColWidth = 15
       DefaultRowHeight = 18
@@ -7891,6 +7896,7 @@ object SpecEmu: TSpecEmu
       Font.Pitch = fpFixed
       Font.Quality = fqDraft
       MouseWheelOption = mwGrid
+      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goSmoothScroll]
       ParentFont = False
       RowCount = 17
       TabOrder = 0
@@ -24714,6 +24720,7 @@ object SpecEmu: TSpecEmu
       Width = 94
       Caption = 'Tape traps'
       Checked = True
+      OnChange = cktape_trapChange
       State = cbChecked
       TabOrder = 3
     end
@@ -58354,7 +58361,7 @@ object SpecEmu: TSpecEmu
   object OpenTapFileDialog: TOpenDialog
     Title = 'Open a TAP file'
     DefaultExt = '.tap'
-    Filter = 'Spectrum TAP files|*.tap'
+    Filter = 'Spectrum TAP files|*.tap|Spectrum TZX files|*.tzx'
     Left = 8
     Top = 192
   end
@@ -58385,7 +58392,7 @@ object SpecEmu: TSpecEmu
   object OpenSnaFileDialog: TOpenDialog
     Title = 'Open snapshot'
     DefaultExt = '.sna'
-    Filter = 'Spectrum SNA files|*.sna|Spectrum Z80 files|*.z80|Spectrum SLT files|*.slt'
+    Filter = 'Spectrum SNA files|*.sna|Spectrum Z80 files|*.z80'
     Left = 8
     Top = 256
   end
@@ -58399,7 +58406,7 @@ object SpecEmu: TSpecEmu
   object SaveSnaFileDialog: TSaveDialog
     Title = 'Save snapshot'
     DefaultExt = '.sna'
-    Filter = 'Spectrum SNA files|*.sna|Spectrum Z80 files|*.z80|Spectrum SLT files|*.slt'
+    Filter = 'Spectrum SNA files|*.sna|Spectrum Z80 files|*.z80'
     Left = 8
     Top = 328
   end
@@ -58434,5 +58441,9 @@ object SpecEmu: TSpecEmu
     Filter = 'Spectrum DSK File|*.dsk'
     Left = 8
     Top = 480
+  end
+  object TAPMenu: TPopupMenu
+    Left = 904
+    Top = 328
   end
 end

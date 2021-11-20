@@ -9,10 +9,10 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes, z80Globals,
-  Z80Tools, LCLType, Grids, ComCtrls, acs_audio, acs_file, acs_misc, acs_mixer,
-  BCListBox, CRT, BGRAGraphicControl, BGRASpriteAnimation,
+  Z80Tools, LCLType, Grids, ComCtrls, Menus, acs_audio, acs_file, acs_misc,
+  acs_mixer, BCListBox, CRT, BGRAGraphicControl, BGRASpriteAnimation,
   BGRAResizeSpeedButton, BGRAImageList, BCPanel, BGRAVirtualScreen, spectrum,
-  SdpoJoystick, global, hardware, fileformats, Types,cassette;
+  SdpoJoystick, global, hardware, fileformats, Types, cassette;
 type
 
   { TSpecEmu }
@@ -166,6 +166,7 @@ type
     panelComputone: TPanel;
     pDebug1: TPanel;
     pDebug2: TPanel;
+    TAPMenu: TPopupMenu;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
     //screen_timer: TEpikTimer;
@@ -283,6 +284,7 @@ type
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ButtonPrevMachineClick(Sender: TObject);
     procedure ButtonNextMachine2Click(Sender: TObject);
+    procedure cktape_trapChange(Sender: TObject);
     procedure dispCompPaint(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
@@ -561,6 +563,8 @@ type
     procedure ZoomInButtonClick(Sender: TObject);
     procedure ZoomOutButtonClick(Sender: TObject);
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
+    procedure tap_edit_controls_enabled(Enab: boolean);
+
   private
     timer_floppyA, timer_floppyB: byte;
     saliendo, starting, pause, debugging, step, breakpoint_active: boolean;
@@ -578,7 +582,7 @@ type
     diskA_filename: string;
     diskB_filename: string;
     grComputer: array [Tmachine] of TBGRABitmap;
-    bcolor: array[0..total_screen_lines-1] of byte;
+    MenuItem: TMenuItem;
     procedure draw_screen;
     procedure RunEmulation;
     procedure refresh_system;
@@ -607,6 +611,7 @@ type
     procedure move_tap_block(uno, dos: word);
     procedure Delete_Tape_Block(row: word);
     procedure Read_tap_blocs;
+    procedure Read_tzx_blocs;
     procedure Tape_select(n: integer);
     procedure Set_tape_leds;
 
@@ -639,6 +644,9 @@ type
     procedure Change_to_floppy;
     procedure Change_to_tape;
     procedure UpdateROMs;
+    procedure Make_selection_menu(tap_block_num: word);
+    procedure EventMenuClick(Sender: TObject);
+
   public
 
   end;
@@ -667,6 +675,8 @@ var
   diskB_inserted: boolean = false;
   step_over_true, step_over_false: word;
   step_over_break: boolean = false;
+  use_tapetraps: boolean = false;
+  tap_file_selected: boolean = false;
   block: word;
 
 implementation
@@ -1357,6 +1367,11 @@ begin
   ResetButtonClick(Sender);
 end;
 
+procedure TSpecEmu.cktape_trapChange(Sender: TObject);
+begin
+  use_tapetraps := cktape_trap.checked and tap_file_selected;
+end;
+
 procedure TSpecEmu.dispCompPaint(Sender: TObject);
 begin
   grcomputer[options.machine].Draw(dispComp.Canvas,0,0,True);
@@ -1452,15 +1467,27 @@ begin
   ButtonFire.Checked := false;
 end;
 
+procedure TSpecEmu.tap_edit_controls_enabled(Enab: boolean);
+begin
+  ButtonBlockdown.Enabled := Enab;
+  ButtonBlockup.Enabled := Enab;
+  ButtonDeleteblock.Enabled := Enab;
+end;
+
 procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
 var
   Reply, BoxStyle: Integer;
   FF: THandle;
+  ext: string;
 begin
   pause_emulation;
+  tap_edit_controls_enabled(false);
+  tap_file_selected := false;
+  use_tapetraps := false;
   if OpenTapFileDialog.Execute then
   begin
      TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
+
      TapeImage.Visible := true;
      TapeFileName.Visible := true;
 
@@ -1474,8 +1501,18 @@ begin
      end;
 
      if FileExists(OpenTapFileDialog.FileName) then
-        Read_tap_blocs;
+     begin
+      ext := Upcase(extractFileExt(OpenTapFileDialog.filename));
+      tap_file_selected := (ext = '.TAP');
+      if tap_file_selected then
+      begin
+        tap_edit_controls_enabled(true);
+        Read_tap_blocs
+      end else if ext = '.TZX' then
+        Read_tzx_blocs;
+     end;
   end;
+  use_tapetraps := cktape_trap.checked and tap_file_selected;
   restart_emulation;
 end;
 
@@ -1668,7 +1705,7 @@ begin
     ButtonPlayPressed.Visible := true;
     ButtonPlay.Visible := false;
     Set_tape_leds;
-    if not cktape_trap.Checked then
+    if not use_tapetraps then
       playtap(OpenTapFileDialog.FileName,Tape_info[blockgrid.Row].Filepos,blockgrid.row);
   end;
 end;
@@ -2735,12 +2772,309 @@ begin
         else begin
             BlockType := 'DATA';
             if (DataType='BAS') then
-               Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,IntToStr(ProgLen)])
+               Blockgrid.InsertRowWithValues(n,['','Data at '+IntToStr(startAddr),BSize,DataType,IntToStr(ProgLen)])
             else if(DataType='BYTES') or (DataType='SCR') then
-               Blockgrid.InsertRowWithValues(n,['','ST='+IntToStr(startAddr),BSize,DataType,''])
+               Blockgrid.InsertRowWithValues(n,['','Data at '+IntToStr(startAddr),BSize,DataType,''])
             else
                Blockgrid.InsertRowWithValues(n,['',Variable,BSize,DataType,'']);
             DataType := 'BYTES';
+        end;
+      end;
+      inc(n);
+    end;
+    Tape_Blocks := n-1;
+    Blockgrid.cells[0,1] := '>';
+    Blockgrid.row := 1;
+    CloseFile(F);
+  except
+    ShowMessage('Error reading tap blocks');
+  end;
+end;
+
+procedure TSpecEmu.EventMenuClick(Sender: TObject);
+begin
+  option := TMenuItem(Sender).Tag;
+end;
+
+procedure TSpecEmu.Make_selection_menu(tap_block_num: word);
+var
+  F: File;
+  result: longint;
+  nn: byte;
+begin
+  try
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    Seek(F, Tape_info[tap_block_num].Filepos);                                // skeep tzx header
+    BlockRead(F, Block_ID, sizeof(Block_ID),result);
+    BlockRead(F, Blocklen, sizeof(Blocklen),result);
+    BlockRead(F, num_options, sizeof(num_options),result);
+    TAPMenu.items.Clear;
+    for nn := 0 to num_options-1 do
+    begin
+      BlockRead(F, select_option.offset,2,result);
+      BlockRead(F, select_option.text[0],1,result);
+      BlockRead(F, select_option.text[1],byte(select_option.text[0]),result);
+      select_options[nn] := select_option;
+      MenuItem := TMenuItem.Create(TAPMenu);
+      MenuItem.Caption := select_option.text;
+      MenuItem.OnClick := @EventMenuClick;
+      MenuItem.Tag := nn;                  // this is the integer which is passed with TMenuItem
+      TAPMenu.items.Add(MenuItem);
+    end;
+    closefile(f);
+  except
+  end;
+end;
+
+procedure TSpecEmu.Read_tzx_blocs;
+var
+  F: File;
+  n,size,Proglen,startAddr,rep: word;
+  AutoStart: word absolute StartAddr;
+  Variable: String[2];
+  BlockType: String[6];
+  DataType: String[6];
+  FileName: String[10];
+  BSize: String[6];
+  BT: Byte;
+  Blocklen: word;
+
+  block_id: byte;
+  result: longint;
+  tzx_end: boolean = false;
+  S: String[255];
+  nn: byte;
+  time: word;
+  machine: HW_type;
+  new_block: word;
+  addr: longint;
+
+  procedure insert_datablock_row(block_id: byte; size: longint);
+  var
+    sbid: string;
+  begin
+    if size > 0 then
+    begin
+      if block_id <> 0 then
+        sbid := '0x'+IntToHex(block_id,2)
+      else
+        sbid := '';
+      Tape_info[n].Flag := BT;
+      Tape_info[n].Size := size;
+      if BT=0 then begin                     // HEADER
+        BlockType := 'HEADER';
+        autostart := Buff[14]*256+Buff[13];
+        case buff[0] of
+          0: DataType := 'BAS';
+          1: DataType := 'NVAR';
+          2: DataType := 'SVAR';
+          3: if startAddr=$4000 then DataType := 'SCR' else DataType := 'BYTES';
+        end;
+        move(buff[1],FileName[1],10);
+        FileName[0]:= #10;
+        Blocklen := Buff[12]*256+Buff[11];
+        if DataType='NVAR' then
+          Variable := chr(byte('A')+buff[14])
+        else if DataType='SVAR' then
+          Variable := chr(byte('A')+buff[14])+'$';
+        Proglen := Buff[16]*256+Buff[15];
+        Blockgrid.InsertRowWithValues(n,['',FileName,BSize,BlockType,'',sBID]);
+      end else begin
+        BlockType := 'DATA';
+        if (DataType='BAS') then
+          Blockgrid.InsertRowWithValues(n,['','Data block',BSize,DataType,IntToStr(ProgLen),sBID])
+        else if(DataType='BYTES') or (DataType='SCR') then
+          Blockgrid.InsertRowWithValues(n,['','Data block',BSize,DataType,'',sBID])
+        else
+          Blockgrid.InsertRowWithValues(n,['',Variable,BSize,DataType,'','','',sBID]);
+        DataType := 'BYTES';
+      end;
+    end;
+  end;
+
+begin
+  try
+    DataType := 'BYTES';                       // If not header next block is RAW
+    n := 1;
+    Blockgrid.Clean;
+    AssignFile (F, OpenTapFileDialog.FileName);
+    Reset(F,1);
+    Seek(F,10);                                // skeep tzx header
+    tzx_end := false;
+    while (FilePos(F) < FileSize(F)) and not tzx_end do
+    begin
+      Tape_info[n].FilePos := FilePos(F);
+      result := FilePos(F);
+      BlockRead(F, block_id, sizeof(block_id));
+      case block_id of
+        $10: // Standard Speed Data Block
+        begin
+          blockread(f,buff,2,result);
+          blockread(f,size, sizeof(size),result);
+          BlockRead(F,BT,1,result);
+          BlockRead(F, buff, size-1,result);
+          Str(size,BSize);
+          insert_datablock_row(block_id,size);
+        end;
+        $11: // Turbo Speed Data Block
+        begin
+          blockread(f,buff,15,result);
+          BlockRead(F, data_size3, sizeof(data_size3),result);
+          data_size := data_size3[2]*65536+data_size3[1]*256+data_size3[0];
+          BlockRead(F,BT,1,result);
+          BlockRead(F, buff, data_size-1,result);
+          Str(data_size,BSize);
+          insert_datablock_row(block_id,data_size);
+        end;
+        $12: begin
+          BlockRead(F, pilot_pulse_len, sizeof(pilot_pulse_len),result);
+          BlockRead(F, PILOT_pulses, sizeof(PILOT_pulses),result);
+          Blockgrid.InsertRowWithValues(n,['','Pure tone',IntToStr(pilot_pulse_len),'',IntToStr(PILOT_pulses),'0x'+IntToHex(block_id,2)]);
+        end;
+        $13: // Pulse sequence
+        begin
+          BlockRead(F, pulse_number, sizeof(pulse_number),result);
+          for nn := 0 to pulse_number-1 do
+          begin
+            BlockRead(F, pulses_len[nn], sizeof(pulses_len[nn]),result);
+          end;
+          Blockgrid.InsertRowWithValues(n,['','Pulse sequence',InttoStr(pulse_number),'','','0x'+IntToHex(block_id,2)]);
+        end;
+        $14: // Pure Data Block
+        begin
+          BlockRead(F, BIT0_len, sizeof(BIT0_len),result);
+          BlockRead(F, BIT1_len, sizeof(BIT1_len),result);
+          BlockRead(F, bits_in_last_byte, sizeof(bits_in_last_byte),result);
+          BlockRead(F, pause_len, sizeof(pause_len),result);
+          BlockRead(F, data_size3, sizeof(data_size3),result);
+          data_size := data_size3[2]*65536+data_size3[1]*256+data_size3[0];
+          BlockRead(F, data, data_size,result);
+          Blockgrid.InsertRowWithValues(n,['','Data block',InttoStr(data_size),'','','0x'+IntToHex(block_id,2)]);
+        end;
+        $20: // Pause (silence) or 'Stop the Tape' command
+        begin
+          BlockRead(F, pause, sizeof(time),result);
+          Blockgrid.InsertRowWithValues(n,['','Pause '+InttoStr(time)+' ms','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $21: // Group start
+        begin
+          blockread(f,s[0],1,result);
+          blockread(f,s[1],byte(s[0]),result);
+          Blockgrid.InsertRowWithValues(n,['','Group '+s,'','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $22: // Group end
+        begin
+          Blockgrid.InsertRowWithValues(n,['','Group end','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $23: // Jump to block
+        begin
+          BlockRead(F, new_block, sizeof(new_block),result);
+          Blockgrid.InsertRowWithValues(n,['','JUMP '+InttoStr(new_block),'','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $24: // Loop start
+        begin
+          BlockRead(F, rep, sizeof(rep),result);
+          Blockgrid.InsertRowWithValues(n,['','Loop('+InttoStr(rep)+')','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $25: // Loop end
+        begin
+          Blockgrid.InsertRowWithValues(n,['','Loop End','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $26: // Call sequence
+        begin
+          BlockRead(F, num_calls, sizeof(num_calls),result);
+          S := 'CALL ';
+          for nn := 0 to num_calls-1 do
+          begin
+            BlockRead(F, call_block, sizeof(call_block),result);
+            call_blocks[nn] := call_block;
+            S := S + IntToStr(call_block)+ ' ' ;
+          end;
+          Blockgrid.InsertRowWithValues(n,['',S,'','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $27: // Return from sequence
+        begin
+          Blockgrid.InsertRowWithValues(n,['','RETURN','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $28: // Select block
+        begin
+          BlockRead(F, Blocklen, sizeof(Blocklen),result);
+          BlockRead(F, num_options, sizeof(num_options),result);
+          S := 'SELECT ';
+          //TAPMenu.items.Clear;
+          for nn := 0 to num_options-1 do
+          begin
+            BlockRead(F, select_option.offset,2,result);
+            BlockRead(F, select_option.text[0],1,result);
+            BlockRead(F, select_option.text[1],byte(select_option.text[0]),result);
+            select_options[nn] := select_option;
+            S := S + select_option.text +' ';
+            //MenuItem := TMenuItem.Create(TAPMenu);
+            //MenuItem.Caption := select_option.text;
+            //TAPMenu.items.Add(MenuItem);
+          end;
+          Blockgrid.InsertRowWithValues(n,['',S,'','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $2A: // Stop the tape if in 48K mode
+        begin
+          BlockRead(F, block_len, 4,result);
+          Blockgrid.InsertRowWithValues(n,['','STOP IN 48K','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $30: // Text description
+        begin
+          blockread(f,s[0],1,result);
+          blockread(f,s[1],byte(s[0]),result);
+          Blockgrid.InsertRowWithValues(n,['',s,'','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $31: // Message block
+        begin
+          blockread(f,show_time,1,result);
+          blockread(f,s[0],1,result);
+          blockread(f,s[1],byte(s[0]),result);
+          Blockgrid.InsertRowWithValues(n,['','MSG('+IntToStr(show_time)+')='+S,'','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $32: // Archive info
+        begin
+          BlockRead(F, size, sizeof(size),result);
+          BlockRead(F, data, size,result);
+          Blockgrid.InsertRowWithValues(n,['','Arch.info','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $33: // Hardware type
+        begin
+          BlockRead(F, num_machines, sizeof(num_machines),result);
+          for nn := 0 to num_machines-1 do
+          begin
+            BlockRead(F, machine, sizeof(machine),result);
+          end;
+          Blockgrid.InsertRowWithValues(n,['','Hardware type','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $35: // Custom info
+        begin
+         S[0] := #10;
+         BlockRead(F,S[1], 10,result);
+         BlockRead(F,Infolen, 4,result);
+         BlockRead(F,data,Infolen,result);
+         Blockgrid.InsertRowWithValues(n,['','CInfo:'+S,'','','','0x'+IntToHex(block_id,2)]);
+         if result < size then
+           stoptap;
+        end;
+        $5A: // "Glue" block
+        begin
+          BlockRead(F, data, 9,result);
+          Blockgrid.InsertRowWithValues(n,['','Glue block','','','','0x'+IntToHex(block_id,2)]);
+        end;
+        $15,$18,$19:
+        begin
+          Blockgrid.InsertRowWithValues(n,['','NOT SUPPORTED'+IntToHex(addr,6),'','','','0x'+IntToHex(block_id,2)]);
+          tzx_end := true;
+        end
+        else begin
+          BlockRead(F, block_len, 4,result);
+          BlockRead(F, data, block_len,result);
+          addr := FilePos(F);
+          Blockgrid.InsertRowWithValues(n,['','UNK '+IntToHex(addr,6),'','','','0x'+IntToHex(block_id,2)]);
+          //tzx_end := true;
         end;
       end;
       inc(n);
@@ -3178,13 +3512,14 @@ begin
          (is_plus3type_machine and (Mem_banks[0]=ROMPAGE3));
 
       if ((pc = $556) or ((pc >= $04c2) and (pc <= $04c6)))
-        and not status_saved and basicrom and cktape_trap.checked then
+        and not status_saved and basicrom and use_tapetraps then
       begin
         status_saved := true;
         save_cpu_status;
       end;
       if (pc >= $04c2) and (pc <= $04d8)
-        and cktape_trap.checked
+        and use_tapetraps
+        and tap_file_selected
         and TapeRecLed.Visible and basicrom then // SAVE ROUTINE
       begin
         if status_saved then
@@ -3197,7 +3532,7 @@ begin
         Application.ProcessMessages;
       end else if (pc >= $556) and (pc < $05e3) and
         TapePlayLed.Visible and basicrom
-        and cktape_trap.checked then // LOAD ROUTINE
+        and use_tapetraps then // LOAD ROUTINE
       begin
         Application.ProcessMessages;
         if status_saved then
@@ -3241,6 +3576,15 @@ begin
     if playing_tap then
     begin
        handle_load_sound(block);
+       if show_selection_menu then
+       begin
+         option := $ffff;
+         Make_selection_menu(tap_block_num);
+         TAPMenu.PopUp;
+         while option = $ffff do
+           Application.ProcessMessages;
+         show_selection_menu := false;
+       end;
        if block <> blockgrid.Row then
           blockgrid.row := block;
     end;
@@ -3510,6 +3854,7 @@ begin
   grComputer[Spectrum_plus2] := TBGRABitmap.Create('spectrum_plus2_c.png');
   grComputer[Spectrum_plus2a] := TBGRABitmap.Create('spectrum_plus2a_c.png');
   grComputer[Spectrum_plus3] := TBGRABitmap.Create('spectrum_plus3_c.png');
+  tap_edit_controls_enabled(false);
 end;
 
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -4061,5 +4406,6 @@ begin
     pantalla.canvas.StretchDraw(rect(15,15,sizex1x*scale+15-1,sizey1x*scale+15-1),bgra.Bitmap);
     bgra.Free;
 end;
+
 end.
 

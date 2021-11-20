@@ -29,19 +29,9 @@ const
   total_screen_lines = alto_borde*2+192;
   t_states_scanline = screen_testados_total div total_screen_lines;
 
-  MAX_TAPE_BLOCKS = 99;
   MAXFREQ = 16500;
 
 type
-  TTapeBlockInfo = record
-    Filepos: longint;
-    Size: word;
-    Flag: byte;
-  end;
-
-
-  TTapeInfo = array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
-
   TAYEnvelope = record
     //freq: integer;
     enabled: boolean;
@@ -76,7 +66,6 @@ type
 var
   bcolor: array[0..total_screen_lines-1] of byte;
   screen_line: word;
-  Tape_info: TTapeInfo;
 //  Tape_info_bak: TTapeInfo;
   border_color : byte = 7;
   frame: byte = 0;

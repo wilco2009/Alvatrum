@@ -118,8 +118,39 @@ some bugs fixed
 standard load without trapping implemented.
 border effects are now supported.
 
+beta version 0.1.11
+tzx files support
+
+Supported blocks:
+ID 10 - Standard Speed Data Block
+ID 11 - Turbo Speed Data Block
+ID 12 - Pure Tone
+ID 13 - Pulse sequence
+ID 14 - Pure Data Block
+ID 20 - Pause (silence) or 'Stop the Tape' command
+ID 21 - Group start
+ID 22 - Group end
+ID 23 - Jump to block
+ID 24 - Loop start
+ID 25 - Loop end
+ID 26 - Call sequence
+ID 27 - Return from sequence
+ID 2A - Stop the tape if in 48K mode
+ID 30 - Text description
+ID 31 - Message block
+ID 32 - Archive info
+ID 33 - Hardware type
+ID 35 - Custom info block
+ID 5A - "Glue" block
+
+Not supported blocks:
+ID 15 - Direct Recording
+ID 18 - CSW Recording
+ID 19 - Generalized Data Block
+ID 28 - Select block
+ID 2B - Set signal level
+
 TO DO:
-tape reading tzx
 memory contention
 
 Thanks to:

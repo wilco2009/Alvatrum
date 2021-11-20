@@ -29,7 +29,6 @@ const
   total_screen_lines = alto_borde*2+192;
   t_states_scanline = screen_testados_total div total_screen_lines;
 
-  MAX_TAPE_BLOCKS = 99;
   MAXFREQ = 16500;
 
 type
@@ -38,9 +37,6 @@ type
     Size: word;
     Flag: byte;
   end;
-
-
-  TTapeInfo = array[1..MAX_TAPE_BLOCKS] of TTapeBlockInfo;
 
   TAYEnvelope = record
     //freq: integer;
@@ -74,8 +70,8 @@ type
   end;
 
 var
+  bcolor: array[0..total_screen_lines-1] of byte;
   screen_line: word;
-  Tape_info: TTapeInfo;
 //  Tape_info_bak: TTapeInfo;
   border_color : byte = 7;
   frame: byte = 0;
@@ -396,7 +392,6 @@ begin
   AY1.R[$E] := $bf;
   pagging_mode := 0;
   disable_pagging := false;
-  fillchar(bcolor, sizeof(bcolor),0);
 end;
 
 procedure spectrum_out(port: word; v: byte);
