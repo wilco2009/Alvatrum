@@ -135,6 +135,7 @@ ID 24 - Loop start
 ID 25 - Loop end
 ID 26 - Call sequence
 ID 27 - Return from sequence
+ID 28 - Select block
 ID 2A - Stop the tape if in 48K mode
 ID 30 - Text description
 ID 31 - Message block
@@ -147,7 +148,6 @@ Not supported blocks:
 ID 15 - Direct Recording
 ID 18 - CSW Recording
 ID 19 - Generalized Data Block
-ID 28 - Select block
 ID 2B - Set signal level
 
 beta version 0.1.12
