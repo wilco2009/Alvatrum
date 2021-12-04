@@ -154,6 +154,8 @@ beta version 0.1.12
 improved cassette and disk animations
 Drag and drop files to the emulator
 convert .BAS, .BIN and .SCR files droping them to the emulator window
+Improved debugger breakpoints
+multiline assembler window available while debugging
 
 TO DO:
 memory contention
