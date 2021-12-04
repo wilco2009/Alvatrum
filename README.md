@@ -150,6 +150,11 @@ ID 19 - Generalized Data Block
 ID 28 - Select block
 ID 2B - Set signal level
 
+beta version 0.1.12
+improved cassette and disk animations
+Drag and drop files to the emulator
+convert .BAS, .BIN and .SCR files droping them to the emulator window
+
 TO DO:
 memory contention
 
