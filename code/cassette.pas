@@ -17,6 +17,11 @@ const
   PILOT1_PULSES = 8063;
   MAX_TAPE_BLOCKS = 99;
 
+  ear_value_off = %00000000;
+  ear_value_on  = %01000000;
+
+  load_sound_on  = 8;
+  load_sound_off = 0;
 
   ftTAP = 0;
   ftTZX = 1;
@@ -129,8 +134,8 @@ begin
   load_pulses:= 0;
   playing_pulse:= false;
   playing_load_tone:= false;
-  //pulse_sign:= false;
-  pulse_sign:= true;
+  pulse_sign:= false;
+  //pulse_sign:= true;
   load_sound:=0;
   tstates_pulse_ini:= 0;
   tap_filename := '';
@@ -462,16 +467,16 @@ begin
   begin
     if pulse_sign then
     begin
-      load_sound := 8;
-      ear_value := %00000000;
+      load_sound := load_sound_on;
+      ear_value := ear_value_on;
     end else
     begin
-      load_sound := 0;
-      ear_value := %01000000;
+      load_sound := load_sound_off;
+      ear_value := ear_value_off;
     end;
     if playing_pulse then
        pulse_sign := not pulse_sign;
-    if playing_pulse and pulse_sign then
+    if playing_pulse and not pulse_sign then
        playing_pulse := false;
     tstates_pulse_ini := tstates_pulse_ini + width;
   end;
@@ -726,6 +731,7 @@ begin
   playing_tap := false;
   reset_play;
   stop_signal := true;
+  ear_value := 0;
 end;
 
 begin

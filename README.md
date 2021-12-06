@@ -157,6 +157,12 @@ convert .BAS, .BIN and .SCR files droping them to the emulator window
 Improved debugger breakpoints
 multiline assembler window available while debugging
 
+beta version 0.1.13
+Keyboard issue 2 behaviour implemented
+Memory and ports breakpoints implemented
+Editable registers and memory values
+solved some bugs
+
 TO DO:
 memory contention
 

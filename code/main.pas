@@ -9,20 +9,37 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes, z80Globals,
-  Z80Tools, LCLType, Grids, ComCtrls, Menus, acs_audio, acs_file, acs_misc,
-  acs_mixer, BCListBox, CRT, BGRAGraphicControl, BGRASpriteAnimation,
+  Z80Tools, LCLType, Grids, ComCtrls, Menus, Spin, acs_audio, acs_file,
+  acs_misc, acs_mixer, BCListBox, CRT, BGRAGraphicControl, BGRASpriteAnimation,
   BGRAResizeSpeedButton, BGRAImageList, BCPanel, BGRAVirtualScreen, spectrum,
-  SdpoJoystick, global, hardware, fileformats, Types, cassette;
+  SdpoJoystick, global, hardware, fileformats, Types, cassette, bgtools,strutils,
+  bas2tap,bin2tap;
 type
 
   { TSpecEmu }
 
   TSpecEmu = class(TForm)
+    ButtonAddBrkLine: TBGRAResizeSpeedButton;
+    ButtonAudio: TBGRAResizeSpeedButton;
+    ButtonDelBrkLine: TBGRAResizeSpeedButton;
+    CheckGroup1: TCheckGroup;
+    ckAYSound: TCheckBox;
+    ckIssue2: TCheckBox;
+    ckWriteEnabled: TCheckBox;
     AudioOut: TAcsAudioOut;
     ACSEar: TAcsMemoryIn;
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
     BFocus: TBitBtn;
+    brueda: TBGRAGraphicControl;
+    brueda1: TBGRAGraphicControl;
+    bdriveAled: TBGRAGraphicControl;
+    bDriveBLed: TBGRAGraphicControl;
+    Button10: TButton;
+    Button8: TButton;
+    Button9: TButton;
+    ButtonBlockdown1: TBGRAResizeSpeedButton;
+    ButtonBlockUp1: TBGRAResizeSpeedButton;
     ButtonPrevMachine: TBGRAResizeSpeedButton;
     ButtonNextMachine2: TBGRAResizeSpeedButton;
     cktape_trap: TCheckBox;
@@ -108,8 +125,6 @@ type
     Button_N: TBGRAResizeSpeedButton;
     Button_M: TBGRAResizeSpeedButton;
     ckDiskA_prot: TCheckBox;
-    ckAYSound: TCheckBox;
-    CheckGroup1: TCheckGroup;
     ckDiskB_prot: TCheckBox;
     ckDiskB_active: TCheckBox;
     DebugPanel: TPanel;
@@ -123,6 +138,7 @@ type
     DriveBPanel: TPanel;
     DumpSource: TRadioGroup;
     EdBreak: TEdit;
+    edAsm_addr: TEdit;
     EdMem: TEdit;
     FlagsPanel: TPanel;
     GroupBox1: TGroupBox;
@@ -130,23 +146,27 @@ type
     GroupBox3: TGroupBox;
     GroupBox4: TGroupBox;
     GroupBox5: TGroupBox;
+    GroupBox6: TGroupBox;
     GroupJoystickProtocol: TRadioGroup;
     GroupRightJoystick: TRadioGroup;
     grUserJoy: TGroupBox;
     Image2: TImage;
     Image3: TImage;
-    Image4: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
     Label13: TLabel;
     Label14: TLabel;
+    Label15: TLabel;
+    Label16: TLabel;
     Label17: TLabel;
     Label18: TLabel;
     Label19: TLabel;
     Label2: TLabel;
     Label20: TLabel;
+    Label21: TLabel;
+    Label22: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
@@ -155,6 +175,7 @@ type
     Label8: TLabel;
     Label9: TLabel;
     labelI: TLabel;
+    lstAsm_window: TListBox;
     memgrid: TStringGrid;
     odROM: TOpenDialog;
     DiskFileDialog: TOpenDialog;
@@ -164,13 +185,18 @@ type
     panelFloppy: TPanel;
     Panel3: TPanel;
     panelComputone: TPanel;
+    AudioPanel: TPanel;
     pDebug1: TPanel;
     pDebug2: TPanel;
+    pDebug3: TPanel;
+    pDebug4: TPanel;
+    sgBreakpoints: TStringGrid;
+    StaticText16: TStaticText;
     TAPMenu: TPopupMenu;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
     //screen_timer: TEpikTimer;
-    Image1: TImage;
+    TecladoSpectrum: TImage;
     BlockGrid: TStringGrid;
     OpenTapFileDialog: TOpenDialog;
     PanelKeyboard: TPanel;
@@ -267,6 +293,11 @@ type
     TapePlayLed: TShape;
     TapeRecLed: TShape;
     Timer2: TTimer;
+    TimerRueda: TTimer;
+    TrackBar_AY: TTrackBar;
+    TrackBar_Speaker: TTrackBar;
+    TrackBar_Ear: TTrackBar;
+    TrackBar_Mic: TTrackBar;
     ZoomOutButton: TBitBtn;
     ZoomInButton: TBitBtn;
     Pantalla: TBGRAGraphicControl;
@@ -282,9 +313,22 @@ type
     procedure BFocusClick(Sender: TObject);
     procedure BFocusdKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure BlockGridDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure Button10Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button9Enter(Sender: TObject);
+    procedure ButtonAddBrkLineClick(Sender: TObject);
+    procedure ButtonAudioClick(Sender: TObject);
+    procedure ButtonBlockdown1Click(Sender: TObject);
+    procedure ButtonBlockUp1Click(Sender: TObject);
+    procedure ButtonDelBrkLineClick(Sender: TObject);
     procedure ButtonPrevMachineClick(Sender: TObject);
     procedure ButtonNextMachine2Click(Sender: TObject);
+    procedure ckIssue2Change(Sender: TObject);
     procedure cktape_trapChange(Sender: TObject);
+    procedure ckWriteEnabledChange(Sender: TObject);
+    procedure DebugPanelClick(Sender: TObject);
     procedure dispCompPaint(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
@@ -499,7 +543,20 @@ type
     procedure ckDiskA_protChange(Sender: TObject);
     procedure ckDiskB_activeChange(Sender: TObject);
     procedure ckDiskB_protChange(Sender: TObject);
+    procedure driveADragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure driveADragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
+    procedure driveAMouseEnter(Sender: TObject);
+    procedure driveBDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure driveBDragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
+    procedure driveBMouseEnter(Sender: TObject);
+    procedure driveBMouseLeave(Sender: TObject);
+    procedure edAsm_addrChange(Sender: TObject);
+    procedure edAsm_addrKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure FormChangeBounds(Sender: TObject);
+    procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure GroupJoystickProtocolClick(Sender: TObject);
     procedure GroupLeftJoystickClick(Sender: TObject);
     //procedure GroupMachineClick(Sender: TObject);
@@ -511,6 +568,14 @@ type
     procedure BlockGridBeforeSelection(Sender: TObject; aCol, aRow: Integer);
     procedure ButtonTap1Click(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
+    procedure Label18Click(Sender: TObject);
+    procedure Label19Click(Sender: TObject);
+    procedure Label1Click(Sender: TObject);
+    procedure Label20Click(Sender: TObject);
+    procedure Label2Click(Sender: TObject);
+    procedure memgridDrawCell(Sender: TObject; aCol, aRow: Integer;
+      aRect: TRect; aState: TGridDrawState);
+    procedure memgridEditingDone(Sender: TObject);
     procedure PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
     procedure PantallaPaint(Sender: TObject);
@@ -527,6 +592,14 @@ type
     procedure rbspec128Change(Sender: TObject);
     procedure rbspec48Change(Sender: TObject);
     procedure ResetButtonClick(Sender: TObject);
+    procedure sgBreakpointsButtonClick(Sender: TObject; aCol, aRow: Integer);
+    procedure sgBreakpointsEditingDone(Sender: TObject);
+    procedure sgBreakpointsHeaderClick(Sender: TObject; IsColumn: Boolean;
+      Index: Integer);
+    procedure stBCcClick(Sender: TObject);
+    procedure stDEcClick(Sender: TObject);
+    procedure stHLcClick(Sender: TObject);
+    procedure stRegisterClick(Sender: TObject);
     procedure StepOverButtonClick(Sender: TObject);
     procedure stFileDriveBClick(Sender: TObject);
     procedure stROM0Click(Sender: TObject);
@@ -557,9 +630,14 @@ type
     procedure stROM1Click(Sender: TObject);
     procedure stROM2Click(Sender: TObject);
     procedure stROM3Click(Sender: TObject);
+    procedure stStackClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure JoyTimerTimer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
+    procedure TimerRuedaTimer(Sender: TObject);
+    procedure TrackBar_AYChange(Sender: TObject);
+    procedure TrackBar_EarChange(Sender: TObject);
+    procedure TrackBar_SpeakerChange(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
     procedure ZoomOutButtonClick(Sender: TObject);
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
@@ -582,11 +660,22 @@ type
     diskA_filename: string;
     diskB_filename: string;
     grComputer: array [Tmachine] of TBGRABitmap;
+    grrueda: array [0..3] of TBGRABitmap;
+    grled: TBGRABitmap;
+    grledApagado: TBGRABitmap;
+    cont_rueda: byte;
     MenuItem: TMenuItem;
+    cur_asm_addr: word;
+    DriveSelected : byte;
+    mem_col: integer;
+    mem_row: integer;
+
     procedure draw_screen;
     procedure RunEmulation;
+    procedure fill_asm_window(addr: word);
     procedure refresh_system;
-    procedure refresh_registers;
+    procedure refresh_register_labels;
+    procedure UpdateRegistersFromLabels;
     procedure pause_emulation;
     procedure timed_pause_emulation;
     procedure restart_emulation;
@@ -607,6 +696,8 @@ type
     procedure Show_Options;
     procedure Hide_Options;
     procedure Hideall;
+    procedure Hide_AudioPanel;
+    procedure Show_AudioPanel;
 
     procedure move_tap_block(uno, dos: word);
     procedure Delete_Tape_Block(row: word);
@@ -646,7 +737,12 @@ type
     procedure UpdateROMs;
     procedure Make_selection_menu(tap_block_num: word);
     procedure EventMenuClick(Sender: TObject);
-
+    procedure compile_breakpoints;
+    procedure load_tap_file(FileName: String);
+    procedure Eject_Drive_A;
+    procedure Eject_Drive_B;
+    procedure Insert_Drive_A(FileName: String);
+    procedure Insert_Drive_B(FileName: String);
   public
 
   end;
@@ -668,6 +764,7 @@ var
   TapePanelWidth: integer = 0;
   KeyboardWidth: integer = 0;
   OptionsWidth: integer = 0;
+  AudioWidth: integer = 0;
   buff: Array[0..$ffff] of byte;
   tmp_delay: longint = 5000;
   status_saved: boolean;
@@ -861,6 +958,7 @@ begin
   Hide_Tape;
   Hide_Debugger;
   Hide_Options;
+  Hide_AudioPanel;
 end;
 
 procedure TSpecEmu.Show_Options;
@@ -874,6 +972,19 @@ begin
   OptionsPanel.Visible := false;
   OptionsWidth := 0;
 end;
+
+procedure TSpecEmu.Show_AudioPanel;
+begin
+  AudioPanel.Visible := True;
+  AudioWidth := AudioPanel.Width;
+end;
+
+procedure TSpecEmu.Hide_AudioPanel;
+begin
+  AudioPanel.Visible := false;
+  AudioWidth := 0;
+end;
+
 
 procedure TSpecEmu.Hide_Keyboard;
 begin
@@ -895,6 +1006,8 @@ end;
 
 procedure TSpecEmu.Show_Tape;
 begin
+  grledapagado.Draw(bDriveALed.Canvas,0,0,True);
+  grledapagado.Draw(bDriveBLed.Canvas,0,0,True);
   TapePanel.Visible:= true;
   TapePanelWidth := TapePanel.Width;//Visible_TapePanel_Width;
 end;
@@ -955,29 +1068,34 @@ end;
 
 procedure TSpecEmu.set_memory_dump;
 var
-  row, addr: word;
+  row, addr,org, corner: word;
   offset,x,y: byte;
 begin
-      if      src_ptr.Checked then addr := mem_addr
-     else if src_ix.Checked then addr := ix-127
-     else if src_iy.Checked then addr := iy-127;
-     row := addr and not $f;
-     for y := 1 to $10 do
-     begin
-      offset := 0;
-      memgrid.Cells[0,y]:=HexStr(row,4);
-      for x := 1 to $10 do
-      begin
-       if ASCIISelection.Checked then
-          //memgrid.Cells[x,y]:=Chr(mem[row+offset])
-          memgrid.Cells[x,y]:=Chr(memp[mem_page(row+offset),mem_offset(row+offset)])
-       else
-          //memgrid.Cells[x,y]:=HexStr(mem[row+offset],2);
-           memgrid.Cells[x,y]:=HexStr(memp[mem_page(row+offset),mem_offset(row+offset)],2);
-       inc(offset);
-      end;
-      inc(row,$10);
-     end;
+  if      src_ptr.Checked then begin org := mem_addr; addr := mem_addr; end
+  else if src_ix.Checked then begin addr := ix-127; org := ix; end
+  else if src_iy.Checked then begin addr := iy-127; org := iy; end;
+  row := addr and not $f;
+  for y := 1 to $10 do
+  begin
+    offset := 0;
+    memgrid.Cells[0,y]:=HexStr(row,4);
+    for x := 1 to $10 do
+    begin
+      if ASCIISelection.Checked then
+        //memgrid.Cells[x,y]:=Chr(mem[row+offset])
+        memgrid.Cells[x,y]:=Chr(memp[mem_page(row+offset),mem_offset(row+offset)])
+      else
+        //memgrid.Cells[x,y]:=HexStr(mem[row+offset],2);
+        memgrid.Cells[x,y]:=HexStr(memp[mem_page(row+offset),mem_offset(row+offset)],2);
+      inc(offset);
+    end;
+    inc(row,$10);
+  end;
+  //if memgrid.visible and memgrid.enabled then
+  //   memgrid.SetFocus;
+  corner := addr and $fff0;
+  mem_col := ((org-corner) and $0f)+1;
+  mem_row := (((org-corner) and $fff0) >> 4)+1;
 end;
 
 procedure TSpecEmu.set_mem;
@@ -1019,7 +1137,7 @@ begin
   MainWindowWidth := 352+sizex1x*scale-sizex1x;
   if windowState = wsNormal then begin
     Height := sizey + buttons_height +10; // Height - sizey1x;
-    width := MainWindowWidth + OptionsWidth+keyboardWidth + debug_width + TapePanelWidth+ SideButtons.width+7;// 55; // width - sizex1x;
+    width := MainWindowWidth + AudioWidth+OptionsWidth+keyboardWidth + debug_width + TapePanelWidth+ SideButtons.width+7;// 55; // width - sizex1x;
   end;
   SideButtons.Height := Height-1;
   SideButtons.Left := MainWindowWidth;
@@ -1028,6 +1146,8 @@ begin
   OptionsPanel.Left := sizex + 60;
   DebugPanel.Left := sizex + 60;
   TapePanel.Left := sizex + 60;
+  AudioPanel.Left := sizex + 60;
+  AudioPanel.Top := 2;
   PanelKeyboard.Left := sizex + 60;
   PanelKeyboard.Top := 2;
   BottomButtonsPanel.Top := sizey + 15;
@@ -1340,6 +1460,98 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
     key := 0;
 end;
 
+procedure TSpecEmu.BlockGridDragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+
+end;
+
+procedure TSpecEmu.Button10Click(Sender: TObject);
+begin
+  pDebug1.Visible:= false;
+  pDebug2.Visible:= false;
+  pDebug3.Visible:= false;
+  pDebug4.Visible:= true;
+end;
+
+procedure TSpecEmu.Button8Click(Sender: TObject);
+begin
+  pDebug1.Visible:= false;
+  pDebug2.Visible:= false;
+  pDebug3.Visible:= true;
+  pDebug4.Visible:= false;
+end;
+
+procedure TSpecEmu.Button9Click(Sender: TObject);
+var
+  code: integer;
+begin
+  val(edAsm_addr.text,cur_asm_addr,code);
+  fill_asm_window(cur_asm_addr);
+end;
+
+procedure TSpecEmu.Button9Enter(Sender: TObject);
+var
+  code: integer;
+begin
+  val(edAsm_addr.text,cur_asm_addr,code);
+  fill_asm_window(cur_asm_addr);
+end;
+
+procedure TSpecEmu.ButtonAddBrkLineClick(Sender: TObject);
+begin
+  if (sgBreakpoints.Row > 0) and (sgBreakpoints.RowCount > 1) then
+     sgBreakpoints.DeleteRow(sgBreakpoints.Row);
+end;
+
+procedure TSpecEmu.ButtonAudioClick(Sender: TObject);
+begin
+  if AudioPanel.Visible then begin
+    HideAll;
+  end else begin
+    HideAll;
+    show_AudioPanel;
+  end;
+  adjust_window_size;
+end;
+
+procedure TSpecEmu.ButtonBlockdown1Click(Sender: TObject);
+var
+  s: string;
+begin
+  s := decode_instruction(cur_asm_addr);
+  cur_asm_addr += get_instruction_len(s);
+  fill_asm_window(cur_asm_addr);
+  lstAsm_window.ItemIndex:=254;
+end;
+
+procedure TSpecEmu.ButtonBlockUp1Click(Sender: TObject);
+var
+  s: string;
+begin
+  s := decode_instruction(cur_asm_addr-4);
+  if (copy(s,8,7) = 'invalid') or (get_instruction_len(s) <> 4) then
+  begin
+    s := decode_instruction(cur_asm_addr-3);
+    if (copy(s,8,7) = 'invalid') or (get_instruction_len(s) <> 3)then
+    begin
+      s := decode_instruction(cur_asm_addr-2);
+      if (copy(s,8,7) = 'invalid') or (get_instruction_len(s) <> 2) then
+      begin
+        s := decode_instruction(cur_asm_addr-1);
+        cur_asm_addr -=1;
+      end else cur_asm_addr -=2;
+    end else cur_asm_addr -=3;
+  end else cur_asm_addr -=4;
+  fill_asm_window(cur_asm_addr);
+end;
+
+procedure TSpecEmu.ButtonDelBrkLineClick(Sender: TObject);
+begin
+  sgBreakpoints.InsertColRow(false,sgBreakpoints.RowCount);
+  //Rows.Add('');
+  //InsertColRow(false,sg);
+end;
+
 procedure TSpecEmu.updateROMs;
 begin
   stROM0.Caption:= ExtractFileName(options.ROMFilename[ord(options.machine),0]);
@@ -1367,9 +1579,28 @@ begin
   ResetButtonClick(Sender);
 end;
 
+procedure TSpecEmu.ckIssue2Change(Sender: TObject);
+begin
+  Options.Issue2 := ckIssue2.Checked;
+  clear_keyboard;
+end;
+
 procedure TSpecEmu.cktape_trapChange(Sender: TObject);
 begin
   use_tapetraps := cktape_trap.checked and tap_file_selected;
+end;
+
+procedure TSpecEmu.ckWriteEnabledChange(Sender: TObject);
+begin
+  if ckWriteEnabled.Checked then
+     memgrid.Options := memgrid.Options+[goEditing]
+  else
+     memgrid.Options := memgrid.Options-[goEditing];
+end;
+
+procedure TSpecEmu.DebugPanelClick(Sender: TObject);
+begin
+
 end;
 
 procedure TSpecEmu.dispCompPaint(Sender: TObject);
@@ -1402,12 +1633,16 @@ procedure TSpecEmu.Button6Click(Sender: TObject);
 begin
   pDebug1.Visible:= true;
   pDebug2.Visible:= false;
+  pDebug3.Visible:= false;
+  pDebug4.Visible:= false;
 end;
 
 procedure TSpecEmu.Button7Click(Sender: TObject);
 begin
   pDebug1.Visible:= false;
   pDebug2.Visible:= true;
+  pDebug3.Visible:= false;
+  pDebug4.Visible:= false;
 end;
 
 procedure TSpecEmu.ButtonBlockdownClick(Sender: TObject);
@@ -1416,10 +1651,10 @@ var
 begin
   if (blockgrid.Row < Tape_Blocks) then
   begin
-       pos := blockgrid.row;
-       move_tap_block(blockgrid.row, blockgrid.row+1);
-       read_tap_blocs;
-       blockgrid.row := pos+1;
+    pos := blockgrid.row;
+    move_tap_block(blockgrid.row, blockgrid.row+1);
+    read_tap_blocs;
+    blockgrid.row := pos+1;
   end;
 end;
 
@@ -1430,15 +1665,18 @@ begin
   if (blockgrid.Row > 1) then
   begin
     pos := blockgrid.row;
-       move_tap_block(blockgrid.row, blockgrid.row-1);
-       read_tap_blocs;
-       blockgrid.row := pos-1;
+    move_tap_block(blockgrid.row, blockgrid.row-1);
+    read_tap_blocs;
+    blockgrid.row := pos-1;
   end;
 end;
 
 procedure TSpecEmu.ButtonConf1Click(Sender: TObject);
+var
+   FileName: String;
 begin
-
+  fileName := 'PRUEBA';
+  bin_to_tap(FileName+'.BIN',FileName+'.TAP',FileName,$8000);
 end;
 
 
@@ -1474,44 +1712,66 @@ begin
   ButtonDeleteblock.Enabled := Enab;
 end;
 
-procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
+procedure TSpecEmu.load_tap_file(FileName: String);
 var
   Reply, BoxStyle: Integer;
   FF: THandle;
   ext: string;
 begin
+  OpenTapFileDialog.FileName := FileName;
+  brueda.visible := true;
+  brueda1.visible := true;
+  grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
+  grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+  TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
+
+  TapeImage.Visible := true;
+  TapeFileName.Visible := true;
+
+  if not FileExists(OpenTapFileDialog.FileName) then
+  begin
+    BoxStyle := MB_ICONQUESTION + MB_YESNO;
+    Reply := Application.MessageBox('CREATE A EMPTY TAP FILE?', 'NEW TAP FILE', BoxStyle);
+    if Reply = IDYES then
+    begin
+      FF := FileCreate(OpenTapFileDialog.FileName);
+      FileClose(FF);
+    end;
+  end;
+
+  if FileExists(OpenTapFileDialog.FileName) then
+  begin
+  ext := Upcase(extractFileExt(OpenTapFileDialog.filename));
+  tap_file_selected := (ext = '.TAP');
+  if tap_file_selected then
+  begin
+    tap_edit_controls_enabled(true);
+    Read_tap_blocs
+  end else if ext = '.TZX' then
+    Read_tzx_blocs;
+  end;
+  use_tapetraps := cktape_trap.checked and tap_file_selected;
+end;
+
+procedure TSpecEmu.ButtonEjectClick(Sender: TObject);
+begin
   pause_emulation;
+  ear_value := 0;
   tap_edit_controls_enabled(false);
   tap_file_selected := false;
   use_tapetraps := false;
-  if OpenTapFileDialog.Execute then
+  if OpenTapFileDialog.FileName <> '' then
   begin
-     TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
-
-     TapeImage.Visible := true;
-     TapeFileName.Visible := true;
-
-     if not FileExists(OpenTapFileDialog.FileName) then
-     begin
-       BoxStyle := MB_ICONQUESTION + MB_YESNO;
-       Reply := Application.MessageBox('CREATE A EMPTY TAP FILE?', 'NEW TAP FILE', BoxStyle);
-       if Reply = IDYES then
-          FF := FileCreate(OpenTapFileDialog.FileName);
-          FileClose(FF);
-     end;
-
-     if FileExists(OpenTapFileDialog.FileName) then
-     begin
-      ext := Upcase(extractFileExt(OpenTapFileDialog.filename));
-      tap_file_selected := (ext = '.TAP');
-      if tap_file_selected then
-      begin
-        tap_edit_controls_enabled(true);
-        Read_tap_blocs
-      end else if ext = '.TZX' then
-        Read_tzx_blocs;
-     end;
-  end;
+    brueda.visible := false;
+    brueda1.visible := false;
+    TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
+    OpenTapFileDialog.FileName := '';
+    TapeImage.Visible := false;
+    TapeFileName.Visible := false;
+    Blockgrid.Clean;
+  end else
+  if OpenTapFileDialog.Execute then
+    load_tap_file(OpenTapFileDialog.FileName);
   use_tapetraps := cktape_trap.checked and tap_file_selected;
   restart_emulation;
 end;
@@ -1541,43 +1801,32 @@ end;
 
 procedure TSpecEmu.ButtonFloppy2Click(Sender: TObject);
 begin
-  flush_drive(1);
-  diskFileDialog.Filename := diskB_filename;
-  disk_modified[1] := false;
-  if diskFileDialog.Execute then
+  pause_emulation;
+  if diskB_filename = '' then
   begin
-     if fileexists(diskFileDialog.filename) then
-     begin
-       read_dsk_file(1);
-       diskB_filename := diskFileDialog.filename;
-       Drive_not_ready[1] := 0;
-       driveBfloppy.visible := true;
-       driveB.visible := false;
-       stFileDriveB.caption := extractfilename(diskFileDialog.filename);
-       stDriveBVersion.caption := getdskversionstring(1);
-       stDriveBCreator.caption := getdskcreator(1);
-       stDriveBTracks.Caption := InttoStr(disk_info[1].Tracks);
-       stDriveBSides.Caption := InttoStr(disk_info[1].Sides);
-     end else begin      // Aquí iria nuevo disco
-       Drive_not_ready[1] := 1;
-       driveBfloppy.visible := false;
-       driveB.visible := true;
-       stFileDriveB.caption := 'EMPTY';
-       stDriveBVersion.caption := getdskversionstring(1);
-       stDriveBCreator.caption := getdskcreator(1);
-       stDriveBTracks.Caption := InttoStr(disk_info[1].Tracks);
-       stDriveBSides.Caption := InttoStr(disk_info[1].Sides);
-     end;
+    if diskFileDialog.Execute then
+    begin
+      if fileexists(diskFileDialog.filename) then
+      begin
+        Insert_Drive_B(diskFileDialog.filename);
+      end else begin      // Aquí iria nuevo disco
+        flush_drive(1);
+        diskFileDialog.Filename := diskB_filename;
+        disk_modified[1] := false;
+        Drive_not_ready[1] := 1;
+        driveBfloppy.visible := false;
+        driveB.visible := true;
+        stFileDriveB.caption := 'EMPTY';
+        stDriveBVersion.caption := getdskversionstring(1);
+        stDriveBCreator.caption := getdskcreator(1);
+        stDriveBTracks.Caption := InttoStr(disk_info[1].Tracks);
+        stDriveBSides.Caption := InttoStr(disk_info[1].Sides);
+      end;
+    end;
   end else begin
-     Drive_not_ready[1] := 1;
-     driveBfloppy.visible := false;
-     driveB.visible := true;
-     stFileDriveB.caption := 'EMPTY';
-     stDriveBVersion.caption := '---';
-     stDriveBCreator.caption := '---';
-     stDriveBTracks.Caption := '---';
-     stDriveBSides.Caption := '---';
-   end;
+    Eject_drive_B;
+  end;
+  restart_emulation;
 end;
 
 procedure TSpecemu.read_dsk_file(drive: byte);
@@ -1624,45 +1873,92 @@ begin
   closefile(ff);
 end;
 
-procedure TSpecEmu.ButtonFloppyClick(Sender: TObject);
+procedure TSpecEmu.Eject_Drive_A;
+begin
+  diskA_filename := '';
+  Drive_not_ready[0] := 1;
+  driveAfloppy.visible := false;
+  driveA.visible := true;
+  stFileDriveA.caption := 'EMPTY';
+  stDriveAVersion.caption := '---';
+  stDriveACreator.caption := '---';
+  stDriveATracks.Caption := '---';
+  stDriveASides.Caption := '---';
+end;
+
+procedure TSpecEmu.Eject_Drive_B;
+begin
+  diskB_filename := '';
+  Drive_not_ready[1] := 1;
+  driveBfloppy.visible := false;
+  driveB.visible := true;
+  stFileDriveB.caption := 'EMPTY';
+  stDriveBVersion.caption := '---';
+  stDriveBCreator.caption := '---';
+  stDriveBTracks.Caption := '---';
+  stDriveBSides.Caption := '---';
+end;
+
+procedure TSpecEmu.Insert_Drive_A(FileName: String);
 begin
   flush_drive(0);
-  diskFileDialog.Filename := diskA_filename;
+  diskFileDialog.Filename := filename;
   disk_modified[0] := false;
-  if diskFileDialog.Execute then
+  diskA_filename := diskFileDialog.filename;
+  read_dsk_file(0);
+  Drive_not_ready[0] := 0;
+  driveAfloppy.visible := true;
+  driveA.visible := false;
+  stFileDriveA.caption := extractfilename(diskFileDialog.filename);
+  stDriveAVersion.caption := getdskversionstring(0);
+  stDriveACreator.caption := getdskcreator(0);
+  stDriveATracks.Caption := InttoStr(disk_info[0].Tracks);
+  stDriveASides.Caption := InttoStr(disk_info[0].Sides);
+end;
+
+procedure TSpecEmu.Insert_Drive_B(FileName: String);
+begin
+  flush_drive(1);
+  diskFileDialog.Filename := filename;
+  disk_modified[1] := false;
+  diskB_filename := diskFileDialog.filename;
+  read_dsk_file(1);
+  Drive_not_ready[1] := 0;
+  driveBfloppy.visible := true;
+  driveB.visible := false;
+  stFileDriveB.caption := extractfilename(diskFileDialog.filename);
+  stDriveBVersion.caption := getdskversionstring(1);
+  stDriveBCreator.caption := getdskcreator(1);
+  stDriveBTracks.Caption := InttoStr(disk_info[1].Tracks);
+  stDriveBSides.Caption := InttoStr(disk_info[1].Sides);
+end;
+
+procedure TSpecEmu.ButtonFloppyClick(Sender: TObject);
+begin
+  pause_emulation;
+  if diskA_filename = '' then
   begin
-    if fileexists(diskFileDialog.filename) then
+    if diskFileDialog.Execute then
     begin
-      diskA_filename := diskFileDialog.filename;
-      read_dsk_file(0);
-      Drive_not_ready[0] := 0;
-      driveAfloppy.visible := true;
-      driveA.visible := false;
-      stFileDriveA.caption := extractfilename(diskFileDialog.filename);
-      stDriveAVersion.caption := getdskversionstring(0);
-      stDriveACreator.caption := getdskcreator(0);
-      stDriveATracks.Caption := InttoStr(disk_info[0].Tracks);
-      stDriveASides.Caption := InttoStr(disk_info[0].Sides);
-   end else begin // Aquí iria nuevo disco
-      Drive_not_ready[0] := 1;
-      driveAfloppy.visible := false;
-      driveA.visible := true;
-      stFileDriveA.caption := 'EMPTY';
-      stDriveAVersion.caption := getdskversionstring(0);
-      stDriveACreator.caption := getdskcreator(0);
-      stDriveATracks.Caption := InttoStr(disk_info[0].Tracks);
-      stDriveASides.Caption := InttoStr(disk_info[0].Sides);
+      if fileexists(diskFileDialog.filename) then
+      begin
+        Insert_Drive_A(diskFileDialog.filename);
+      end else begin // Aquí iria nuevo disco
+        flush_drive(0);
+        diskFileDialog.Filename := diskA_filename;
+        disk_modified[0] := false;
+        Drive_not_ready[0] := 1;
+        driveAfloppy.visible := false;
+        driveA.visible := true;
+        stFileDriveA.caption := 'EMPTY';
+        stDriveAVersion.caption := getdskversionstring(0);
+        stDriveACreator.caption := getdskcreator(0);
+        stDriveATracks.Caption := InttoStr(disk_info[0].Tracks);
+        stDriveASides.Caption := InttoStr(disk_info[0].Sides);
+      end;
     end;
-  end else begin
-    Drive_not_ready[0] := 1;
-    driveAfloppy.visible := false;
-    driveA.visible := true;
-    stFileDriveA.caption := 'EMPTY';
-    stDriveAVersion.caption := '---';
-    stDriveACreator.caption := '---';
-    stDriveATracks.Caption := '---';
-    stDriveASides.Caption := '---';
-  end;
+  end else Eject_Drive_A;
+  restart_emulation;
 end;
 
 procedure TSpecEmu.ButtonFWDClick(Sender: TObject);
@@ -1702,6 +1998,8 @@ end;
 procedure TSpecEmu.ButtonPlayClick(Sender: TObject);
 begin
   if TapeImage.Visible then begin
+    grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
+    grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
     ButtonPlayPressed.Visible := true;
     ButtonPlay.Visible := false;
     Set_tape_leds;
@@ -1721,13 +2019,13 @@ end;
 
 procedure TSpecEmu.ButtonDeleteBlockClick(Sender: TObject);
 begin
-     if (blockgrid.Row <= Tape_Blocks) and
-        (Application.MessageBox('Are you sure?', 'Delete current tap block',
-                                    MB_ICONQUESTION + MB_YESNO) = IDYES) then
-     begin
-          Delete_Tape_Block(blockgrid.Row);
-          read_tap_blocs;
-     end;
+  if (blockgrid.Row <= Tape_Blocks) and
+    (Application.MessageBox('Are you sure?', 'Delete current tap block',
+                                MB_ICONQUESTION + MB_YESNO) = IDYES) then
+  begin
+    Delete_Tape_Block(blockgrid.Row);
+    read_tap_blocs;
+  end;
 end;
 
 procedure TSpecEmu.ButtonRightChange(Sender: TObject);
@@ -2426,6 +2724,10 @@ begin
   //Options.machine := Tmachine(Groupmachine.ItemIndex);
   Options.user_keys := user_buttons;
   fdc_present := is_fdc_machine;
+  options.volume_AY := Trackbar_AY.Position;
+  options.volume_ear := Trackbar_ear.Position;
+  options.volume_speaker := Trackbar_speaker.Position;
+  options.volume_mic:=Trackbar_mic.Position;
 end;
 
 procedure TSpecEmu.ckAYSoundChange(Sender: TObject);
@@ -2468,11 +2770,152 @@ begin
   drive_protected[1] := byte(ckDiskB_prot.checked) and 1;
 end;
 
+procedure TSpecEmu.driveADragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+
+end;
+
+procedure TSpecEmu.driveADragOver(Sender, Source: TObject; X, Y: Integer;
+  State: TDragState; var Accept: Boolean);
+begin
+  DriveSelected := 1;
+end;
+
+procedure TSpecEmu.driveAMouseEnter(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.driveBDragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+  DriveSelected := 1;
+end;
+
+procedure TSpecEmu.driveBDragOver(Sender, Source: TObject; X, Y: Integer;
+  State: TDragState; var Accept: Boolean);
+begin
+
+end;
+
+procedure TSpecEmu.driveBMouseEnter(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.driveBMouseLeave(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.edAsm_addrChange(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.edAsm_addrKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key=VK_RETURN then
+    button9click(self);
+
+end;
+
+
 procedure TSpecEmu.FormChangeBounds(Sender: TObject);
 begin
   timed_pause_emulation;
 end;
 
+procedure TSpecEmu.FormDropFiles(Sender: TObject;
+  const FileNames: array of String);
+var
+   ext, FileName: String;
+   fname: string;
+   coord: TPoint;
+   BR: TRect;
+   question: string;
+   txt: pchar;
+begin
+  pause_emulation;
+  for FileName in FileNames do
+  begin
+    ext := Upcase(extractfileext(FileName));
+    fname := ChangeFileExt(extractfilename(filename),EmptyStr);
+    if (ext = '.TAP') or (ext = '.TZX') then
+    begin
+      load_tap_file(FileName);
+    end else
+    if (ext = '.DSK') then
+    begin
+      coord := ScreenToClient(Mouse.CursorPos);
+      BR :=DriveBPanel.BoundsRect;
+      BR.SetLocation(DriveBPanel.Left+PanelFloppy.Left+TapePanel.Left, DriveBPanel.Top+PanelFloppy.Top+TapePanel.Top);
+      if BR.Contains(coord) then
+        Insert_Drive_B(FileName)
+      else
+        Insert_Drive_A(FileName);
+    end else
+    if (ext = '.BAS') or (ext = '.BIN') or (ext = '.SCR') then
+    begin
+      if OpenTapFileDialog.Filename = '' then
+      begin
+        OpenTapFileDialog.Filename := fname+'.TAP';
+        if OpenTapFileDialog.Execute then
+        begin
+          if fileexists(OpenTapFileDialog.Filename) then
+          begin
+            question := 'OVERWRITE '+ OpenTapFileDialog.Filename + '?';
+            txt := StrAlloc(Length(question) + 1);
+            StrPCopy(txt, question);
+            if Application.MessageBox(txt, 'FILE EXISTS', MB_ICONQUESTION + MB_YESNO)=IDYES then
+            begin
+              if (ext = '.BAS') then
+                 bas_to_tap(FileName,OpenTapFileDialog.Filename,$8000,fname)
+              else
+              if (ext = '.BIN') then
+                 bin_to_tap(FileName,OpenTapFileDialog.Filename,fname, $8000)
+              else
+              if (ext = '.SCR') then
+                 bin_to_tap(FileName,OpenTapFileDialog.Filename,fname, $4000);
+              load_tap_file(OpenTapFileDialog.Filename);
+            end;
+            StrDispose(txt);
+          end else begin
+            if (ext = '.BAS') then
+               bas_to_tap(FileName,OpenTapFileDialog.Filename,$8000,fname)
+            else
+            if (ext = '.BIN') then
+               bin_to_tap(FileName,OpenTapFileDialog.Filename,fname, $8000)
+            else
+            if (ext = '.SCR') then
+               bin_to_tap(FileName,OpenTapFileDialog.Filename,fname, $4000);
+            load_tap_file(OpenTapFileDialog.Filename);
+          end;
+        end;
+      end else begin
+        //OpenTapFileDialog.Filename := fname+'.TAP';
+        deletefile('$$$$$$$$.001');
+        deletefile('$$$$$$$$.002');
+        if (ext = '.BAS') then
+          bas_to_tap(FileName,'$$$$$$$$.002',$8000,fname)
+        else
+        if (ext = '.BIN') then
+           bin_to_tap(FileName,'$$$$$$$$.002',fname, $8000)
+        else
+        if (ext = '.SCR') then
+          bin_to_tap(FileName,'$$$$$$$$.002',fname, $4000);
+        renamefile(OpenTapFileDialog.Filename,'$$$$$$$$.001');
+        UnirArchivo('$$$$$$$$.001',OpenTapFileDialog.Filename);
+        load_tap_file(OpenTapFileDialog.Filename);
+      end;
+    end else
+    if (ext = '.Z80') or (ext = '.SNA') then
+    begin
+      loadSnapshotfile(FileName);
+    end;
+  end;
+  restart_emulation;
+end;
 
 procedure TSpecEmu.GroupJoystickProtocolClick(Sender: TObject);
 begin
@@ -2719,6 +3162,85 @@ begin
      end;
 end;
 
+procedure TSpecEmu.Label18Click(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(hl);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.Label19Click(Sender: TObject);
+var
+  v: word;
+begin
+  v := rdmem2(bc);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.Label1Click(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(pc);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.Label20Click(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(de);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.Label2Click(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(sp);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.memgridDrawCell(Sender: TObject; aCol, aRow: Integer;
+  aRect: TRect; aState: TGridDrawState);
+begin
+  if (aCol=mem_col) and (aRow=mem_row) then
+  with TStringGrid(Sender) do
+  begin
+    //paint the background Green
+    Canvas.Brush.Color := clSkyBlue;
+    Canvas.FillRect(aRect);
+    Canvas.TextOut(aRect.Left+2,aRect.Top+2,Cells[ACol, ARow]);
+  end;
+end;
+
+procedure TSpecEmu.memgridEditingDone(Sender: TObject);
+var
+  addr: word;
+  v,code: byte;
+  s: string[2];
+begin
+  if      src_ptr.Checked then addr := mem_addr
+  else if src_ix.Checked then addr := ix-127
+  else if src_iy.Checked then addr := iy-127;
+  addr := addr and not $f;
+  addr+=(memgrid.Row-1)*$10+(memgrid.Col-1);
+  S := memgrid.Cells[memgrid.Col,memgrid.Row];
+  if S = '' then S := #0;
+  if asciiselection.Checked then
+    v := ord(s[1])
+  else
+    v := Hex2Dec(S);
+  wrmem(addr,v);
+  set_memory_dump;
+end;
+
 procedure TSpecEmu.Read_tap_blocs;
 var
   F: File;
@@ -2805,7 +3327,7 @@ begin
   try
     AssignFile (F, OpenTapFileDialog.FileName);
     Reset(F,1);
-    Seek(F, Tape_info[tap_block_num].Filepos);                                // skeep tzx header
+    Seek(F, Tape_info[tap_block_num].Filepos); // skeep tzx header
     BlockRead(F, Block_ID, sizeof(Block_ID),result);
     BlockRead(F, Blocklen, sizeof(Blocklen),result);
     BlockRead(F, num_options, sizeof(num_options),result);
@@ -3153,7 +3675,7 @@ begin
   PlayButton.Visible := pause;
   stInstruction.caption := decode_instruction(pc);
   draw_screen;
-  refresh_registers;
+  refresh_register_labels;
   DebugPanel.Enabled := true;
   StepButton.Enabled := true;
   stepbutton.SetFocus;
@@ -3336,9 +3858,222 @@ begin
   pc := 0;
   if pause then begin
     draw_screen;
-    refresh_registers;
+    refresh_register_labels;
   end;
   BFocus.setfocus;
+end;
+
+procedure TSpecEmu.sgBreakpointsButtonClick(Sender: TObject; aCol, aRow: Integer
+  );
+begin
+
+end;
+
+procedure TSpecEmu.compile_breakpoints;
+var
+  nn: byte;
+  code: byte;
+
+{
+PC
+A
+F
+B
+C
+D
+E
+H
+L
+AF
+BC
+DE
+HL
+IX
+IY
+SP
+R
+I
+MEM()
+READMEM
+WRITEMEM
+xxFE_in
+xxFE_out
+7FFD_out
+1FFD_out
+FFFD_in
+FFFD_out
+BFFD_out
+}
+
+  procedure compile_cond(r: string; o: string; v: string; index: byte; c: byte);
+  var
+    s: string;
+    code: integer;
+  begin
+    with breakpoints[index].cond[c] do
+    begin
+      active := true;
+      S := trim(upcase(r));
+      if      s = 'F' then reg := REG_F
+      else if s = 'A' then reg := REG_A
+      else if s = 'C' then reg := REG_C
+      else if s = 'B' then reg := REG_B
+      else if s = 'E' then reg := REG_E
+      else if s = 'D' then reg := REG_D
+      else if s = 'L' then reg := REG_L
+      else if s = 'H' then reg := REG_H
+      else if s = 'F''' then reg := REG_F1
+      else if s = 'A''' then reg := REG_A1
+      else if s = 'C''' then reg := REG_C1
+      else if s = 'B''' then reg := REG_B1
+      else if s = 'E''' then reg := REG_E1
+      else if s = 'D''' then reg := REG_D1
+      else if s = 'L''' then reg := REG_L1
+      else if s = 'H''' then reg := REG_H1
+      else if s = 'AF' then reg := REG_AF
+      else if s = 'BC' then reg := REG_BC
+      else if s = 'DE' then reg := REG_DE
+      else if s = 'HL' then reg := REG_HL
+      else if s = 'AF''' then reg := REG_AF1
+      else if s = 'BC''' then reg := REG_BC1
+      else if s = 'DE''' then reg := REG_DE1
+      else if s = 'HL''' then reg := REG_HL1
+      else if s = 'PC' then reg := REG_PC
+      else if s = 'SP' then reg := REG_SP
+      else if s = 'I' then reg := REG_I
+      else if s = 'R' then reg := REG_R
+      else if copy(s,1,4) = 'MEMW' then
+           reg := REG_MEMW
+      else if copy(s,1,4) = 'MEMR' then
+           reg := REG_MEMR
+      else if copy(s,1,3) = 'MEM' then
+      begin
+        reg := REG_MEM;
+        s := copy(s,5,length(s)-5);
+        val(s,addr,code);
+      end
+      else if copy(s,1,2) = 'IN' then
+      begin
+        reg := REG_IN;
+        s := copy(s,4,length(s)-4);
+        val(s,addr,code);
+      end
+      else if copy(s,1,3) = 'OUT' then
+      begin
+        reg := REG_OUT;
+        s := copy(s,5,length(s)-5);
+        val(s,addr,code);
+      end
+      else active := false;
+      S := trim(upcase(o));
+      if      s='=' then op := OP_EQ
+      else if s='>' then op := OP_GT
+      else if s='<' then op := OP_LT
+      else if s='<>' then op := OP_NEQ
+      else if s='>=' then op := OP_GET
+      else if s='<=' then op := OP_LET
+      else active := false;
+      val(v,value,code);
+    end;
+  end;
+
+begin
+  grid_breakpoint_active := false;
+  max_breakpoint := sgBreakpoints.RowCount-1;
+  for nn := 1 to max_breakpoint do
+  begin
+    compile_cond(sgBreakpoints.Cells[1,nn],sgBreakpoints.Cells[2,nn],sgBreakpoints.Cells[3,nn],nn,0);
+    compile_cond(sgBreakpoints.Cells[4,nn],sgBreakpoints.Cells[5,nn],sgBreakpoints.Cells[6,nn],nn,1);
+    compile_cond(sgBreakpoints.Cells[7,nn],sgBreakpoints.Cells[8,nn],sgBreakpoints.Cells[9,nn],nn,2);
+    breakpoints[nn].active:=(sgBreakpoints.Cells[0,nn]<>'OFF') and
+       (breakpoints[nn].cond[0].active or breakpoints[nn].cond[1].active or breakpoints[nn].cond[2].active);
+    if breakpoints[nn].active then grid_breakpoint_active := true;
+  end;
+end;
+
+procedure TSpecEmu.sgBreakpointsEditingDone(Sender: TObject);
+begin
+  compile_breakpoints;
+end;
+
+procedure TSpecEmu.sgBreakpointsHeaderClick(Sender: TObject; IsColumn: Boolean;
+  Index: Integer);
+begin
+  if not IsColumn then
+    if sgBreakpoints.Cells[0,index] = 'OFF' then
+      sgBreakpoints.Cells[0,index]:=' '
+    else
+      sgBreakpoints.Cells[0,index]:='OFF'
+end;
+
+procedure TSpecEmu.stBCcClick(Sender: TObject);
+var
+  v: word;
+begin
+  v := rdmem2(bc);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+  set_mem;
+end;
+
+procedure TSpecEmu.stDEcClick(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(de);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.stHLcClick(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(hl);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
+end;
+
+procedure TSpecEmu.UpdateRegistersFromLabels;
+begin
+  pc := hex2dec(stPC.caption);
+  sp := hex2dec(stSP.caption);
+  af := hex2dec(stAF.caption);
+  bc := hex2dec(stBC.caption);
+  de := hex2dec(stDE.caption);
+  hl := hex2dec(stHL.caption);
+  af1 := hex2dec(stAF1.caption);
+  bc1 := hex2dec(stBC1.caption);
+  de1 := hex2dec(stDE1.caption);
+  hl1 := hex2dec(stHL1.caption);
+  ix := hex2dec(stIX.caption);
+  iy := hex2dec(stIY.caption);
+  r := hex2dec(stRR.caption);
+  i := hex2dec(stii.caption);
+end;
+
+procedure TSpecEmu.stRegisterClick(Sender: TObject);
+var
+  v: word;
+  code: integer;
+  s,regname: String;
+  ww: byte;
+begin
+  if (TStaticText(Sender).Name <> 'stRR') and (TStaticText(Sender).Name <> 'stII') then
+  begin
+    ww := 4;
+    regname := copy(TStaticText(Sender).Name,3,255);
+  end
+  else begin
+    ww := 2;
+    regname := copy(TStaticText(Sender).Name,4,255);
+  end;
+  s := InputBox('Register ' + regname,'New value?', 'x'+TStaticText(Sender).caption);
+  val(s,v,code);
+  if code = 0 then
+    TStaticText(Sender).Caption := hexstr(v,ww);
+  UpdateRegistersFromLabels;
+  refresh_register_labels;
 end;
 
 procedure TSpecEmu.StepOverButtonClick(Sender: TObject);
@@ -3392,10 +4127,29 @@ procedure TSpecEmu.refresh_system;
 begin
   clear_keyboard;
   draw_screen;
-  refresh_registers;
+  refresh_register_labels;
 end;
 
-procedure TSpecEmu.refresh_registers;
+procedure TSpecEmu.fill_asm_window(addr: word);
+var
+  nn: word;
+  S: string;
+  len: byte;
+begin
+  nn := 0;
+  lstasm_window.Clear;
+  while nn < 255 do
+  begin
+    s := decode_instruction(addr);
+    len := get_instruction_len(s);
+    s := HexStr(addr,4)+ s;
+    lstasm_window.items.Append(s);
+    addr += len;
+    inc(nn);
+  end;
+end;
+
+procedure TSpecEmu.refresh_register_labels;
 var
   S: String;
 begin
@@ -3477,6 +4231,9 @@ begin
     stportoutfe.caption := HexStr(last_out_fe,4);
     stportinfe.caption := HexStr(last_in_fe,4);
   end;
+  cur_asm_addr := pc;
+  fill_asm_window(cur_asm_addr);
+  edAsm_addr.text := 'x'+HexStr(cur_asm_addr,4);
 end;
 
 procedure TSpecEmu.RunEmulation;
@@ -3498,7 +4255,7 @@ begin
   status_saved := false;
   while (not saliendo) do begin
     if not pause and
-      ((breakpoint_active) and ((breakpoint = pc) and not empezando)) or
+      (((breakpoint_active and (breakpoint = pc)) or (grid_breakpoint_active and test_breakpoints)) and not empezando) or
       (step_over_break and (step_over_true = pc) and not empezando)
       then
     begin
@@ -3530,6 +4287,7 @@ begin
         ret;
         clear_keyboard;
         Application.ProcessMessages;
+        speaker_out := false;
       end else if (pc >= $556) and (pc < $05e3) and
         TapePlayLed.Visible and basicrom
         and use_tapetraps then // LOAD ROUTINE
@@ -3551,13 +4309,17 @@ begin
         ret;
         clear_keyboard;
         Application.ProcessMessages;
+        restart_emulation;
+        sonido_acumulado := 0;
+        load_sound := 0;
+        speaker_out := false;
       end else if not screen_tstates_reached or step then
          do_z80
       {else sleep(1)};
       if pause then
       begin
         stInstruction.caption := decode_instruction(pc);
-        refresh_registers;
+        refresh_register_labels;
         draw_screen;
         Application.ProcessMessages;
       end;
@@ -3605,9 +4367,9 @@ begin
 
 
       t_states_ini_half_scanline :=  t_states; //-(t_states_cur_half_scanline-t_states_sound_bit);
-      ss := ((sonido_acumulado * 8*volume_speaker) div t_states_sound_bit+
-              (load_sound * 8*volume_speaker)+
-              AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) div 4;
+      ss := ((sonido_acumulado * {8*}volume_speaker *2) div t_states_sound_bit+
+              (load_sound * {8*}volume_ear)+
+              (AYCHA.sound_level+AYCHB.sound_level+AYCHC.sound_level) * volume_AY div 4) div 4;
       if ss > 127 then
          ss := 127;
       speaker_data[soundpos_write] := 128 + ss;
@@ -3626,7 +4388,7 @@ begin
     repaint_screen := screen_tstates_reached and (sound_bytes <= 2048);//screen_timer.Elapsed >= 0.020;
     if screen_tstates_reached and not repaint_screen and not yadormido then
     begin
-         sleep(1);
+         sleep(5);
          yadormido := true;
     end;
     if disk_motor[0] then
@@ -3642,14 +4404,22 @@ begin
       if (frames mod 10 = 0) and (timer_floppyA = 0) then
       begin
         timer_floppyA := 50;
-        driveALed.Visible := led_motor_on[0];
+        //driveALed.Visible := led_motor_on[0];
+        if led_motor_on[0] then
+          grled.Draw(bDriveALed.Canvas,0,0,True)
+        else
+           grledapagado.Draw(bDriveALed.Canvas,0,0,True);
         disk_motor[0] := false;
         led_motor_on[0] := false;
       end;
       if (frames mod 10 = 0) and (timer_floppyB = 0) and (drive_connected[1]=1) then
       begin
         timer_floppyB := 50;
-        driveBLed.Visible := led_motor_on[1];
+        if led_motor_on[1] then
+          grled.Draw(bDriveBLed.Canvas,0,0,True)
+        else
+           grledapagado.Draw(bDriveBLed.Canvas,0,0,True);
+        //driveBLed.Visible := led_motor_on[1];
         disk_motor[1] := false;
         led_motor_on[1] := false;
       end;
@@ -3684,6 +4454,11 @@ begin
   stROM1.caption := ExtractFileName(options.ROMFileName[ord(options.machine),1]);
   stROM2.caption := ExtractFileName(options.ROMFileName[ord(options.machine),2]);
   stROM3.caption := ExtractFileName(options.ROMFileName[ord(options.machine),3]);
+  ckIssue2.checked := options.Issue2;
+  Trackbar_AY.Position := options.volume_AY;
+  Trackbar_ear.Position := options.volume_ear;
+  Trackbar_speaker.Position := options.volume_speaker;
+  Trackbar_mic.Position := options.volume_mic;
   if is_fdc_machine then
   begin
     drive_connected[0] := 1;
@@ -3745,6 +4520,11 @@ begin
   options.ROMFilename[ord(spectrum_plus3),2]:='ROM\plus3ROM2_4-1.rom';
   options.ROMFilename[ord(spectrum_plus3),3]:='ROM\plus3ROM3_4-1.rom';
 
+  options.volume_AY:=100;
+  options.volume_ear:=100;
+  options.volume_speaker:=100;
+  options.volume_mic:=100;
+
   UpdateFromOptions;
 
   LeftJoystickSelection := 0;
@@ -3804,9 +4584,17 @@ end;
 
 procedure TSpecEmu.FormActivate(Sender: TObject);
 begin
+  mem_col := -1;
+  mem_row := -1;
+
+  DriveSelected := 0;
+  cont_rueda := 0;
+  brueda.visible := false;
+  brueda1.visible := false;
   drive_protected[0] := byte(ckdiskA_prot.Checked) and 1;
   drive_protected[1] := byte(ckdiskB_prot.Checked) and 1;
   DebugPanel.Enabled := false;
+  Button6Click(self);  // Activate debug panel 1
   TapePanel.Visible := false;
   DebugPanel.Visible := false;
   memgrid.ColWidths[0] := 35;
@@ -3854,6 +4642,17 @@ begin
   grComputer[Spectrum_plus2] := TBGRABitmap.Create('spectrum_plus2_c.png');
   grComputer[Spectrum_plus2a] := TBGRABitmap.Create('spectrum_plus2a_c.png');
   grComputer[Spectrum_plus3] := TBGRABitmap.Create('spectrum_plus3_c.png');
+
+  grrueda[0] := TBGRABitmap.Create('rueda1.png');
+  grrueda[1] := TBGRABitmap.Create('rueda2.png');
+  grrueda[2] := TBGRABitmap.Create('rueda3.png');
+  grrueda[3] := TBGRABitmap.Create('rueda4.png');
+
+  grled := TBGRABitmap.Create('led floppy.png');
+  grledapagado := TBGRABitmap.Create('led floppy apagado.png');
+  grledapagado.Draw(bDriveBLed.Canvas,0,0,True);
+  grledapagado.Draw(bDriveALed.Canvas,0,0,True);
+
   tap_edit_controls_enabled(false);
 end;
 
@@ -3928,8 +4727,19 @@ begin
 end;
 
 procedure TSpecEmu.stInstructionClick(Sender: TObject);
+var
+   v: word;
+   s: string;
+   code: integer;
 begin
-
+  s := stInstruction.caption;
+  if s[length(s)] = ']' then
+  begin
+    s := 'x'+copy(s,length(s)-4,4);
+    //val(s,v,code);
+    EdMem.Text := s;//'x'+InttoHex(v,4);
+    set_mem;
+  end;
 end;
 
 procedure TSpecEmu.stIYClick(Sender: TObject);
@@ -3970,6 +4780,15 @@ begin
     stROM3.Caption := ExtractFileName(odROM.FileName);
     options.ROMFilename[ord(options.machine),3] := odROM.FileName;
   end;
+end;
+
+procedure TSpecEmu.stStackClick(Sender: TObject);
+var
+   v: word;
+begin
+  v := rdmem2(sp);
+  EdMem.Text := 'x'+InttoHex(v,4);
+  set_mem;
 end;
 
 procedure TSpecEmu.Timer1Timer(Sender: TObject);
@@ -4222,10 +5041,44 @@ end;
 
 procedure TSpecEmu.Timer2Timer(Sender: TObject);
 begin
-  Audioout.Resume();
   if not debugging then
-     pause := false;
+  begin
+    Audioout.Resume();
+    pause := false;
+  end;
   Timer2.Enabled := false;
+end;
+
+procedure TSpecEmu.TimerRuedaTimer(Sender: TObject);
+begin
+  if TapeImage.Visible then
+  begin
+    grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
+    grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+  end else begin
+  end;
+  if TapePlayLed.Visible or TapeRecLed.Visible then
+  begin
+    if cont_rueda < 3 then
+      inc(cont_rueda)
+    else
+      cont_rueda := 0;
+  end;
+end;
+
+procedure TSpecEmu.TrackBar_AYChange(Sender: TObject);
+begin
+  volume_AY:=calcVolumen(trackbar_AY.position);
+end;
+
+procedure TSpecEmu.TrackBar_EarChange(Sender: TObject);
+begin
+  volume_ear := calcVolumen(trackbar_ear.position);
+end;
+
+procedure TSpecEmu.TrackBar_SpeakerChange(Sender: TObject);
+begin
+  volume_speaker := calcVolumen(trackbar_Speaker.Position,50,100);
 end;
 
 procedure TSpecEmu.ZoomInButtonClick(Sender: TObject);

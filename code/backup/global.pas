@@ -28,6 +28,53 @@ const
   SCREENPAGE = 5;
   SHADOWPAGE = 7;
 
+  REG_F  = $00;
+  REG_A  = $01;
+  REG_C  = $02;
+  REG_B  = $03;
+  REG_E  = $04;
+  REG_D  = $05;
+  REG_L  = $06;
+  REG_H  = $07;
+  REG_F1 = $08;
+  REG_A1 = $09;
+  REG_C1 = $0A;
+  REG_B1 = $0B;
+  REG_E1 = $0C;
+  REG_D1 = $0D;
+  REG_L1 = $0E;
+  REG_H1 = $0F;
+
+  REG_AF  = $10;
+  REG_BC  = $11;
+  REG_DE  = $12;
+  REG_HL  = $13;
+  REG_AF1 = $14;
+  REG_BC1 = $15;
+  REG_DE1 = $16;
+  REG_HL1 = $17;
+
+  REG_PC  = $20;
+  REG_SP  = $21;
+  REG_R   = $22;
+  REG_I   = $23;
+
+  REG_MEM  = $F0;
+  REG_IN   = $F1;
+  REG_OUT  = $F2;
+  REG_MEMW = $F3;
+  REG_MEMR = $F4;
+
+  OP_EQ  = 0;
+  OP_GT  = 1;
+  OP_LT  = 2;
+  OP_NEQ = 3;
+  OP_GET = 4;
+  OP_LET = 5;
+  OP_RD  = 6;
+  OP_WR  = 7;
+
+
 
 Type
   Tmachine = (Spectrum48, tk90x, tk95, inves, Spectrum128, Spectrum_plus2, Spectrum_plus2a, Spectrum_plus3);
@@ -42,20 +89,101 @@ Type
     user_keys: TUser_buttons;
     ROMFilename: array[0..10,0..3] of string[100];
     cursorfire: word;
+    Issue2: boolean;
+    Dummy: Array[0..99] of byte;
+  end;
+
+  Tcond = record
+    active: boolean;
+    reg: byte;
+    addr: word;
+    op: byte;
+    value: word;
+  end;
+
+  Tbreakpoint = record
+    active: boolean;
+    cond: array[0..2] of Tcond;
   end;
 
 var
   options: Toptions;
   coldbootrequired: boolean = false;
   fdc_present: boolean = true;
+  breakpoints: array[0..255] of Tbreakpoint;
+  max_breakpoint: byte;
+  grid_breakpoint_active: boolean = false;
+  last_mem_write_addr: word = 0;
+  last_mem_write_value: byte = 0;
+  last_mem_read_addr: word = 0;
+  last_mem_read_value: byte = 0;
+  ports_in: array[0..$FFFF] of byte;
+  ports_out: array[0..$FFFF] of byte;
 
 function is_plus3type_machine: boolean;
 function is_fdc_machine: boolean;
 function is_48k_machine: boolean;
 function is_plus2type_machine: boolean;
 function AYMachine: boolean;
+procedure UnirArchivo( sTrozo, sArchivoOriginal: TFileName );
+function Log10( x: real):real;
+function calcVolumen(level: longint; minlevel, maxlevel: longint): word;
+function calcVolumen(level: longint; maxlevel: longint): word;
+function calcVolumen(level: longint): word;
 
 implementation
+
+function Log10( x: real):real;
+begin
+  Log10 := ln (x) / ln (10);
+end;
+
+function calcVolumen(level: longint; minlevel, maxlevel: longint): word;
+begin
+  if level = 0 then
+    calcVolumen := 0
+  else begin
+    level := minlevel+(maxlevel-minlevel)*level div maxlevel;
+    calcVolumen := round(10*log10(maxlevel/((maxlevel+1)-level)));
+  end;
+end;
+
+function calcVolumen(level: longint; maxlevel: longint): word;
+begin
+  calcVolumen := calcVolumen(level,0,maxlevel);;
+end;
+
+function calcVolumen(level: longint): word;
+begin
+  CalcVolumen := calcVolumen(level,0,100);
+end;
+
+procedure UnirArchivo( sTrozo, sArchivoOriginal: TFileName );
+var
+  i: integer;
+  FS, Stream: TFileStream;
+begin
+  i := 1;
+  FS := TFileStream.Create( sArchivoOriginal, fmCreate or fmShareExclusive );
+
+  try
+    while FileExists( sTrozo ) do
+    begin
+      Stream := TFileStream.Create( sTrozo, fmOpenRead or fmShareDenyWrite );
+
+      try
+        FS.CopyFrom( Stream, 0 );
+      finally
+        Stream.Free;
+      end;
+
+      Inc(i);
+      sTrozo := ChangeFileExt( sTrozo, '.' + FormatFloat( '000', i ) );
+    end;
+  finally
+    FS.Free;
+  end;
+end;
 
 function AYMachine: boolean;
 begin

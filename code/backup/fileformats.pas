@@ -277,10 +277,10 @@ Type
     pause: word;
     symbols_in_pilot: dword;
     max_pulses_in_pilot: byte;
-    symbols_in_table: byte;
+    pilot_sync_symbols_in_table: byte;
     symbols_in_data_stream: dword;
     max_pulses_in_data_symbol: byte;
-    symbols_in_table: byte;
+    data_symbols_in_table: byte;
     //pilot_and_symbols_table:
   end;
 

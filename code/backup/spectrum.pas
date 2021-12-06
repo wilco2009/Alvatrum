@@ -32,12 +32,6 @@ const
   MAXFREQ = 16500;
 
 type
-  TTapeBlockInfo = record
-    Filepos: longint;
-    Size: word;
-    Flag: byte;
-  end;
-
   TAYEnvelope = record
     //freq: integer;
     enabled: boolean;
@@ -70,6 +64,8 @@ type
   end;
 
 var
+  mic_val: byte = 0;
+  ear_val: byte = 0;
   bcolor: array[0..total_screen_lines-1] of byte;
   screen_line: word;
 //  Tape_info_bak: TTapeInfo;
@@ -90,6 +86,9 @@ var
   t_states_sound_bit: Qword = screen_tstates_half_scanline;
   SoundFrames: Qword = 0;
   volume_speaker: byte = 8;
+  volume_ear: byte = 8;
+  volume_mic: byte = 8;
+  volume_AY: byte = 8;
   speaker_out: boolean = false;
   speaker_data: array[0..7014] of byte;
   AYCHA, AYCHB, AYCHC: TAYChannel;
@@ -369,11 +368,13 @@ var
    j: byte;
 begin
   for j := 0 to 7 do
-      keyboard[j] := $bf;
+    keyboard[j] := $bf;
 end;
 
 procedure init_spectrum;
 begin
+  fillchar(ports_in,sizeof(ports_in),$ff);
+  fillchar(ports_out,sizeof(ports_out),$ff);
   border_color := 7;
   clear_keyboard;
   screen_page := Mem_banks[1];
@@ -396,6 +397,7 @@ end;
 
 procedure spectrum_out(port: word; v: byte);
 begin
+  ports_out[port] := v;
   if (port and 1) = 0 then begin // ULA port 0xfe
     last_out_fe := v;
     border_color := v and $7;
@@ -405,6 +407,8 @@ begin
     end else begin
      speaker_out := false;
     end;
+    mic_val := (v and %00001000);
+    ear_val := (v and %00010000);
   end;
 
   if not disable_pagging then
@@ -566,8 +570,6 @@ begin
      begin
         v := v and Keyboard[4]; // 0 9 8 7 6
         v := v and SinclairRight;
-        if v and 1 = 0 then
-           a := a;
      end;
      if (hport and %00100000) = 0 then
         v := v and Keyboard[5]; // P O I U Y
@@ -576,6 +578,14 @@ begin
      if (hport and %10000000) = 0 then
         v := v and Keyboard[7]; // SPACE SYM M N B
      v := v or ear_value;
+
+     if not playing_tap then
+     begin
+       if options.Issue2 then
+          v := (v and %10111111) or (ear_val << 2) or (mic_val << 3)
+       else
+          v := (v and %10111111) or (ear_val << 2);
+     end;
      last_in_FE := v;
   end else begin                   // other write ports
     if (lport = $ff) and not is_plus3type_machine or
@@ -625,6 +635,7 @@ begin
       Handle_fdc(v,FROM_IN);
     end;
   end;
+  ports_in[port] := v;
   spectrum_in := v;
 end;
 
