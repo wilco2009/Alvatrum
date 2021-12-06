@@ -161,6 +161,7 @@ beta version 0.1.13
 Keyboard issue 2 behaviour implemented
 Memory and ports breakpoints implemented
 Editable registers and memory values
+Volume mixer
 solved some bugs
 
 TO DO:
