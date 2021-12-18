@@ -5,7 +5,7 @@ unit Global;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, Graphics;
 
 const
   user_up = 0;
@@ -90,6 +90,12 @@ Type
     ROMFilename: array[0..10,0..3] of string[100];
     cursorfire: word;
     Issue2: boolean;
+    volume_AY: byte;
+    volume_speaker: byte;
+    volume_ear: byte;
+    volume_mic: byte;
+    AspectRatio: Boolean;
+    ScrColor: integer;
     Dummy: Array[0..99] of byte;
   end;
 

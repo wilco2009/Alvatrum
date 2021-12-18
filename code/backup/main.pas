@@ -1,8 +1,8 @@
 unit main;
 
 {$mode objfpc}{$H+}
-{$MACRO ON}
-{$OPTIMIZATION LEVEL2}
+//{$MACRO ON}
+//{$OPTIMIZATION LEVEL3}
 
 interface
 
@@ -11,26 +11,31 @@ uses
   StdCtrls, Buttons, z80, Z80ops, BGRABitmap, BGRABitmapTypes, z80Globals,
   Z80Tools, LCLType, Grids, ComCtrls, Menus, Spin, acs_audio, acs_file,
   acs_misc, acs_mixer, BCListBox, CRT, BGRAGraphicControl, BGRASpriteAnimation,
-  BGRAResizeSpeedButton, BGRAImageList, BCPanel, BGRAVirtualScreen, spectrum,
-  SdpoJoystick, global, hardware, fileformats, Types, cassette, bgtools,strutils,
-  bas2tap,bin2tap;
+  BGRAResizeSpeedButton, BGRAImageList, BCPanel, BGRAVirtualScreen,
+  BGRAColorTheme, BCImageButton, BCButtonFocus, BCButton, BGRAShape,
+  BCTrackbarUpdown, spectrum, SdpoJoystick, global, hardware, fileformats,
+  Types, cassette, bgtools, ColorPalette, strutils, bas2tap, bin2tap,
+  BGRAFilters,BGRATextFX, BGRAGradients;
 type
 
   { TSpecEmu }
 
   TSpecEmu = class(TForm)
+    BFocus: TBCButtonFocus;
     ButtonAddBrkLine: TBGRAResizeSpeedButton;
     ButtonAudio: TBGRAResizeSpeedButton;
     ButtonDelBrkLine: TBGRAResizeSpeedButton;
+    ButtonDebug: TBGRAResizeSpeedButton;
+    ButtonKeyboard: TBGRAResizeSpeedButton;
     CheckGroup1: TCheckGroup;
     ckAYSound: TCheckBox;
     ckIssue2: TCheckBox;
+    ckaspect: TCheckBox;
     ckWriteEnabled: TCheckBox;
     AudioOut: TAcsAudioOut;
     ACSEar: TAcsMemoryIn;
     ApplicationProperties1: TApplicationProperties;
     AsciiSelection: TCheckBox;
-    BFocus: TBitBtn;
     brueda: TBGRAGraphicControl;
     brueda1: TBGRAGraphicControl;
     bdriveAled: TBGRAGraphicControl;
@@ -43,6 +48,7 @@ type
     ButtonPrevMachine: TBGRAResizeSpeedButton;
     ButtonNextMachine2: TBGRAResizeSpeedButton;
     cktape_trap: TCheckBox;
+    BkScrColor: TColorPalette;
     dispComp: TBGRAGraphicControl;
     Button1: TButton;
     Button2: TButton;
@@ -113,8 +119,6 @@ type
     Button_cuatro: TBGRAResizeSpeedButton;
     Button_cinco: TBGRAResizeSpeedButton;
     Button_uno: TBGRAResizeSpeedButton;
-    ButtonDebug: TSpeedButton;
-    ButtonTap1: TSpeedButton;
     Button_dos: TBGRAResizeSpeedButton;
     Button_E: TBGRAResizeSpeedButton;
     Button_U: TBGRAResizeSpeedButton;
@@ -190,8 +194,17 @@ type
     pDebug2: TPanel;
     pDebug3: TPanel;
     pDebug4: TPanel;
+    ResetButton: TBGRAResizeSpeedButton;
+    PlayButton: TBGRAResizeSpeedButton;
+    PauseButton: TBGRAResizeSpeedButton;
+    StepButton: TBGRAResizeSpeedButton;
     sgBreakpoints: TStringGrid;
+    StaticText14: TStaticText;
     StaticText16: TStaticText;
+    StaticText19: TStaticText;
+    StepOverButton: TBGRAResizeSpeedButton;
+    FullScreenButton: TBGRAResizeSpeedButton;
+    ZoomOutButton: TBGRAResizeSpeedButton;
     TAPMenu: TPopupMenu;
     SaveSnaFileDialog: TSaveDialog;
     OptionsPanel: TPanel;
@@ -213,7 +226,6 @@ type
     StaticText11: TStaticText;
     StaticText12: TStaticText;
     StaticText13: TStaticText;
-    StaticText14: TStaticText;
     StaticText15: TStaticText;
     StaticText17: TStaticText;
     StaticText18: TStaticText;
@@ -231,7 +243,6 @@ type
     stDriveBVersion: TStaticText;
     stFileDriveAInfo: TStaticText;
     stFileDriveBInfo: TStaticText;
-    stPaused: TStaticText;
     StaticText2: TStaticText;
     StaticText3: TStaticText;
     StaticText4: TStaticText;
@@ -241,7 +252,6 @@ type
     StaticText8: TStaticText;
     StaticText9: TStaticText;
     stdiskMotor: TStaticText;
-    StepOverButton: TBitBtn;
     stFileDriveA: TStaticText;
     stFileDriveB: TStaticText;
     stportoutFE: TStaticText;
@@ -292,27 +302,31 @@ type
     JoyTimer: TTimer;
     TapePlayLed: TShape;
     TapeRecLed: TShape;
-    Timer2: TTimer;
+    TimerBottomBar: TTimer;
+    TimerBottomBar1: TTimer;
+    TimerSideBar: TTimer;
     TimerRueda: TTimer;
+    TimerSideBar1: TTimer;
     TrackBar_AY: TTrackBar;
     TrackBar_Speaker: TTrackBar;
     TrackBar_Ear: TTrackBar;
     TrackBar_Mic: TTrackBar;
-    ZoomOutButton: TBitBtn;
-    ZoomInButton: TBitBtn;
     Pantalla: TBGRAGraphicControl;
-    PauseButton: TBitBtn;
-    PlayButton: TBitBtn;
-    ResetButton: TBitBtn;
-    StepButton: TBitBtn;
     BottomButtonsPanel: TPanel;
     Timer1: TTimer;
+    ZoomInButton: TBGRAResizeSpeedButton;
     procedure ACSEarBufferDone(Sender: TComponent);
     procedure ApplicationProperties1Activate(Sender: TObject);
+    procedure ApplicationProperties1Idle(Sender: TObject; var Done: Boolean);
     procedure AsciiSelectionChange(Sender: TObject);
+    procedure BFocus1Click(Sender: TObject);
+    procedure BFocus2Click(Sender: TObject);
     procedure BFocusClick(Sender: TObject);
     procedure BFocusdKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BFocusdKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure BkScrColorClick(Sender: TObject);
+    procedure BkScrColorColorPick(Sender: TObject; AColor: TColor;
+      Shift: TShiftState);
     procedure BlockGridDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure Button10Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
@@ -322,9 +336,12 @@ type
     procedure ButtonAudioClick(Sender: TObject);
     procedure ButtonBlockdown1Click(Sender: TObject);
     procedure ButtonBlockUp1Click(Sender: TObject);
+    procedure ButtonDebugClick(Sender: TObject);
     procedure ButtonDelBrkLineClick(Sender: TObject);
+    procedure ButtonKeyboardClick(Sender: TObject);
     procedure ButtonPrevMachineClick(Sender: TObject);
     procedure ButtonNextMachine2Click(Sender: TObject);
+    procedure ckaspectChange(Sender: TObject);
     procedure ckIssue2Change(Sender: TObject);
     procedure cktape_trapChange(Sender: TObject);
     procedure ckWriteEnabledChange(Sender: TObject);
@@ -556,7 +573,17 @@ type
     procedure edAsm_addrKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure FormChangeBounds(Sender: TObject);
+    procedure FormClick(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseLeave(Sender: TObject);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FullScreenButtonClick(Sender: TObject);
     procedure GroupJoystickProtocolClick(Sender: TObject);
     procedure GroupLeftJoystickClick(Sender: TObject);
     //procedure GroupMachineClick(Sender: TObject);
@@ -578,10 +605,14 @@ type
     procedure memgridEditingDone(Sender: TObject);
     procedure PanelKeyboardMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
+    procedure PantallaMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
     procedure PantallaPaint(Sender: TObject);
+    procedure PauseButton2Click(Sender: TObject);
     procedure PauseButtonClick(Sender: TObject);
-    procedure PlayButtonClick(Sender: TObject);
+    procedure PlayButton2Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
+    procedure PlayButtonClick(Sender: TObject);
     procedure rbplus2aChange(Sender: TObject);
     procedure rbPlus2gChange(Sender: TObject);
     procedure rbplus3Change(Sender: TObject);
@@ -598,13 +629,14 @@ type
       Index: Integer);
     procedure stBCcClick(Sender: TObject);
     procedure stDEcClick(Sender: TObject);
+    procedure StepButtonClick(Sender: TObject);
+    procedure StepOverButtonClick(Sender: TObject);
     procedure stHLcClick(Sender: TObject);
     procedure stRegisterClick(Sender: TObject);
-    procedure StepOverButtonClick(Sender: TObject);
+    procedure StepOverButton2Click(Sender: TObject);
     procedure stFileDriveBClick(Sender: TObject);
     procedure stROM0Click(Sender: TObject);
     procedure StatusJoystick2ChangeBounds(Sender: TObject);
-    procedure StepButtonClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
@@ -618,7 +650,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure PantallaClick(Sender: TObject);
     procedure ScreenClick(Sender: TObject);
-    procedure ButtonDebugClick(Sender: TObject);
+    procedure ButtonDebug1Click(Sender: TObject);
     procedure src_ixChange(Sender: TObject);
     procedure src_iyChange(Sender: TObject);
     procedure src_ptrChange(Sender: TObject);
@@ -633,19 +665,24 @@ type
     procedure stStackClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure JoyTimerTimer(Sender: TObject);
-    procedure Timer2Timer(Sender: TObject);
+    procedure TimerBottomBar1Timer(Sender: TObject);
+    procedure TimerBottomBarTimer(Sender: TObject);
     procedure TimerRuedaTimer(Sender: TObject);
+    procedure TimerSideBar1Timer(Sender: TObject);
+    procedure TimerSideBarTimer(Sender: TObject);
     procedure TrackBar_AYChange(Sender: TObject);
     procedure TrackBar_EarChange(Sender: TObject);
     procedure TrackBar_SpeakerChange(Sender: TObject);
+    procedure ZoomInButton2Click(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
-    procedure ZoomOutButtonClick(Sender: TObject);
+    procedure ZoomOutButton2Click(Sender: TObject);
     procedure selectjoystick(joyactive: boolean; var joysticksel: word; newsel: word);
     procedure tap_edit_controls_enabled(Enab: boolean);
+    procedure ZoomOutButtonClick(Sender: TObject);
 
   private
     timer_floppyA, timer_floppyB: byte;
-    saliendo, starting, pause, debugging, step, breakpoint_active: boolean;
+    saliendo, starting, pause, timed_pause, debugging, step, breakpoint_active: boolean;
     AYActive: boolean;
     SS_Status: Byte;
     breakpoint, mem_addr: word;
@@ -669,7 +706,11 @@ type
     DriveSelected : byte;
     mem_col: integer;
     mem_row: integer;
+    OriginalBounds: TRect;
+    OriginalWindowState: TWindowState;
+    ScreenBounds: TRect;
 
+    procedure SwitchFullScreen;
     procedure draw_screen;
     procedure RunEmulation;
     procedure fill_asm_window(addr: word);
@@ -686,6 +727,9 @@ type
     procedure set_mem;
     procedure set_stack_label;
     procedure set_memory_dump;
+    procedure ClearSpectrumScreen(scr_color: integer);
+    procedure RefreshScreen;
+    procedure maximize_window;
     procedure adjust_window_size;
     procedure Hide_Tape;
     procedure Show_Tape;
@@ -743,6 +787,9 @@ type
     procedure Eject_Drive_B;
     procedure Insert_Drive_A(FileName: String);
     procedure Insert_Drive_B(FileName: String);
+    procedure ShowMessage(msg: String);
+    procedure SetFocusToScreen;
+    procedure SwitchAspectRatio;
   public
 
   end;
@@ -753,10 +800,15 @@ const
    Visible_debug_width = 632;
    Visible_TapePanel_Width = 495;
    buttons_height = 44;
+   SideButtons_width = 27;
+   SideButtons_height = 22;
+   BottomButtons_width = 32;
+   BottomButtons_height = 28;
 
 
 var
-  sizex, sizey, scale,bak_scale: word;
+  sizex, sizey: word;
+  scale_X,scale_Y,bak_scale_X,bak_scale_Y, OriginalSX, OriginalSY: Real;
   SpecEmu: TSpecEmu;
   jj: word = 0;
   frame_counter: word = 0;
@@ -775,12 +827,20 @@ var
   use_tapetraps: boolean = false;
   tap_file_selected: boolean = false;
   block: word;
+  stX, stY: word;
+  signal_refresh: boolean = false;
 
 implementation
 
 {$R *.lfm}
 
 { TSpecEmu }
+
+procedure TSpecEmu.ShowMessage(msg: String);
+begin
+  pause_emulation;
+  Dialogs.showmessage(msg);
+end;
 
 procedure TSpecEmu.move_tap_block(uno,dos: word);
 Var
@@ -811,15 +871,15 @@ begin
   try
     // copy block from fbak(dos) to f(uno)
     seek(Fbak, Tape_info[dos].Filepos);
-    blockread(fbak,speaker_buffer,Tape_info[dos].size+2);
+    blockread(fbak,buff,Tape_info[dos].size+2);
     seek(F, Tape_info[uno].Filepos);
-    blockwrite(f,speaker_buffer,Tape_info[dos].size+2);
+    blockwrite(f,buff,Tape_info[dos].size+2);
 
     // copy block from fbak(uno) to f(uno)+size(uno)+2
     seek(Fbak, Tape_info[uno].Filepos);
-    blockread(fbak,speaker_buffer,Tape_info[uno].size+2);
+    blockread(fbak,buff,Tape_info[uno].size+2);
     seek(F, Tape_info[uno].Filepos+Tape_info[dos].size+2);
-    blockwrite(f,speaker_buffer,Tape_info[uno].size+2);
+    blockwrite(f,buff,Tape_info[uno].size+2);
 
     closefile(F);
     closefile(Fbak);
@@ -843,9 +903,9 @@ begin
     while Source_pos < filesize(F) do
     begin
       seek(f,source_pos);
-      blockread(f, speaker_buffer, sizeof(speaker_buffer), result);
+      blockread(f, buff, sizeof(buff), result);
       seek(f,dest_pos);
-      blockwrite(f,speaker_buffer,result);
+      blockwrite(f,buff,result);
       inc(source_pos, result);
       inc(dest_pos, result);
     end;
@@ -905,8 +965,8 @@ begin
       for x := pos to Tape_Blocks do
       begin
          seek(FBAK, Tape_Info[x].Filepos);
-         blockread(FBAK, speaker_buffer, Tape_info[x].Size+2);
-         blockwrite(F, speaker_buffer, Tape_info[x].Size+2);
+         blockread(FBAK, buff, Tape_info[x].Size+2);
+         blockwrite(F, buff, Tape_info[x].Size+2);
       end;
       CloseFile(FBAK);
       Truncate(F);
@@ -945,7 +1005,7 @@ begin
       closefile(F);
       Load_Tape_block := FLAG_C; // devuelve FLAG_C=0 si error
     end else Load_Tape_block := 0;
-    BFocus.setfocus;
+    SetFocusToScreen;
   except
     Showmessage('Error loading tap block.');
     Load_Tape_block := 0; // devuelve FLAG_C=0 si error
@@ -1131,27 +1191,114 @@ end;
 procedure TSpecEmu.adjust_window_size;
 var
   MainWindowWidth: Integer;
+  sx, sy: integer;
+
+  procedure resize_side_buttons;
+  var
+    w,h: integer;
+
+    function distribute(i, num, s, max: integer): integer;
+    begin
+      distribute := i*(max div (num+1))-s div 2;
+    end;
+
+  begin
+    w := SideButtons_width*sx;
+    h := SideButtons_height*sy;
+    SideButtons.Width := w+3;
+    ButtonDebug.Width := w;
+    ButtonDebug.Top := distribute(1, 5, h, height);
+    ButtonDebug.Height := h;
+    ButtonMedia.Width := w;
+    ButtonMedia.Height := h;
+    ButtonMedia.Top := distribute(2, 5, h, height);
+    ButtonKeyboard.Width := w;
+    ButtonKeyboard.Height := h;
+    ButtonKeyboard.Top := distribute(3, 5, h, height);
+    ButtonConf.Width := w;
+    ButtonConf.Height := h;
+    ButtonConf.Top := distribute(4, 5, h, height);
+    ButtonAudio.Width := w;
+    ButtonAudio.Height := h;
+    ButtonAudio.Top := distribute(5, 5, h, height);
+    w := BottomButtons_width*sx;
+    h := BottomButtons_height*sy;
+    BottomButtonsPanel.Left := 0;
+    BottomButtonsPanel.width := SideButtons.Left-5;
+    BottomButtonsPanel.Height := h;
+    PlayButton.Width := w;
+    PlayButton.Height := h;
+    PlayButton.Left := distribute(1, 7, w, BottomButtonsPanel.width);
+    PauseButton.Width := w;
+    PauseButton.Height := h;
+    PauseButton.Left := distribute(1, 7, w, BottomButtonsPanel.width);
+    ResetButton.Width := w;
+    ResetButton.Height := h;
+    ResetButton.Left := distribute(2, 7, w, BottomButtonsPanel.width);
+    StepButton.Width := w;
+    StepButton.Height := h;
+    StepButton.Left := distribute(3, 7, w, BottomButtonsPanel.width);
+    StepOverButton.Width := w;
+    StepOverButton.Height := h;
+    StepOverButton.Left := distribute(4, 7, w, BottomButtonsPanel.width);
+    ZoomOutButton.Width := w;
+    ZoomOutButton.Height := h;
+    ZoomOutButton.Left := distribute(5, 7, w, BottomButtonsPanel.width);
+    ZoomInButton.Width := w;
+    ZoomInButton.Height := h;
+    ZoomInButton.Left := distribute(6, 7, w, BottomButtonsPanel.width);
+    FullScreenButton.Width := w;
+    FullScreenButton.Height := h;
+    FullScreenButton.Left := distribute(7, 7, w, BottomButtonsPanel.width);
+  end;
+
 begin
-  sizex := sizex1x*scale+15;     //256+15=271
-  sizey := sizey1x*scale+5;
-  MainWindowWidth := 352+sizex1x*scale-sizex1x;
-  if windowState = wsNormal then begin
-    Height := sizey + buttons_height +10; // Height - sizey1x;
-    width := MainWindowWidth + AudioWidth+OptionsWidth+keyboardWidth + debug_width + TapePanelWidth+ SideButtons.width+7;// 55; // width - sizex1x;
+  sizex := round(sizex1x*scale_X+stX);     //256+15=271
+  sizey := round(sizey1x*scale_Y+stY);
+
+  if Scale_X > 2 then sx := 2
+  else sx := round(Scale_X);
+  if Scale_Y > 2 then sy := 2
+  else sy := round(Scale_Y);
+
+  MainWindowWidth := round(352+sizex1x*scale_X-sizex1x);
+  if BorderStyle = bsNone then
+  begin
+    Height := Screen.Height;
+    Width := Screen.Width;
+    pantalla.Height:=Height;
+    pantalla.Width:=Width;
+  end else begin
+    if windowState = wsNormal then begin
+      Height := sizey + BottomButtons_height*sy+2 +10; // Height - sizey1x;
+      width := MainWindowWidth + AudioWidth+OptionsWidth+keyboardWidth + debug_width + TapePanelWidth+ SideButtons_width*sx+7;// 55; // width - sizex1x;
+      pantalla.Height:=Height+stX*2;
+      pantalla.Width:=Height+stY*2;
+    end;
+    pantalla.width := sizex+stX;
+    pantalla.Height:= sizey+stY;
   end;
   SideButtons.Height := Height-1;
   SideButtons.Left := MainWindowWidth;
-  pantalla.width := sizex+17;   //271+38= 288
-  pantalla.Height:= sizey+15;
-  OptionsPanel.Left := sizex + 60;
-  DebugPanel.Left := sizex + 60;
-  TapePanel.Left := sizex + 60;
-  AudioPanel.Left := sizex + 60;
+  if (width > screen.width) or ((windowState = wsMaximized) and not options.AspectRatio) then
+  begin
+    OptionsPanel.Left := SideButtons.Left - OptionsWidth;
+    DebugPanel.Left := SideButtons.Left - debug_width;
+    TapePanel.Left := SideButtons.Left - TapePanelWidth;
+    AudioPanel.Left := SideButtons.Left - AudioWidth;
+    PanelKeyboard.Left := SideButtons.Left - keyboardWidth;
+  end else begin
+    OptionsPanel.Left := SideButtons.Left + SideButtons_width*sx+3;
+    DebugPanel.Left := SideButtons.Left + SideButtons_width*sx+3;
+    TapePanel.Left := SideButtons.Left + SideButtons_width*sx+3;
+    AudioPanel.Left := SideButtons.Left + SideButtons_width*sx+3;
+    PanelKeyboard.Left := SideButtons.Left + SideButtons_width*sx+3;
+  end;
   AudioPanel.Top := 2;
-  PanelKeyboard.Left := sizex + 60;
   PanelKeyboard.Top := 2;
-  BottomButtonsPanel.Top := sizey + 15;
-  BottomButtonsPanel.width := pantalla.width;
+  BottomButtonsPanel.Top := sizey + 8;
+  resize_side_buttons;
+  //BottomButtonsPanel.width := SideButtons.Left-2;
 end;
 
 procedure TSpecEmu.DumpSourceSelectionChanged(Sender: TObject);
@@ -1178,10 +1325,9 @@ begin
      set_mem;
 end;
 
-procedure TSpecEmu.PauseButtonClick(Sender: TObject);
+procedure TSpecEmu.PlayButton2Click(Sender: TObject);
 begin
-  start_debug;
-  draw_screen;
+
 end;
 
 function TSpecEmu.FisicalJoyUsed: boolean;
@@ -1223,15 +1369,147 @@ begin
   Keyboard[fila] := Keyboard[fila] and not(%000000001 << bit);
 end;
 
+procedure TSpecEmu.ClearSpectrumScreen(scr_color: integer);
+begin
+  pantalla.color := bkScrColor.Colors[scr_color];
+  pantalla.ColorOpacity:=255;
+  pantalla.canvas.Brush.Color:=pantalla.color;
+  pantalla.Canvas.FillRect(0,0,pantalla.width,pantalla.height);
+end;
+
+procedure TSpecEmu.RefreshScreen;
+var
+  sx, sy: real;
+  w, h: word;
+  c: TColor;
+begin
+  if BorderStyle = bsNone then begin
+    // To full screen
+    sidebuttons.visible := false;
+
+    BorderStyle := bsNone;
+    BoundsRect := Screen.MonitorFromWindow(Handle).BoundsRect;
+    stX := 0;
+    stY := 0;
+    w := Screen.Width;
+    h := Screen.height;
+    pantalla.width := w;
+    pantalla.Height := h;
+    clearSpectrumScreen(options.ScrColor);
+    sx := w / sizex1x;
+    sy := h / sizey1x;
+    if ckAspect.checked then
+    begin
+      if sx < sy then sy := sx
+      else sx := sy;
+      stX := round((Screen.Width-sizex1x*sx) / 2);
+    end;
+    scale_X := sx;
+    scale_Y := sy;
+    HideAll;
+    adjust_window_size;
+    //pantalla.canvas.Brush.Color:=clWhite;
+    //pantalla.Canvas.FillRect(0,0,pantalla.Width,pantalla.height);
+  end else begin
+    // From full screen
+    pantalla.color := bkScrColor.Colors[options.ScrColor];
+    pantalla.ColorOpacity:=128;
+    stX := 15;
+    stY := 10;
+    sidebuttons.visible := true;
+    //bottomButtonsPanel.visible := true;
+    BorderStyle := bsSizeable;
+    if WindowState = wsMaximized then
+      maximize_window;
+    adjust_window_size;
+  end;
+end;
+
+procedure TSpecEmu.SwitchFullScreen;
+var
+  sx, sy: real;
+  w, h: word;
+begin
+  if BorderStyle <> bsNone then begin
+    // To full screen
+    sidebuttons.visible := false;
+    //bottomButtonsPanel.visible := false;
+    OriginalWindowState := WindowState;
+    OriginalBounds := BoundsRect;
+    OriginalSX := Scale_X;
+    OriginalSY := Scale_Y;
+
+    BorderStyle := bsNone;
+    BoundsRect := Screen.MonitorFromWindow(Handle).BoundsRect;
+    stX := 0;
+    stY := 0;
+    w := Screen.Width;
+    h := Screen.height;
+    pantalla.width := w;
+    pantalla.Height := h;
+    //pantalla.color := clBlack;
+    //pantalla.ColorOpacity:=255;
+    //pantalla.canvas.Brush.Color:=clBlack;
+    //pantalla.Canvas.FillRect(0,0,w,h);
+    clearSpectrumScreen(options.ScrColor);
+    sx := w / sizex1x;
+    sy := h / sizey1x;
+    if ckAspect.checked then
+    begin
+      if sx < sy then sy := sx
+      else sx := sy;
+      stX := round((Screen.Width-sizex1x*sx) / 2);
+    end;
+    scale_X := sx;
+    scale_Y := sy;
+    HideAll;
+    BottomButtonsPanel.Visible := false;
+    SideButtons.Visible := false;
+    adjust_window_size;
+  end else begin
+    // From full screen
+    pantalla.color := clWhite;
+    pantalla.ColorOpacity:=128;
+    stX := 15;
+    stY := 10;
+    sidebuttons.visible := true;
+    //bottomButtonsPanel.visible := true;
+    BorderStyle := bsSizeable;
+    if OriginalWindowState = wsMaximized then
+    begin
+      WindowState := wsMaximized;
+      maximize_window;
+      //sx := (width - debug_width-stX-sideButtons.width) / sizex1x;
+      //sy := (height -stY - bottomButtonsPanel.Height) / sizey1x;
+      //if ckAspect.checked then
+      //begin
+      //  if sx < sy then sy := sx
+      //  else sx := sy;
+      //end;
+      //scale_X := sx;
+      //scale_Y := sy;
+    end
+    else begin
+      BoundsRect := OriginalBounds;
+      Scale_X := OriginalSX;
+      Scale_Y := OriginalSY;
+    end;
+    BottomButtonsPanel.Visible := true;
+    SideButtons.Visible := true;
+    adjust_window_size;
+  end;
+end;
+
 procedure TSpecEmu.BFocusdKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 
   begin
        //if Key = VK_RETURN then
        //   enter_pulsado := true;
-       if (Activecontrol = EdBreak) or (ActiveControl = EdMem) then exit;
+       if not BFocus.Focused then exit;
        case key of
-            VK_F8    : step := true;
+            //VK_F8    : step := true;
+            //VK_F11   : SwitchFullScreen;
             VK_LEFT  : if not FisicalJoyUsed then
                        begin
                          setkeyb(0,0);
@@ -1334,19 +1612,35 @@ procedure TSpecEmu.BFocusdKeyDown(Sender: TObject; var Key: Word;
 
 end;
 
-procedure TSpecEmu.BFocusClick(Sender: TObject);
-begin
-  refresh_system;
-end;
-
 procedure TSpecEmu.AsciiSelectionChange(Sender: TObject);
 begin
   set_memory_dump;
 end;
 
+procedure TSpecEmu.BFocus1Click(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.BFocus2Click(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.BFocusClick(Sender: TObject);
+begin
+  refresh_system;
+end;
+
 procedure TSpecEmu.ApplicationProperties1Activate(Sender: TObject);
 begin
   clear_keyboard;
+end;
+
+procedure TSpecEmu.ApplicationProperties1Idle(Sender: TObject; var Done: Boolean
+  );
+begin
+ a := a;
 end;
 
 procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
@@ -1460,6 +1754,18 @@ procedure TSpecEmu.BFocusdKeyUp(Sender: TObject; var Key: Word;
     key := 0;
 end;
 
+procedure TSpecEmu.BkScrColorClick(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.BkScrColorColorPick(Sender: TObject; AColor: TColor;
+  Shift: TShiftState);
+begin
+  options.ScrColor:=BkScrColor.PickedIndex;
+  RefreshScreen;
+end;
+
 procedure TSpecEmu.BlockGridDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
 
@@ -1545,12 +1851,35 @@ begin
   fill_asm_window(cur_asm_addr);
 end;
 
+procedure TSpecEmu.ButtonDebugClick(Sender: TObject);
+begin
+  if DebugPanel.Visible then begin
+    HideAll;
+  end else begin
+    HideAll;
+    Show_Debugger;
+  end;
+  adjust_window_size;
+end;
+
 procedure TSpecEmu.ButtonDelBrkLineClick(Sender: TObject);
 begin
   sgBreakpoints.InsertColRow(false,sgBreakpoints.RowCount);
   //Rows.Add('');
   //InsertColRow(false,sg);
 end;
+
+procedure TSpecEmu.ButtonKeyboardClick(Sender: TObject);
+begin
+  if PanelKeyboard.Visible then begin
+    HideAll;
+  end else begin
+    HideAll;
+    show_keyboard;
+  end;
+  adjust_window_size;
+end;
+
 
 procedure TSpecEmu.updateROMs;
 begin
@@ -1579,6 +1908,12 @@ begin
   ResetButtonClick(Sender);
 end;
 
+procedure TSpecEmu.ckaspectChange(Sender: TObject);
+begin
+  Options.AspectRatio := ckAspect.Checked;
+  RefreshScreen;
+end;
+
 procedure TSpecEmu.ckIssue2Change(Sender: TObject);
 begin
   Options.Issue2 := ckIssue2.Checked;
@@ -1605,13 +1940,16 @@ end;
 
 procedure TSpecEmu.dispCompPaint(Sender: TObject);
 begin
-  grcomputer[options.machine].Draw(dispComp.Canvas,0,0,True);
+  //grcomputer[options.machine].Draw(dispComp.Canvas,0,0,True);
+  dispComp.Canvas.StretchDraw(rect(0,0,dispComp.width,dispComp.height),grcomputer[options.machine].Bitmap);
+  //pantalla.canvas.StretchDraw(rect(stX,stY,round(sizex1x*scale_X+stX-1),round(sizey1x*scale_Y+stY-1)),bgra.Bitmap);
 end;
 
 procedure TSpecEmu.Button4Click(Sender: TObject);
 var
    FF: File;
 begin
+  pause_emulation;
   UpdateOptions;
   Try
     AssignFile(FF,'OPTIONS.CFG');
@@ -1712,6 +2050,16 @@ begin
   ButtonDeleteblock.Enabled := Enab;
 end;
 
+procedure TSpecEmu.ZoomOutButtonClick(Sender: TObject);
+begin
+  pause_emulation;
+  if (BorderStyle <> bsNone) and (scale_X > 1) and (WindowState = wsNormal) then begin
+    scale_X := scale_X - 1;
+    scale_Y := scale_Y - 1;
+    adjust_window_size;
+  end;
+end;
+
 procedure TSpecEmu.load_tap_file(FileName: String);
 var
   Reply, BoxStyle: Integer;
@@ -1721,8 +2069,10 @@ begin
   OpenTapFileDialog.FileName := FileName;
   brueda.visible := true;
   brueda1.visible := true;
-  grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
-  grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+  //grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
+  //grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+  brueda.Canvas.StretchDraw(rect(0,0,brueda.width,brueda.height),grrueda[cont_rueda].Bitmap);
+  brueda1.Canvas.StretchDraw(rect(0,0,brueda1.width,brueda1.height),grrueda[cont_rueda].Bitmap);
   TapeFileName.Caption := ExtractFileName(OpenTapFileDialog.FileName);
 
   TapeImage.Visible := true;
@@ -1730,6 +2080,7 @@ begin
 
   if not FileExists(OpenTapFileDialog.FileName) then
   begin
+    pause_emulation;
     BoxStyle := MB_ICONQUESTION + MB_YESNO;
     Reply := Application.MessageBox('CREATE A EMPTY TAP FILE?', 'NEW TAP FILE', BoxStyle);
     if Reply = IDYES then
@@ -1773,7 +2124,7 @@ begin
   if OpenTapFileDialog.Execute then
     load_tap_file(OpenTapFileDialog.FileName);
   use_tapetraps := cktape_trap.checked and tap_file_selected;
-  restart_emulation;
+  //restart_emulation;
 end;
 
 procedure TSpecEmu.ButtonEjectMouseDown(Sender: TObject; Button: TMouseButton;
@@ -1826,7 +2177,7 @@ begin
   end else begin
     Eject_drive_B;
   end;
-  restart_emulation;
+  //restart_emulation;
 end;
 
 procedure TSpecemu.read_dsk_file(drive: byte);
@@ -1958,7 +2309,7 @@ begin
       end;
     end;
   end else Eject_Drive_A;
-  restart_emulation;
+  //restart_emulation;
 end;
 
 procedure TSpecEmu.ButtonFWDClick(Sender: TObject);
@@ -1998,8 +2349,10 @@ end;
 procedure TSpecEmu.ButtonPlayClick(Sender: TObject);
 begin
   if TapeImage.Visible then begin
-    grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
-    grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+    //grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
+    //grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+    brueda.Canvas.StretchDraw(rect(0,0,brueda.width,brueda.height),grrueda[cont_rueda].Bitmap);
+    brueda1.Canvas.StretchDraw(rect(0,0,brueda1.width,brueda1.height),grrueda[cont_rueda].Bitmap);
     ButtonPlayPressed.Visible := true;
     ButtonPlay.Visible := false;
     Set_tape_leds;
@@ -2019,6 +2372,7 @@ end;
 
 procedure TSpecEmu.ButtonDeleteBlockClick(Sender: TObject);
 begin
+  pause_emulation;
   if (blockgrid.Row <= Tape_Blocks) and
     (Application.MessageBox('Are you sure?', 'Delete current tap block',
                                 MB_ICONQUESTION + MB_YESNO) = IDYES) then
@@ -2053,6 +2407,7 @@ var
 begin
    if disk_modified[drive] then
    begin
+     pause_emulation;
      S := 'drive '+ chr(ord('A')+drive) + ' modified';
      reply := Application.MessageBox('Update DSK file?', PChar(S),
                               MB_ICONQUESTION + MB_YESNO) = IDYES;
@@ -2104,8 +2459,8 @@ begin
     loadSnapshotfile(OpenSnaFileDialog.FileName);
     refresh_system;
   end;
-  restart_emulation;
-  BFocus.setfocus;
+  //restart_emulation;
+  SetFocusToScreen;
 end;
 
 procedure TSpecEmu.ButtonSnapSaveClick(Sender: TObject);
@@ -2113,17 +2468,16 @@ var
    reply: boolean;
 begin
   pause_emulation;
-   if SaveSnaFileDialog.Execute then
-   begin
-     reply := true;
-     if fileexists(SaveSnaFileDialog.FileName) then
-        reply := Application.MessageBox('Are you sure?', 'overwrite existing file',
-                                 MB_ICONQUESTION + MB_YESNO) = IDYES;
-     if reply = true then
-        SaveSnapshotfile(SaveSnaFileDialog.FileName);
-   end;
-   restart_emulation;
-   BFocus.setfocus;
+  if SaveSnaFileDialog.Execute then
+  begin
+    reply := true;
+    if fileexists(SaveSnaFileDialog.FileName) then
+      reply := Application.MessageBox('Are you sure?', 'overwrite existing file',
+                               MB_ICONQUESTION + MB_YESNO) = IDYES;
+    if reply = true then
+      SaveSnapshotfile(SaveSnaFileDialog.FileName);
+  end;
+  SetFocusToScreen;
 end;
 
 procedure TSpecEmu.ButtonTapeFirstClick(Sender: TObject);
@@ -2300,7 +2654,7 @@ procedure TSpecEmu.Button_dosMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   setkeyb(3,1);
-  BFocus.setfocus;
+  SetFocusToScreen;
 end;
 
 procedure TSpecEmu.Button_dosMouseUp(Sender: TObject; Button: TMouseButton;
@@ -2736,7 +3090,7 @@ begin
   AYCHA.enabled := ckAYSound.Checked;
   AYCHB.enabled := false;
   AYCHC.enabled := false;
-  AudioOut.Resume
+  //restart_emulation;
 end;
 
 procedure TSpecEmu.ckDiskA_protChange(Sender: TObject);
@@ -2826,6 +3180,11 @@ begin
   timed_pause_emulation;
 end;
 
+procedure TSpecEmu.FormClick(Sender: TObject);
+begin
+
+end;
+
 procedure TSpecEmu.FormDropFiles(Sender: TObject;
   const FileNames: array of String);
 var
@@ -2867,6 +3226,7 @@ begin
             question := 'OVERWRITE '+ OpenTapFileDialog.Filename + '?';
             txt := StrAlloc(Length(question) + 1);
             StrPCopy(txt, question);
+            pause_emulation;
             if Application.MessageBox(txt, 'FILE EXISTS', MB_ICONQUESTION + MB_YESNO)=IDYES then
             begin
               if (ext = '.BAS') then
@@ -2914,7 +3274,97 @@ begin
       loadSnapshotfile(FileName);
     end;
   end;
-  restart_emulation;
+  //restart_emulation;
+end;
+
+procedure TSpecEmu.SwitchAspectRatio;
+begin
+  ckAspect.Checked := not ckAspect.Checked;
+  options.AspectRatio:= ckAspect.checked;
+  RefreshScreen;
+  if debugging then
+  begin
+    pantalla.ColorOpacity:=255;
+    //clearSpectrumScreen(options.ScrColor);
+    draw_screen;
+  end;
+end;
+
+
+procedure TSpecEmu.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  case key of
+    VK_NEXT  : ZoomOutButtonClick(self);
+    VK_PRIOR : ZoomInButtonClick(self);
+    VK_F6    : SwitchAspectRatio;
+    VK_F7    : StepOverButtonclick(self);
+    VK_F8    : step := true;
+    VK_F9    : begin
+      if debugging then PlayButtonClick(self)
+      else begin
+        start_debug;
+        if BorderStyle = bsNone then
+        begin
+          pantalla.ColorOpacity:=255;
+          draw_screen;
+        end;
+      end;
+      SetFocusToScreen;
+    end;
+    VK_F11   : begin
+      signal_refresh := true;
+      SwitchFullScreen;
+      if (BorderStyle = bsNone) and debugging then
+      begin
+        //clearSpectrumScreen(options.ScrColor);
+        draw_screen;
+        pantalla.ColorOpacity:=255;
+      end;
+      SetFocusToScreen;
+    end;
+  end;
+  if (BorderStyle = bsNone) or Bfocus.focused then
+  begin
+    BFocusdKeyDown(Sender, Key, Shift);
+  end;
+end;
+
+procedure TSpecEmu.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
+  );
+begin
+  if (BorderStyle = bsNone) or Bfocus.focused then
+  begin
+    BFocusdKeyUp(Sender, Key, Shift);
+  end;
+end;
+
+procedure TSpecEmu.FormMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  a:=a;
+end;
+
+procedure TSpecEmu.FormMouseLeave(Sender: TObject);
+begin
+
+end;
+
+procedure TSpecEmu.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+end;
+
+procedure TSpecEmu.FormMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  a:=a;
+end;
+
+procedure TSpecEmu.FullScreenButtonClick(Sender: TObject);
+begin
+  SwitchFullScreen;
+  SetFocusToScreen;
 end;
 
 procedure TSpecEmu.GroupJoystickProtocolClick(Sender: TObject);
@@ -3109,6 +3559,11 @@ begin
   blockgrid.cells[0,blockgrid.Row] := '';
 end;
 
+procedure TSpecEmu.ButtonTap1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TSpecEmu.Set_tape_leds;
 begin
   TapeRecLed.Visible := ButtonPlayPressed.Visible and ButtonRecPressed.Visible;
@@ -3131,35 +3586,38 @@ begin
   Set_tape_leds;
 end;
 
-procedure TSpecEmu.ButtonTap1Click(Sender: TObject);
+procedure TSpecEmu.maximize_window;
+var
+  sx, sy: Real;
 begin
-  if PanelKeyboard.Visible then begin
-    HideAll;
-  end else begin
-    HideAll;
-    show_keyboard;
+  //bak_scale_X := scale_X;
+  //bak_scale_Y := scale_Y;
+  sx := (width - debug_width-stX*2-SideButtons.width) / sizex1x;
+  sy := (height -stY*2 - bottomButtonsPanel.Height) / sizey1x;
+  if ckAspect.checked then
+  begin
+    if sx < sy then sy := sx
+    else sx := sy;
   end;
-  adjust_window_size;
+  scale_X := sx;
+  scale_Y := sy;
 end;
 
-
 procedure TSpecEmu.FormWindowStateChange(Sender: TObject);
-var
-  sx, sy: integer;
 begin
-     if (WindowState=wsMaximized) then begin
-//        bak_scale := scale;
-        sx := (width - debug_width-15) div sizex1x;
-        sy := (height -5) div sizey1x;
-        if sx < sy then scale := sx
-        else scale := sy;
-        adjust_window_size;
-//        draw_screen;
-     end else if (WindowState=wsNormal) then begin
-         scale := bak_scale;
-         adjust_window_size;
-         bak_scale := scale;
-     end;
+  if (WindowState=wsMaximized) then begin
+    //        bak_scale := scale;
+    maximize_window;
+    adjust_window_size;
+    //        draw_screen;
+  end else if (WindowState=wsNormal) then begin
+    scale_X := bak_scale_X;
+    scale_Y := bak_scale_Y;
+    adjust_window_size;
+    bak_scale_X := scale_X;
+    bak_scale_Y := scale_Y;
+  end;
+  signal_refresh := true;
 end;
 
 procedure TSpecEmu.Label18Click(Sender: TObject);
@@ -3616,14 +4074,54 @@ begin
 
 end;
 
+procedure TSpecEmu.PantallaMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  //if (BorderStyle = bsNone) and (y < (screen.height -10)) then
+  //begin
+  //  TimerBottomBar1.Enabled := true;
+  //  TimerBottomBar.Enabled := false;
+  //end
+  //else
+  //  TimerBottomBar1.Enabled := false;
+  //if (BorderStyle = bsNone) and (y > (screen.height -10)) then
+  //begin
+  //  TimerBottomBar.Enabled := true;
+  //  TimerBottomBar1.Enabled := false;
+  //end
+  //else
+  //  TimerBottomBar.Enabled := false;
+  //
+  //if (BorderStyle = bsNone) and (x < (screen.width -10)) then
+  //begin
+  //  TimerSideBar1.Enabled := true;
+  //  TimerSideBar.Enabled := false;
+  //end
+  //else
+  //  TimerSideBar1.Enabled := false;
+  //if (BorderStyle = bsNone) and (x > (screen.width -10)) then
+  //begin
+  //  TimerSideBar.Enabled := true;
+  //  TimerSideBar1.Enabled := false;
+  //end
+  //else
+  //  TimerSideBar.Enabled := false;
+end;
+
 procedure TSpecEmu.PantallaPaint(Sender: TObject);
 begin
   draw_screen;
 end;
 
-procedure TSpecEmu.PlayButtonClick(Sender: TObject);
+procedure TSpecEmu.PauseButton2Click(Sender: TObject);
 begin
-  stop_debug;
+
+end;
+
+procedure TSpecEmu.PauseButtonClick(Sender: TObject);
+begin
+  start_debug;
+  draw_screen;
 end;
 
 procedure TSpecEmu.restart_emulation;
@@ -3632,7 +4130,7 @@ begin
   begin
     AudioOut.resume();
     pause := false;
-    stPaused.visible := false;
+    //stPaused.visible := false;
   end;
 end;
 
@@ -3655,13 +4153,11 @@ procedure TSpecEmu.pause_emulation;
 begin
   AudioOut.pause();
   pause := true;
-  stPaused.visible := true;
+  //stPaused.visible := true;
 end;
 
 procedure TSpecEmu.timed_pause_emulation;
 begin
-  Timer2.enabled := false;
-  Timer2.enabled := true;
   AudioOut.pause();
   pause := true;
 end;
@@ -3678,7 +4174,7 @@ begin
   refresh_register_labels;
   DebugPanel.Enabled := true;
   StepButton.Enabled := true;
-  stepbutton.SetFocus;
+  //StepButton.SetFocus;
   debugging := true;
   step_over_break := false;
   clear_keyboard;
@@ -3687,6 +4183,11 @@ end;
 procedure TSpecEmu.BitBtn3Click(Sender: TObject);
 begin
 
+end;
+
+procedure TSpecEmu.PlayButtonClick(Sender: TObject);
+begin
+  stop_debug;
 end;
 
 procedure TSpecEmu.UpdateJoystickPanels;
@@ -3860,7 +4361,7 @@ begin
     draw_screen;
     refresh_register_labels;
   end;
-  BFocus.setfocus;
+  SetFocusToScreen;
 end;
 
 procedure TSpecEmu.sgBreakpointsButtonClick(Sender: TObject; aCol, aRow: Integer
@@ -4025,6 +4526,31 @@ begin
   set_mem;
 end;
 
+procedure TSpecEmu.StepButtonClick(Sender: TObject);
+begin
+  step := true;
+end;
+
+procedure TSpecEmu.StepOverButtonClick(Sender: TObject);
+var
+  S: string;
+  len: byte;
+  inst: string;
+begin
+  if pause then
+  begin
+    step_over_break := true;
+    S := decode_instruction(pc);
+    len := get_instruction_len(s);
+    inst := get_instruction(s);
+    step_over_true := pc + len;
+    empezando := true;
+    stop_debug;
+    clear_keyboard;
+  end;
+  SetFocusToScreen;
+end;
+
 procedure TSpecEmu.stHLcClick(Sender: TObject);
 var
    v: word;
@@ -4076,24 +4602,9 @@ begin
   refresh_register_labels;
 end;
 
-procedure TSpecEmu.StepOverButtonClick(Sender: TObject);
-var
-  S: string;
-  len: byte;
-  inst: string;
+procedure TSpecEmu.StepOverButton2Click(Sender: TObject);
 begin
-  if pause then
-  begin
-    step_over_break := true;
-    S := decode_instruction(pc);
-    len := get_instruction_len(s);
-    inst := get_instruction(s);
-    step_over_true := pc + len;
-    empezando := true;
-    stop_debug;
-    clear_keyboard;
-  end;
-  BFocus.setfocus;
+
 end;
 
 procedure TSpecEmu.stFileDriveBClick(Sender: TObject);
@@ -4110,17 +4621,12 @@ begin
     stROM0.Caption := ExtractFileName(odROM.FileName);
     options.ROMFilename[ord(options.machine),0] := odROM.FileName;
   end;
-  restart_emulation;
+  //restart_emulation;
 end;
 
 procedure TSpecEmu.StatusJoystick2ChangeBounds(Sender: TObject);
 begin
 
-end;
-
-procedure TSpecEmu.StepButtonClick(Sender: TObject);
-begin
-  step := true;
 end;
 
 procedure TSpecEmu.refresh_system;
@@ -4254,12 +4760,21 @@ begin
   prev_sound_bytes := sound_bytes;
   status_saved := false;
   while (not saliendo) do begin
+    if signal_refresh then
+    begin
+      SwitchAspectRatio;
+      SwitchAspectRatio;
+      signal_refresh := false;
+    end;
     if not pause and
       (((breakpoint_active and (breakpoint = pc)) or (grid_breakpoint_active and test_breakpoints)) and not empezando) or
       (step_over_break and (step_over_true = pc) and not empezando)
       then
     begin
       start_debug;
+    end else if pause and not debugging then
+    begin
+      restart_emulation;
     end;
     if not pause or step or step_over_break then
     begin
@@ -4388,8 +4903,8 @@ begin
     repaint_screen := screen_tstates_reached and (sound_bytes <= 2048);//screen_timer.Elapsed >= 0.020;
     if screen_tstates_reached and not repaint_screen and not yadormido then
     begin
-         sleep(5);
-         yadormido := true;
+      sleep(5);
+      yadormido := true;
     end;
     if disk_motor[0] then
        led_motor_on[0] := true;
@@ -4455,6 +4970,7 @@ begin
   stROM2.caption := ExtractFileName(options.ROMFileName[ord(options.machine),2]);
   stROM3.caption := ExtractFileName(options.ROMFileName[ord(options.machine),3]);
   ckIssue2.checked := options.Issue2;
+  ckAspect.Checked := Options.AspectRatio;
   Trackbar_AY.Position := options.volume_AY;
   Trackbar_ear.Position := options.volume_ear;
   Trackbar_speaker.Position := options.volume_speaker;
@@ -4524,6 +5040,8 @@ begin
   options.volume_ear:=100;
   options.volume_speaker:=100;
   options.volume_mic:=100;
+  options.AspectRatio:=true;
+  options.ScrColor:=clWhite;
 
   UpdateFromOptions;
 
@@ -4582,8 +5100,20 @@ begin
   UpdateJoystickPanels;
 end;
 
+procedure TSpecEmu.SetFocusToScreen;
+begin
+  if (BorderStyle <> bsNone) then
+  begin
+    BFocus.SetFocus;
+  end;
+end;
+
 procedure TSpecEmu.FormActivate(Sender: TObject);
 begin
+
+  stX := 15;
+  stY := 10;
+
   mem_col := -1;
   mem_row := -1;
 
@@ -4613,6 +5143,9 @@ begin
   soundpos_write := sound_bytes;
 
   ReadOptions('OPTIONS.CFG');
+  volume_AY:=calcVolumen(trackbar_AY.position);
+  volume_ear := calcVolumen(trackbar_ear.position);
+  volume_speaker := calcVolumen(trackbar_Speaker.Position,50,100);
   ReadROM;
 
   ButtonUp.OnKeyPress:=@UserJoyKeypress;
@@ -4654,6 +5187,8 @@ begin
   grledapagado.Draw(bDriveALed.Canvas,0,0,True);
 
   tap_edit_controls_enabled(false);
+
+  bkScrColor.PickedIndex:=options.ScrColor;
 end;
 
 procedure TSpecEmu.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -4671,16 +5206,18 @@ begin
      debugging := false;
      step := false;
      mem_addr := 0;
-     scale := 1;
-     bak_scale := scale;
-     sizex := sizex1x*scale+15;
-     sizey := sizey1x*scale+5;
+     scale_X := 1;
+     scale_Y := 1;
+     bak_scale_X := scale_X;
+     bak_scale_Y := scale_Y;
+     sizex := round(sizex1x*scale_X+15);
+     sizey := round(sizey1x*scale_Y+5);
      SS_Status := 0;
 end;
 
 procedure TSpecEmu.PantallaClick(Sender: TObject);
 begin
-  BFocus.SetFocus;
+  SetFocusToScreen;
   draw_screen;
   clear_keyboard;
 end;
@@ -4690,15 +5227,9 @@ begin
 
 end;
 
-procedure TSpecEmu.ButtonDebugClick(Sender: TObject);
+procedure TSpecEmu.ButtonDebug1Click(Sender: TObject);
 begin
-  if DebugPanel.Visible then begin
-    HideAll;
-  end else begin
-    HideAll;
-    Show_Debugger;
-  end;
-  adjust_window_size;
+
 end;
 
 procedure TSpecEmu.src_ixChange(Sender: TObject);
@@ -5039,22 +5570,31 @@ begin
   end;
 end;
 
-procedure TSpecEmu.Timer2Timer(Sender: TObject);
+procedure TSpecEmu.TimerBottomBar1Timer(Sender: TObject);
 begin
-  if not debugging then
-  begin
-    Audioout.Resume();
-    pause := false;
-  end;
-  Timer2.Enabled := false;
+  BottomButtonsPanel.Top := sizey + 8;
+end;
+
+procedure TSpecEmu.TimerBottomBarTimer(Sender: TObject);
+begin
+  BottomButtonsPanel.Top := screen.Height-BottomButtonsPanel.Height;
+  //if not debugging then
+  //begin
+  //  restart_emulation;
+  //  //Audioout.Resume();
+  //  //pause := false;
+  //end;
+  //TimerBottomBar.Enabled := false;
 end;
 
 procedure TSpecEmu.TimerRuedaTimer(Sender: TObject);
 begin
   if TapeImage.Visible then
   begin
-    grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
-    grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+    //grrueda[cont_rueda].Draw(brueda.Canvas,0,0,True);
+    //grrueda[cont_rueda].Draw(brueda1.Canvas,0,0,True);
+    brueda.Canvas.StretchDraw(rect(0,0,brueda.width,brueda.height),grrueda[cont_rueda].Bitmap);
+    brueda1.Canvas.StretchDraw(rect(0,0,brueda1.width,brueda1.height),grrueda[cont_rueda].Bitmap);
   end else begin
   end;
   if TapePlayLed.Visible or TapeRecLed.Visible then
@@ -5064,6 +5604,18 @@ begin
     else
       cont_rueda := 0;
   end;
+end;
+
+procedure TSpecEmu.TimerSideBar1Timer(Sender: TObject);
+begin
+  sidebuttons.visible := false;
+  SideButtons.Left := round(352+sizex1x*scale_X-sizex1x);
+end;
+
+procedure TSpecEmu.TimerSideBarTimer(Sender: TObject);
+begin
+  sidebuttons.visible := true;
+  SideButtons.Left := screen.Width-SideButtons.Width;
 end;
 
 procedure TSpecEmu.TrackBar_AYChange(Sender: TObject);
@@ -5081,21 +5633,29 @@ begin
   volume_speaker := calcVolumen(trackbar_Speaker.Position,50,100);
 end;
 
-procedure TSpecEmu.ZoomInButtonClick(Sender: TObject);
+procedure TSpecEmu.ZoomInButton2Click(Sender: TObject);
 begin
-    if (scale < 10) and (WindowState = wsNormal) then begin
-      inc(scale);
-      adjust_window_size;
-    end;
+
 end;
 
-procedure TSpecEmu.ZoomOutButtonClick(Sender: TObject);
+procedure TSpecEmu.ZoomInButtonClick(Sender: TObject);
+var
+   new_height: word;
 begin
-  if (scale > 1) and (WindowState = wsNormal) then begin
-    dec(scale);
+  new_height := round((scale_Y+1)*sizey1x);
+  pause_emulation;
+  if (BorderStyle <> bsNone) and (new_height < screen.height) and (WindowState = wsNormal) then begin
+    scale_X := scale_X + 1;
+    scale_Y := scale_Y + 1;
     adjust_window_size;
   end;
 end;
+
+procedure TSpecEmu.ZoomOutButton2Click(Sender: TObject);
+begin
+
+end;
+
 
 procedure TSpecEmu.draw_screen;
   const
@@ -5130,10 +5690,12 @@ procedure TSpecEmu.draw_screen;
   var
     x, y, curline: Integer;
     bgra: TBGRABitmap;
+    bgrac: TBGRACustomBitmap;
     // bitmap: TBitmap;
     p: PBGRAPixel;
     v, bit, attr_offset: byte;
     pmem, pattr: word;
+    desp: byte;
 
     function getColor(attr: byte; pixel: boolean): byte;
     begin
@@ -5176,17 +5738,18 @@ procedure TSpecEmu.draw_screen;
       getBlueComponent := blue_comp[color];
     end;
 
-    procedure linea_borde(pixels: word);
+    procedure linea_borde(start,pixels: word);
     var
        x: word;
     begin
-      for x := 0 to pixels-1 do
+      inc(p,start);
+      for x := start to pixels-1 do
       begin
-           v := bcolor[curline];{border_color;}
-           p^.red:= getRedComponent(v);
-           p^.blue:= getBlueComponent(v);
-           p^.green:= getGreenComponent(v);
-           Inc(p);
+        v := bcolor[curline];{border_color;}
+        p^.red:= getRedComponent(v);
+        p^.blue:= getBlueComponent(v);
+        p^.green:= getGreenComponent(v);
+        Inc(p);
       end;
     end;
 
@@ -5200,64 +5763,116 @@ procedure TSpecEmu.draw_screen;
       rdscreen := memp[5,addr and $3FFF];
     end;
 
+    procedure show_pause;
+    var
+      shader: TPhongShading;
+      renderer: TBGRATextEffectFontRenderer;
+    begin
+      //if (BorderStyle = bsNone) then
+      //begin
+        shader := TPhongShading.Create;
+        renderer := TBGRATextEffectFontRenderer.Create(shader,True);
+        bgra.FontRenderer := renderer;
+        renderer.ShadowVisible := True;
+        bgra.FontFullHeight := 5+round(5*Scale_Y);
+        bgra.FontQuality:= fqFineAntialiasing;
+        bgra.TextOut(120,1,'PAUSE',CSSRed);
+    //  end {else stPaused.visible := true};
+    end;
+
 begin
-    inc(frame);
-    bgra := TBGRABitmap.Create(sizex1x, sizey1x, BGRABlack);
-    p := bgra.Data;
-    x := 0;
-    y := 0;
-    bit := 128;
-    pattr := 16384+6144;
-    attr_offset := 0;
-    curline := 0;
+  if debugging and (BorderStyle <> bsNone)then
+    pantalla.ColorOpacity:=64
+  else begin
+    pantalla.ColorOpacity:=255;
+    //stPaused.visible := false;
+  end;
+  inc(frame);
+  bgra := TBGRABitmap.Create(sizex1x, sizey1x, BGRABlack);
+  p := bgra.Data;
+  x := 0;
+  y := 0;
+  bit := 128;
+  pattr := 16384+6144;
+  attr_offset := 0;
+  curline := 0;
+  if BorderEffect then
+  begin
+    desp := 50;
     for y := 0 to alto_borde-1 do
     begin
       p := bgra.Scanline[y];
-      linea_borde(ancho_borde*2+256);
+      linea_borde(desp,ancho_borde*2+256-desp);
+      if desp > 0 then
+         desp := desp div 2;
       inc(curline);
     end;
-    for y := 0 to 191 do
+  end else begin
+    for y := 0 to alto_borde-1 do
     begin
-      p := bgra.Scanline[y+alto_borde];
-      linea_borde(ancho_borde);
-      pmem := lines[y];
-      for x := 0 to 255 do
-      begin
-        if is_48k_machine then
-           v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0)
-        else if (screen_page = SCREENPAGE) then
-           v := getColor(rdscreen(pattr+attr_offset), (rdscreen(pmem) and bit) <> 0)
-        else // SHADOW SCREEN SELECTED
-           v := getColor(rdshadow(pattr+attr_offset), (rdshadow(pmem) and bit) <> 0);
-        p^.red:= getRedComponent(v);
-        p^.blue:= getBlueComponent(v);
-        p^.green:= getGreenComponent(v);
-        Inc(p);
-        if bit > 1 then bit := bit >> 1
-        else begin
-          bit := 128;
-          inc(pmem);
-          inc(attr_offset);
-        end;
-      end;
-      linea_borde(ancho_borde);
-      if y mod 8 = 7 then
-         inc(pattr,32);
-      attr_offset := 0;
+      p := bgra.Scanline[y];
+      linea_borde(0,ancho_borde*2+256);
       inc(curline);
     end;
+  end;
+  for y := 0 to 191 do
+  begin
+    p := bgra.Scanline[y+alto_borde];
+    linea_borde(0,ancho_borde);
+    pmem := lines[y];
+    for x := 0 to 255 do
+    begin
+      if is_48k_machine then
+         v := getColor(rdmem(pattr+attr_offset), (rdmem(pmem) and bit) <> 0)
+      else if (screen_page = SCREENPAGE) then
+         v := getColor(rdscreen(pattr+attr_offset), (rdscreen(pmem) and bit) <> 0)
+      else // SHADOW SCREEN SELECTED
+         v := getColor(rdshadow(pattr+attr_offset), (rdshadow(pmem) and bit) <> 0);
+      p^.red:= getRedComponent(v);
+      p^.blue:= getBlueComponent(v);
+      p^.green:= getGreenComponent(v);
+      Inc(p);
+      if bit > 1 then bit := bit >> 1
+      else begin
+        bit := 128;
+        inc(pmem);
+        inc(attr_offset);
+      end;
+    end;
+    linea_borde(0,ancho_borde);
+    if y mod 8 = 7 then
+       inc(pattr,32);
+    attr_offset := 0;
+    inc(curline);
+  end;
+  if BorderEffect then
+  begin
+    desp := 1;
     for y := 0 to alto_borde-1 do
     begin
       p := bgra.Scanline[y+192+alto_borde];
-      linea_borde(ancho_borde*2+256);
+      linea_borde(desp-1,ancho_borde*2+256-desp+1);
+      if y > alto_borde-9 then
+         desp := desp * 2;
       inc(curline);
     end;
-    if bfocus.Focused then
-       bgra.canvas.DrawFocusRect(rect(0,0,sizex1x-1,sizey1x-1));
-    bgra.InvalidateBitmap;
-//    bgra.Draw(pantalla.Canvas, 15, 5, False);
-    pantalla.canvas.StretchDraw(rect(15,15,sizex1x*scale+15-1,sizey1x*scale+15-1),bgra.Bitmap);
-    bgra.Free;
+  end else begin
+    for y := 0 to alto_borde-1 do
+    begin
+      p := bgra.Scanline[y+192+alto_borde];
+      linea_borde(0,ancho_borde*2+256);
+      inc(curline);
+    end;
+  end;
+  if debugging then
+    show_pause;
+  if BFocus.Focused and (BorderStyle <> bsNone) then
+     bgra.canvas.DrawFocusRect(rect(0,0,sizex1x-1,sizey1x-1));
+  // bgra.InvalidateBitmap;
+//  pantalla.canvas.StretchDraw(rect(stX,stY,round(sizex1x*scale_X+stX-1),round(sizey1x*scale_Y+stY-1)),bgra.Bitmap);
+  //bgrac := FilterBlurRadial(bgra,2,rbFast);
+  pantalla.canvas.StretchDraw(rect(stX,stY,round(sizex1x*scale_X+stX-1),round(sizey1x*scale_Y+stY-1)),bgra.Bitmap);
+  bgra.Free;
 end;
 
 end.

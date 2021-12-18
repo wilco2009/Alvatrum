@@ -23,31 +23,34 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="9">
       <Item1>
-        <PackageName Value="laz_acs"/>
+        <PackageName Value="LazColorPalette"/>
       </Item1>
       <Item2>
-        <PackageName Value="bgragames"/>
+        <PackageName Value="laz_acs"/>
       </Item2>
       <Item3>
-        <PackageName Value="laz_acs_lib"/>
+        <PackageName Value="bgragames"/>
       </Item3>
       <Item4>
-        <PackageName Value="etpackage"/>
+        <PackageName Value="laz_acs_lib"/>
       </Item4>
       <Item5>
-        <PackageName Value="pascalscript"/>
+        <PackageName Value="etpackage"/>
       </Item5>
       <Item6>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="pascalscript"/>
       </Item6>
       <Item7>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="bgracontrols"/>
       </Item7>
       <Item8>
-        <PackageName Value="LCL"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item8>
+      <Item9>
+        <PackageName Value="LCL"/>
+      </Item9>
     </RequiredPackages>
     <Units Count="20">
       <Unit0>
@@ -154,6 +157,11 @@
       <IncludeFiles Value="$(ProjOutDir)"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
     <Linking>
       <Options>
         <Win32>

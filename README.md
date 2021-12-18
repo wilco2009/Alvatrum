@@ -164,6 +164,12 @@ Editable registers and memory values
 Volume mixer
 solved some bugs
 
+beta version 0.1.14
+Full screen mode implemented
+Now is possible to keep or not original aspect ratio
+some minor bugs solved
+
+
 TO DO:
 memory contention
 

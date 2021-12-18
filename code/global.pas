@@ -5,7 +5,7 @@ unit Global;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, Graphics;
 
 const
   user_up = 0;
@@ -94,6 +94,8 @@ Type
     volume_speaker: byte;
     volume_ear: byte;
     volume_mic: byte;
+    AspectRatio: Boolean;
+    ScrColor: integer;
     Dummy: Array[0..99] of byte;
   end;
 
@@ -123,6 +125,7 @@ var
   last_mem_read_value: byte = 0;
   ports_in: array[0..$FFFF] of byte;
   ports_out: array[0..$FFFF] of byte;
+  BorderEffect: boolean = false;
 
 function is_plus3type_machine: boolean;
 function is_fdc_machine: boolean;
