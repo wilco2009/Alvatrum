@@ -3313,15 +3313,7 @@ begin
       SetFocusToScreen;
     end;
     VK_F11   : begin
-      signal_refresh := true;
-      SwitchFullScreen;
-      if (BorderStyle = bsNone) and debugging then
-      begin
-        //clearSpectrumScreen(options.ScrColor);
-        draw_screen;
-        pantalla.ColorOpacity:=255;
-      end;
-      SetFocusToScreen;
+      FullScreenButtonClick(self);
     end;
   end;
   if (BorderStyle = bsNone) or Bfocus.focused then
@@ -3363,7 +3355,14 @@ end;
 
 procedure TSpecEmu.FullScreenButtonClick(Sender: TObject);
 begin
+  signal_refresh := true;
   SwitchFullScreen;
+  if (BorderStyle = bsNone) and debugging then
+  begin
+    //clearSpectrumScreen(options.ScrColor);
+    draw_screen;
+    pantalla.ColorOpacity:=255;
+  end;
   SetFocusToScreen;
 end;
 
