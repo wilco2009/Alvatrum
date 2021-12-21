@@ -177,3 +177,22 @@ Thanks to:
  - Cesar Hernandez (ZEsarUX coder) - For his help along the emulator development. 
    Thanks also, because the source code of his emulator (ZEsarUX) was a very good reference in many occasions.
 - José Luis Sanchez (JSpeccy coder) - For his help in the AY emulator matters. I take his Java code as reference in this matter.
+
+Compiled using FreePascal + Lazarus
+
+Libraries used:
+
+sound (ACS Sound library)
+https://github.com/serbod/acs 
+
+graphics (BGRABitmap+BRGAControls)
+https://github.com/bgrabitmap/bgrabitmap
+
+joystick (BGRAGames)
+https://github.com/bgrabitmap/bgragames
+
+colorpalette package
+
+
+
+
